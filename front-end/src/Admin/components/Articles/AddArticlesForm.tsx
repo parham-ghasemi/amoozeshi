@@ -15,6 +15,10 @@ export default function AddArticleForm() {
   const [category, setCategory] = useState('');
   const [relatedArticles, setRelatedArticles] = useState<string[]>([]);
   const [allArticles, setAllArticles] = useState<ArticleShort[]>([]);
+  const [thumbnail, setThumbnail] = useState<string>('');
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [isUploadingThumb, setIsUploadingThumb] = useState(false);
+
 
   useEffect(() => {
     const editor = new EditorJS({
@@ -59,10 +63,38 @@ export default function AddArticleForm() {
     };
   }, []);
 
+  const handleThumbnailUpload = async (file: File) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    setIsUploadingThumb(true);
+
+    try {
+      const response = await axios.post('http://localhost:3000/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      if (response.data?.success) {
+        setThumbnail(response.data.file.url);
+      } else {
+        alert('Thumbnail upload failed.');
+      }
+    } catch (err) {
+      console.error('Thumbnail upload error:', err);
+      alert('Failed to upload thumbnail.');
+    } finally {
+      setIsUploadingThumb(false);
+    }
+  };
+
+
   const handleSubmit = async () => {
     const data = await ejInstance.current?.save();
     if (!title || !description || !data || !category || data.blocks.length === 0) {
       alert('No title, description, content or category provided!');
+      return;
+    }
+    if (!thumbnail) {
+      alert('Thumbnail is required!');
       return;
     }
 
@@ -73,6 +105,7 @@ export default function AddArticleForm() {
         content: JSON.stringify(data),
         category,
         related: relatedArticles,
+        thumbnail,
       });
       alert('Article posted!');
     } catch (error: any) {
@@ -97,6 +130,31 @@ export default function AddArticleForm() {
         value={description}
         onChange={(e) => setDescription(e.target.value)}
       />
+      <div className="space-y-2">
+        <label className="block font-semibold text-gray-700">Thumbnail Image</label>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+              setThumbnailFile(file);
+              handleThumbnailUpload(file);
+            }
+          }}
+          className="block w-full border border-gray-200 rounded-xl px-4 py-2 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition"
+        />
+        {isUploadingThumb ? (
+          <p className="text-sm text-gray-500 italic">Uploading...</p>
+        ) : thumbnail ? (
+          <img
+            src={thumbnail}
+            alt="Thumbnail Preview"
+            className="mt-2 w-full max-h-64 object-cover rounded-xl border"
+          />
+        ) : null}
+      </div>
+
       <div
         id="editorjs"
         className="min-h-[300px] border border-gray-200 rounded-xl p-4 bg-gray-50 focus-within:ring-2 focus-within:ring-blue-400"

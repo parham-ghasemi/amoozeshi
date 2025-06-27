@@ -16,6 +16,5 @@ export interface ArticleShort {
   _id: ObjectId;
   title: string;
   thumbnail: string;
-  visits: number;
-  createdAt: string;
+  description: string;
 }

@@ -2,7 +2,7 @@ import AddArticleForm from "./components/Articles/AddArticlesForm"
 
 const Articles = () => {
   return (
-    <div>
+    <div className="my-5">
       <AddArticleForm />
     </div>
   )

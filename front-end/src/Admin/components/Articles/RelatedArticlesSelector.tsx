@@ -1,13 +1,10 @@
-
-type Article = {
-  _id: string;
-  title: string;
-};
+import { useState } from "react";
+import type { ArticleShort } from "types/article";
 
 type Props = {
-  allArticles: Article[];
+  allArticles: ArticleShort[];
   relatedArticles: string[];
-  setRelatedArticles: React.Dispatch<React.SetStateAction<string[]>>; 
+  setRelatedArticles: React.Dispatch<React.SetStateAction<string[]>>;
   excludeTitle?: string;
 };
 
@@ -17,35 +14,65 @@ export function RelatedArticlesSelector({
   setRelatedArticles,
   excludeTitle,
 }: Props) {
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const toggleArticle = (id: string) => {
+    setRelatedArticles((prev) =>
+      prev.includes(id) ? prev.filter((aid) => aid !== id) : [...prev, id]
+    );
+  };
+
+  // Filter articles by title (case insensitive) and excludeTitle
+  const filteredArticles = allArticles.filter(
+    (a) =>
+      a.title !== excludeTitle &&
+      a.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
-    <div className="space-y-2">
-      <label className="block text-gray-800 font-semibold text-sm">Related Articles</label>
-      <div className="max-h-48 overflow-y-auto border border-gray-200 rounded-xl p-3 bg-gray-50 space-y-2">
-        {allArticles
-          .filter((a) => a.title !== excludeTitle)
-          .map((article) => (
-            <div key={article._id} className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                id={article._id}
-                value={article._id}
-                checked={relatedArticles.includes(article._id)}
-                onChange={(e) => {
-                  const value = e.target.value as string;
-                  const checked = e.target.checked;
+    <div className="space-y-4 border p-5 rounded-lg">
+      <label className="block text-gray-800 font-semibold text-sm">
+        Select Related Articles
+      </label>
 
-                  setRelatedArticles((prev: string[]) =>
-                    checked ? [...prev, value] : prev.filter((id) => id !== value)
-                  );
-                }}
+      {/* Search input */}
+      <input
+        type="text"
+        placeholder="Search articles by title..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+      />
 
-                className="w-4 h-4 accent-blue-600 rounded"
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+        {filteredArticles.map((article) => {
+          const isSelected = relatedArticles.includes(article._id);
+          return (
+            <div
+              key={article._id}
+              onClick={() => toggleArticle(article._id)}
+              className={`cursor-pointer rounded-xl border transition-all shadow-sm overflow-hidden
+                ${isSelected
+                  ? "border-blue-400 bg-blue-50"
+                  : "border-gray-200 bg-white hover:bg-gray-50"
+                }`}
+            >
+              <img
+                src={article.thumbnail}
+                alt={article.title}
+                className="w-full h-32 object-cover"
               />
-              <label htmlFor={article._id} className="text-gray-700 text-sm">
-                {article.title}
-              </label>
+              <div className="p-3 space-y-1">
+                <h3 className="text-sm font-semibold text-gray-800">
+                  {article.title}
+                </h3>
+                <p className="text-xs text-gray-500 line-clamp-2">
+                  {article.description || "No description"}
+                </p>
+              </div>
             </div>
-          ))}
+          );
+        })}
       </div>
     </div>
   );
