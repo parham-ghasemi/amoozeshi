@@ -48,6 +48,9 @@ export default function AddArticleForm() {
         },
       },
       placeholder: 'Write your article...',
+      i18n: {
+        direction: 'rtl'
+      }
     });
 
     ejInstance.current = editor;

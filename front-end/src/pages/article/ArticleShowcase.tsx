@@ -32,6 +32,9 @@ const ArticleShowcase = () => {
     if (article && article.content) {
       const editor = new EditorJS({
         holder: "readOnlyEditor",
+        i18n: {
+          direction: 'rtl'
+        },
         readOnly: true,
         data: article.content,
         tools: {
