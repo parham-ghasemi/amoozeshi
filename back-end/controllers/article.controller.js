@@ -6,17 +6,18 @@ const Article = require('../models/Article');
 
 exports.addArticle = async (req, res) => {
   try {
-    const { title, content, category, related } = req.body;
+    const { title, description, content, category, related } = req.body;
     console.log('Trying to add article...')
     console.log(`title: ${title}, category: ${category}`)
 
     // Basic validation
-    if (!title || !content || !category) {
+    if (!title || !description || !content || !category) {
       return res.status(400).json({ message: 'Title, content, and category are required' });
     }
 
     const newArticle = new Article({
       title,
+      description,
       content,
       category,
       related: related || [],
@@ -66,7 +67,6 @@ exports.uploadImage = (req, res) => {
 };
 
 
-// Get
 exports.getArticleById = async (req, res) => {
   try {
     const article = await Article.findById(req.params.id);
@@ -74,5 +74,15 @@ exports.getArticleById = async (req, res) => {
     res.json({ article });
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch article' });
+  }
+};
+
+exports.getAllArticles = async (req, res) => {
+  try {
+    const articles = await Article.find({}, { id: 1, thumbnail: 1, title: 1, visits: 1, createdAt: 1 });
+    res.status(200).json(articles);
+  } catch (error) {
+    console.error('Fetch articles error:', error);
+    res.status(500).json({ message: 'Failed to fetch articles' });
   }
 };

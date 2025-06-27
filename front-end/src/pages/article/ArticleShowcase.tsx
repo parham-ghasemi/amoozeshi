@@ -60,7 +60,9 @@ const ArticleShowcase = () => {
   return (
     <div className="max-w-3xl mx-auto p-6 space-y-6">
       <h1 className="text-3xl font-bold">{article.title}</h1>
+      <h2 className="text-2xl font-semibold">{article.description}</h2>
       <div id="readOnlyEditor" className="min-h-[300px] bg-gray-50 p-4 border border-gray-300 rounded-xl" />
+      <p className="text-xl font-semibold">category: {article.category}</p>
     </div>
   );
 };

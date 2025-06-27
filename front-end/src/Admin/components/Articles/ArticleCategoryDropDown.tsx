@@ -19,32 +19,31 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
-const frameworks = [
+const categorys = [
   {
-    value: "next.js",
-    label: "Next.js",
+    value: "WebDevelopment",
+    label: "WebDevelopment",
   },
   {
-    value: "sveltekit",
-    label: "SvelteKit",
+    value: 'Data Science',
+    label: "Data Science",
   },
   {
-    value: "nuxt.js",
-    label: "Nuxt.js",
+    value: 'Machine Learning',
+    label: "Machine Learning",
   },
   {
-    value: "remix",
-    label: "Remix",
+    value: 'Mobile Development',
+    label: "Mobile Development",
   },
   {
-    value: "astro",
-    label: "Astro",
+    value: 'Game development',
+    label: "Game development",
   },
 ]
 
-export function ExampleCombobox() {
+export function ArticleCategoryDropDown({ value, setValue }: { value: string, setValue: (value: string) => void }) {
   const [open, setOpen] = React.useState(false)
-  const [value, setValue] = React.useState("")
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -56,21 +55,21 @@ export function ExampleCombobox() {
           className="w-[200px] justify-between"
         >
           {value
-            ? frameworks.find((framework) => framework.value === value)?.label
-            : "Select framework..."}
+            ? categorys.find((category) => category.value === value)?.label
+            : "Select category..."}
           <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
         <Command>
-          <CommandInput placeholder="Search framework..." />
+          <CommandInput placeholder="Search category..." />
           <CommandList>
-            <CommandEmpty>No framework found.</CommandEmpty>
+            <CommandEmpty>No category found.</CommandEmpty>
             <CommandGroup>
-              {frameworks.map((framework) => (
+              {categorys.map((category) => (
                 <CommandItem
-                  key={framework.value}
-                  value={framework.value}
+                  key={category.value}
+                  value={category.value}
                   onSelect={(currentValue) => {
                     setValue(currentValue === value ? "" : currentValue)
                     setOpen(false)
@@ -79,10 +78,10 @@ export function ExampleCombobox() {
                   <CheckIcon
                     className={cn(
                       "mr-2 h-4 w-4",
-                      value === framework.value ? "opacity-100" : "opacity-0"
+                      value === category.value ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  {framework.label}
+                  {category.label}
                 </CommandItem>
               ))}
             </CommandGroup>
