@@ -5,14 +5,12 @@ type Props = {
   allArticles: ArticleShort[];
   relatedArticles: string[];
   setRelatedArticles: React.Dispatch<React.SetStateAction<string[]>>;
-  excludeTitle?: string;
 };
 
 export function RelatedArticlesSelector({
   allArticles,
   relatedArticles,
   setRelatedArticles,
-  excludeTitle,
 }: Props) {
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -22,10 +20,9 @@ export function RelatedArticlesSelector({
     );
   };
 
-  // Filter articles by title (case insensitive) and excludeTitle
+  // Filter articles by title (case insensitive)
   const filteredArticles = allArticles.filter(
     (a) =>
-      a.title !== excludeTitle &&
       a.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 

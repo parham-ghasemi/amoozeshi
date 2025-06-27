@@ -164,7 +164,6 @@ export default function AddArticleForm() {
         allArticles={allArticles}
         relatedArticles={relatedArticles}
         setRelatedArticles={setRelatedArticles}
-        excludeTitle={title}
       />
       <div className="text-right pt-4">
         <button
