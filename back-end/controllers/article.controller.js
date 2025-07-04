@@ -96,6 +96,20 @@ exports.getArticleById = async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch article' });
   }
 };
+exports.getShortArticleById = async (req, res) => {
+  try {
+    const article = await Article.find({ _id: req.params.id }, { id: 1, thumbnail: 1, title: 1, description: 1 });
+
+    if (!article) return res.status(404).json({ message: 'Article not found' });
+
+    const articleObject = article.shift();
+
+    res.json({ articleObject });
+  } catch (error) {
+    console.error('Error getting short article:', error);
+    res.status(500).json({ message: 'Failed to fetch article' });
+  }
+}
 
 
 exports.getAllArticles = async (req, res) => {

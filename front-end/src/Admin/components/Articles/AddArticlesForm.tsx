@@ -125,6 +125,7 @@ export default function AddArticleForm() {
         placeholder="Article title"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
+        dir='rtl'
       />
       <input
         type="text"
@@ -132,6 +133,7 @@ export default function AddArticleForm() {
         placeholder="Article description"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
+        dir='rtl'
       />
       <div className="space-y-2">
         <label className="block font-semibold text-gray-700">Thumbnail Image</label>

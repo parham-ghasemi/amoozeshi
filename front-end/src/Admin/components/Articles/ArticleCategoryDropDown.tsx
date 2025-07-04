@@ -21,8 +21,8 @@ import {
 
 const categorys = [
   {
-    value: "WebDevelopment",
-    label: "WebDevelopment",
+    value: "Web Development",
+    label: "Web Development",
   },
   {
     value: 'Data Science',
