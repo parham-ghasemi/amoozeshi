@@ -13,31 +13,35 @@ import VideoShowcase from "./pages/video/VideoShowcase"
 import Login from "./pages/login/Login"
 import Seed from "./seed/Seed"
 import Articles from "./Admin/Articles"
+import ArticleSearch from "./pages/article/ArticleSearch"
 
 export default function App() {
   return (
-    <Router>
-      <Routes>
-        {/* test */}
-        <Route path="/seed" element={<Seed />} />
+    <div className="bg-slate-100">
+      <Router>
+        <Routes>
+          {/* test */}
+          <Route path="/seed" element={<Seed />} />
 
-        {/* public */}
-        <Route path="/" element={<Home />} />
-        <Route path="/about-us" element={<About />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/articles" element={<ShowArticles />} />
-        <Route path="/articles-all" element={<AllArticles />} />
-        <Route path="/article/:id" element={<ArticleShowcase />} />
-        <Route path="/courses" element={<ShowCourses />} />
-        <Route path="/courses-all" element={<ShowAllCourses />} />
-        <Route path="/course/:id" element={<CourseShowcase />} />
-        <Route path="/videos" element={<Showvideos />} />
-        <Route path="/videos-all" element={<AllVideos />} />
-        <Route path="/video/:id" element={<VideoShowcase />} />
+          {/* public */}
+          <Route path="/" element={<Home />} />
+          <Route path="/about-us" element={<About />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/articles" element={<ShowArticles />} />
+          <Route path="/articles/results" element={<ArticleSearch />} />
+          <Route path="/articles-all" element={<AllArticles />} />
+          <Route path="/article/:id" element={<ArticleShowcase />} />
+          <Route path="/courses" element={<ShowCourses />} />
+          <Route path="/courses-all" element={<ShowAllCourses />} />
+          <Route path="/course/:id" element={<CourseShowcase />} />
+          <Route path="/videos" element={<Showvideos />} />
+          <Route path="/videos-all" element={<AllVideos />} />
+          <Route path="/video/:id" element={<VideoShowcase />} />
 
-        {/* admin */}
-        <Route path="/admin/article" element={<Articles />} />
-      </Routes>
-    </Router>
+          {/* admin */}
+          <Route path="/admin/article" element={<Articles />} />
+        </Routes>
+      </Router>
+    </div>
   )
 }

@@ -13,7 +13,7 @@ const ArticleShowcase = () => {
   useEffect(() => {
     const fetchArticle = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/articles/${id}`);
+        const res = await fetch(`http://localhost:3000/article/${id}`);
         const data = await res.json();
         setArticle(data.article);
       } catch (err) {

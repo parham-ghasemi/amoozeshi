@@ -9,13 +9,15 @@ const {
   getArticleById,
   getShortArticleById,
   getAllArticles,
+  searchedArticles
 } = require('../controllers/article.controller');
 
 router.post('/articles', addArticle);
 router.post('/upload', uploadMiddleware, uploadImage);
 
-router.get('/articles/:id', getArticleById);
+router.get('/article/:id', getArticleById);
 router.get('/articles/short/:id', getShortArticleById)
 router.get('/articles', getAllArticles);
+router.get('/articles/search', searchedArticles)
 
 module.exports = router;

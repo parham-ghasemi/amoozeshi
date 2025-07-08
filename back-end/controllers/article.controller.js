@@ -8,8 +8,6 @@ const Article = require('../models/Article');
 exports.addArticle = async (req, res) => {
   try {
     const { title, description, content, category, related, thumbnail } = req.body;
-    console.log('Trying to add article...')
-    console.log(`title: ${title}, category: ${category}`)
 
     // Basic validation
     if (!title || !description || !content || !category || !thumbnail) {
@@ -18,15 +16,6 @@ exports.addArticle = async (req, res) => {
 
     const parsedRelated = (related || []).map(id => new mongoose.Types.ObjectId(id));
 
-    // const newArticle = new Article({
-    //   title,
-    //   description,
-    //   content,
-    //   category,
-    //   related: related || [],
-    //   thumbnail,
-    //   visits: 0,
-    // });
     const newArticle = new Article({
       title,
       description,
@@ -36,7 +25,6 @@ exports.addArticle = async (req, res) => {
       thumbnail,
       visits: 0,
     });
-    console.log('Article Added successfully: \n', newArticle);
 
     await newArticle.save();
 
@@ -119,5 +107,25 @@ exports.getAllArticles = async (req, res) => {
   } catch (error) {
     console.error('Fetch articles error:', error);
     res.status(500).json({ message: 'Failed to fetch articles' });
+  }
+};
+exports.searchedArticles = async (req, res) => {
+  const query = req.query.query;
+  if (!query) {
+    return res.status(400).json({ error: 'Query parameter is required' });
+  }
+
+  try {
+    // Search MongoDB (case-insensitive search in title or description)
+    const results = await Article.find({
+      $or: [
+        { title: { $regex: query, $options: 'i' } },
+        { description: { $regex: query, $options: 'i' } },
+      ],
+    });
+    res.json(results);
+  } catch (error) {
+    console.error('Search error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
