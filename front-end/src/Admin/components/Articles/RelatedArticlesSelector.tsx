@@ -27,7 +27,7 @@ export function RelatedArticlesSelector({
   );
 
   return (
-    <div className="space-y-4 border p-5 rounded-lg">
+    <div className="space-y-4 border p-5 rounded-lg" dir="rtl">
       <label className="block text-gray-800 font-semibold text-sm">
         Select Related Articles
       </label>
@@ -48,7 +48,7 @@ export function RelatedArticlesSelector({
             <div
               key={article._id}
               onClick={() => toggleArticle(article._id)}
-              className={`cursor-pointer rounded-xl border transition-all shadow-sm overflow-hidden
+              className={`cursor-pointer rounded-xl border transition-all shadow-sm overflow-hidden hover:shadow-xl hover:scale-95
                 ${isSelected
                   ? "border-blue-400 bg-blue-50"
                   : "border-gray-200 bg-white hover:bg-gray-50"
