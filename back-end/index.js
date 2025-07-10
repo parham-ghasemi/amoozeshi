@@ -26,6 +26,9 @@ app.use('/', authRoutes);
 const articleRoutes = require('./routes/article.routes');
 app.use('/', articleRoutes);
 
+const videoRoutes = require('./routes/video.routes');
+app.use('/'. videoRoutes)
+
 // Serve /uploads folder
 const uploadPath = path.join(__dirname, 'uploads');
 app.use('/uploads', express.static(uploadPath));

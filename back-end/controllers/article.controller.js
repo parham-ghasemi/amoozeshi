@@ -5,36 +5,6 @@ const mongoose = require('mongoose');
 
 const Article = require('../models/Article');
 
-exports.addArticle = async (req, res) => {
-  try {
-    const { title, description, content, category, related, thumbnail } = req.body;
-
-    // Basic validation
-    if (!title || !description || !content || !category || !thumbnail) {
-      return res.status(400).json({ message: 'Title, content, and category are required' });
-    }
-
-    const parsedRelated = (related || []).map(id => new mongoose.Types.ObjectId(id));
-
-    const newArticle = new Article({
-      title,
-      description,
-      content: JSON.parse(content), // ⛏️ NOTE: Frontend is sending it stringified
-      category,
-      related: parsedRelated,
-      thumbnail,
-      visits: 0,
-    });
-
-    await newArticle.save();
-
-    res.status(201).json({ message: 'Article created successfully', article: newArticle });
-  } catch (error) {
-    console.error('Add article error:', error);
-    res.status(500).json({ message: 'Failed to create article' });
-  }
-};
-
 // Multer setup
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -66,6 +36,36 @@ exports.uploadImage = (req, res) => {
       url: fileUrl,
     },
   });
+};
+
+exports.addArticle = async (req, res) => {
+  try {
+    const { title, description, content, category, related, thumbnail } = req.body;
+
+    // Basic validation
+    if (!title || !description || !content || !category || !thumbnail) {
+      return res.status(400).json({ message: 'Title, content, and category are required' });
+    }
+
+    const parsedRelated = (related || []).map(id => new mongoose.Types.ObjectId(id));
+
+    const newArticle = new Article({
+      title,
+      description,
+      content: JSON.parse(content), // ⛏️ NOTE: Frontend is sending it stringified
+      category,
+      related: parsedRelated,
+      thumbnail,
+      visits: 0,
+    });
+
+    await newArticle.save();
+
+    res.status(201).json({ message: 'Article created successfully', article: newArticle });
+  } catch (error) {
+    console.error('Add article error:', error);
+    res.status(500).json({ message: 'Failed to create article' });
+  }
 };
 
 exports.getArticleById = async (req, res) => {
