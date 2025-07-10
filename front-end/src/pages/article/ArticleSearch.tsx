@@ -19,7 +19,6 @@ const SearchResults = () => {
         try {
           // Fetch results from backend
           const response = await axios.get(`http://localhost:3000/articles/search?query=${encodeURIComponent(query)}`);
-          console.log(response.data);
           setResults(response.data);
         } catch (error) {
           console.error('Error fetching search results:', error);

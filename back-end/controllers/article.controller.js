@@ -109,6 +109,7 @@ exports.getAllArticles = async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch articles' });
   }
 };
+
 exports.searchedArticles = async (req, res) => {
   const query = req.query.query;
   if (!query) {
@@ -127,5 +128,50 @@ exports.searchedArticles = async (req, res) => {
   } catch (error) {
     console.error('Search error:', error);
     res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Get articles by category
+exports.getArticlesByCategory = async (req, res) => {
+  const { category } = req.params;
+
+  if (!category) {
+    return res.status(400).json({ message: 'Category is required' });
+  }
+
+  try {
+    const articles = await Article.find({ category }, { id: 1, thumbnail: 1, title: 1, description: 1 });
+    res.status(200).json(articles);
+  } catch (error) {
+    console.error('Error fetching category articles:', error);
+    res.status(500).json({ message: 'Failed to fetch category articles' });
+  }
+};
+
+// Get most viewed articles (top 10 by visits)
+exports.getMostViewedArticles = async (req, res) => {
+  try {
+    const articles = await Article.find({}, { id: 1, thumbnail: 1, title: 1, description: 1, visits: 1 })
+      .sort({ visits: -1 })
+      .limit(20);
+
+    res.status(200).json(articles);
+  } catch (error) {
+    console.error('Error fetching most viewed articles:', error);
+    res.status(500).json({ message: 'Failed to fetch most viewed articles' });
+  }
+};
+
+// Get newest articles (sorted by createdAt descending)
+exports.getNewestArticles = async (req, res) => {
+  try {
+    const articles = await Article.find({}, { id: 1, thumbnail: 1, title: 1, description: 1, createdAt: 1 })
+      .sort({ createdAt: -1 })
+      .limit(20);
+
+    res.status(200).json(articles);
+  } catch (error) {
+    console.error('Error fetching newest articles:', error);
+    res.status(500).json({ message: 'Failed to fetch newest articles' });
   }
 };

@@ -3,7 +3,7 @@ import type { ArticleShort } from "types/article";
 
 const ArticleCard = ({ article }: { article: ArticleShort }) => {
   return (
-    <div className="h-[262px] sm:h-[362px] w-full max-w-xs mx-auto border rounded-xl overflow-hidden pb-2.5 relative hover:shadow-xl hover:scale-[102%] transition-transform">
+    <div className="h-[262px] sm:h-[362px] w-full max-w-xs mx-auto border rounded-xl overflow-hidden pb-2.5 relative hover:shadow-xl hover:scale-[102%] transition-transform cursor-context-menu">
       <img src={article.thumbnail} alt="article thumbnail" className="w-full h-24 sm:h-36 object-cover" />
       <div className="p-2 sm:p-2.5 space-y-2 sm:space-y-3.5">
         <p className="font-bold text-sm sm:text-base line-clamp-2">{article.title}</p>
