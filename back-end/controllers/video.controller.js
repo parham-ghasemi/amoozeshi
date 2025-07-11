@@ -35,7 +35,7 @@ exports.uploadVideoMiddleware = videoUpload.single('video');
 // === Controller to add a new video ===
 exports.uploadVideo = async (req, res) => {
   try {
-    const { title, shortDesc, thumbnail, category, related } = req.body;
+    const { title, shortDesc, longDesc, thumbnail, category, related } = req.body;
 
     if (!req.file) {
       return res.status(400).json({ message: 'No video file uploaded' });
@@ -46,6 +46,7 @@ exports.uploadVideo = async (req, res) => {
     const newVideo = new Video({
       title,
       shortDesc,
+      longDesc,
       thumbnail,
       category,
       related: related ? JSON.parse(related) : [],
@@ -59,5 +60,15 @@ exports.uploadVideo = async (req, res) => {
   } catch (err) {
     console.error('Upload video error:', err);
     res.status(500).json({ message: 'Failed to upload video' });
+  }
+};
+
+exports.getAllVideos = async (req, res) => {
+  try {
+    const articles = await Video.find({}, { id: 1, thumbnail: 1, title: 1, visits: 1, createdAt: 1 });
+    res.status(200).json(articles);
+  } catch (error) {
+    console.error('Fetch articles error:', error);
+    res.status(500).json({ message: 'Failed to fetch articles' });
   }
 };

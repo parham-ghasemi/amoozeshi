@@ -4,7 +4,7 @@ import EditorJS from '@editorjs/editorjs';
 import Header from '@editorjs/header';
 import List from '@editorjs/list';
 import axios from 'axios';
-import { ArticleCategoryDropDown } from './ArticleCategoryDropDown';
+import { CategoryDropDown } from '../CategoryDropDown';
 import { RelatedArticlesSelector } from './RelatedArticlesSelector';
 import type { ArticleShort } from '@/../types/article'
 
@@ -164,7 +164,7 @@ export default function AddArticleForm() {
         id="editorjs"
         className="min-h-[300px] border border-gray-200 rounded-xl p-4 bg-gray-50 focus-within:ring-2 focus-within:ring-blue-400"
       />
-      <ArticleCategoryDropDown value={category} setValue={setCategory} />
+      <CategoryDropDown value={category} setValue={setCategory} />
       <RelatedArticlesSelector
         allArticles={allArticles}
         relatedArticles={relatedArticles}

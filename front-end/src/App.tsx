@@ -14,6 +14,7 @@ import Login from "./pages/login/Login"
 import Seed from "./seed/Seed"
 import Articles from "./Admin/Articles"
 import ArticleSearch from "./pages/article/ArticleSearch"
+import Videos from "./Admin/Videos"
 
 export default function App() {
   return (
@@ -40,6 +41,7 @@ export default function App() {
 
           {/* admin */}
           <Route path="/admin/article" element={<Articles />} />
+          <Route path="/admin/video" element={<Videos />} />
         </Routes>
       </Router>
     </div>

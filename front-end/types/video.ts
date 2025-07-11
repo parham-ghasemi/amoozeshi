@@ -4,9 +4,18 @@ export interface Video {
   _id: ObjectId;
   title: string;
   shortDesc: string;
+  longDesc: any;
   thumbnail: string;
   content: string;
   category: Category;
-  related: ObjectId[]; // or Article[] if populated
+  related: ObjectId[];
   createdAt: string;
+}
+
+export type VideoShort = {
+  _id: string
+  title: string
+  thumbnail: string
+  visits: number
+  createdAt: string
 }
