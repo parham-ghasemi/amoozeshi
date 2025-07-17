@@ -65,10 +65,42 @@ exports.uploadVideo = async (req, res) => {
 
 exports.getAllVideos = async (req, res) => {
   try {
-    const articles = await Video.find({}, { id: 1, thumbnail: 1, title: 1, visits: 1, createdAt: 1 });
-    res.status(200).json(articles);
+    const videos = await Video.find({}, { id: 1, thumbnail: 1, title: 1, visits: 1, createdAt: 1 });
+    res.status(200).json(videos);
   } catch (error) {
-    console.error('Fetch articles error:', error);
-    res.status(500).json({ message: 'Failed to fetch articles' });
+    console.error('Fetch video error:', error);
+    res.status(500).json({ message: 'Failed to fetch video' });
   }
 };
+
+exports.getVideoById = async (req, res) => {
+  try {
+    const video = await Video.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { visits: 1 } },
+      { new: true }
+    );
+
+    if (!video) return res.status(404).json({ message: 'video not found' });
+
+    res.json({ video });
+  } catch (error) {
+    console.error('Error incrementing visits:', error);
+    res.status(500).json({ message: 'Failed to fetch video' });
+  }
+};
+
+exports.getShortVideoById = async (req, res) => {
+  try {
+    const video = await Video.find({ _id: req.params.id }, { id: 1, thumbnail: 1, title: 1, visits: 1, createdAt: 1 });
+
+    if (!video) return res.status(404).json({ message: 'Video not found' });
+
+    const videoObject = video.shift();
+
+    res.json({ videoObject });
+  } catch (error) {
+    console.error('Error getting short video:', error);
+    res.status(500).json({ message: 'Failed to fetch video' });
+  }
+}
