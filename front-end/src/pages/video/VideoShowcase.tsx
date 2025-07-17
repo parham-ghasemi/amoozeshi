@@ -1,14 +1,71 @@
 import VideoCard from "@/components/cards/VideoCard";
 import { SquareCheck, SquareX } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import type { Video, VideoShort } from "types/video";
+import Plyr from "plyr";
+import "plyr/dist/plyr.css";
 
 const VideoShowcase = () => {
   const { id } = useParams();
-  const [video, setVideo] = useState<Video>();
-  const [relatedVideos, setRelatedVideos] = useState<VideoShort[]>();
+  const [video, setVideo] = useState<Video | null>(null);
+  const [relatedVideos, setRelatedVideos] = useState<VideoShort[] | null>(null);
   const [loading, setLoading] = useState(true);
+  const playerRef = useRef<HTMLVideoElement | null>(null);
+  const plyrInstanceRef = useRef<Plyr | null>(null);
+  const playerContainerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!video?.content || !playerContainerRef.current) return;
+
+    // Clear any previous instance
+    if (plyrInstanceRef.current) {
+      plyrInstanceRef.current.destroy();
+      plyrInstanceRef.current = null;
+    }
+
+    // Clear previous HTML
+    playerContainerRef.current.innerHTML = "";
+
+    const videoElement = document.createElement("video");
+    videoElement.className = "plyr w-full h-auto max-h-[480px]";
+    videoElement.setAttribute("playsinline", "");
+    videoElement.setAttribute("controls", "");
+
+    const source = document.createElement("source");
+    source.src = video.content;
+    source.type = "video/mp4";
+
+    videoElement.appendChild(source);
+    playerContainerRef.current.appendChild(videoElement);
+
+    // Initialize Plyr
+    const player = new Plyr(videoElement, {
+      controls: [
+        "play",
+        "progress",
+        "current-time",
+        "duration",
+        "mute",
+        "volume",
+        "captions",
+        "settings",
+        "pip",
+        "airplay",
+        "fullscreen",
+      ],
+      settings: ["speed", "captions"],
+      speed: { selected: 1, options: [0.5, 1, 1.25, 1.5, 2] },
+    });
+
+    plyrInstanceRef.current = player;
+
+    return () => {
+      player.destroy();
+      plyrInstanceRef.current = null;
+    };
+  }, [video?.content]);
+
 
   useEffect(() => {
     const fetchVideo = async () => {
@@ -45,6 +102,7 @@ const VideoShowcase = () => {
 
     fetchRelatedVideos();
   }, [video]);
+
 
   const renderEditorContent = (content: any) => {
     if (!content || !content.blocks) return null;
@@ -126,10 +184,8 @@ const VideoShowcase = () => {
 
   const longDesc = typeof video.longDesc === "string" ? JSON.parse(video.longDesc) : video.longDesc;
 
-  const test = new Array(9).fill(relatedVideos);
   return (
     <div className="w-full max-w-[90%] lg:max-w-6xl mx-auto p-4 sm:p-6 space-y-6 flex items-center justify-center flex-col min-h-screen">
-      {/* Top Background Thumbnail */}
       <div className="absolute top-0 left-0 right-0 opacity-20 -z-10">
         <img src={video.thumbnail} alt="thumbnail" className="w-full h-auto object-cover" />
         <div className="relative z-10 w-full h-full -translate-y-[50vh] sm:-translate-y-96">
@@ -137,35 +193,32 @@ const VideoShowcase = () => {
         </div>
       </div>
 
-      {/* Title */}
       <h1 className="max-w-[90%] sm:max-w-[600px] text-center text-2xl sm:text-3xl font-bold leading-[150%]">
         {video.title}
       </h1>
 
-      {/* Short Description */}
-      <h2 className="text-base sm:text-lg font-normal max-w-[90%] sm:max-w-[700px] text-center" dir="rtl">
-        {video.shortDesc}
-      </h2>
+      {/* Plyr Video Player */}
+      {video.content && (
+        <div className="w-full max-w-3xl rounded-xl overflow-hidden border border-gray-300 bg-black">
+          <div ref={playerContainerRef} key={video.content} />
+        </div>
+      )}
 
-      {/* Video Player */}
-      <div className="w-full max-w-3xl rounded-xl overflow-hidden border border-gray-300 bg-black">
-        <video controls className="w-full h-auto max-h-[480px] bg-black">
-          <source src={video.content} type="video/mp4" />
-          مرورگر شما از تگ ویدیو پشتیبانی نمی‌کند.
-        </video>
+      <div className="bg-gray-50 p-10 border border-gray-300 rounded-xl w-full flex flex-col" dir="rtl">
+        <h4 className="font-bold text-lg mb-3">توضیحات کوتاه:</h4>
+        <p>{video.shortDesc}</p>
       </div>
 
-      {/* Long Description */}
-      <div className="bg-gray-50 p-6 border border-gray-300 rounded-xl w-full flex flex-col min-h-[300px]" dir="rtl">
+      <div className="bg-gray-50 p-10 border border-gray-300 rounded-xl w-full flex flex-col min-h-[300px]" dir="rtl">
+        <p className="text-2xl font-bold mb-5">در این ویدئو:</p>
         {renderEditorContent(longDesc)}
       </div>
 
-      {/* Related Videos */}
       {video.related && video.related.length > 0 && relatedVideos?.length ? (
         <div className="bg-gray-50 py-10 px-6 border border-gray-300 rounded-xl w-full flex flex-col" dir="rtl">
           <h1 className="text-xl font-bold mb-8">ویدیوهای مشابه</h1>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {test.map((related, i) => (
+            {relatedVideos.map((related, i) => (
               <VideoCard key={`relatedVideo-${i}`} video={related} />
             ))}
           </div>
