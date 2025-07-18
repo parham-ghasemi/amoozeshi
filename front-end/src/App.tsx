@@ -15,6 +15,7 @@ import Seed from "./seed/Seed"
 import Articles from "./Admin/Articles"
 import ArticleSearch from "./pages/article/ArticleSearch"
 import Videos from "./Admin/Videos"
+import VideoSearch from "./pages/video/VideoSearch"
 
 export default function App() {
   return (
@@ -28,14 +29,18 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/about-us" element={<About />} />
           <Route path="/login" element={<Login />} />
+          {/* Article */}
           <Route path="/articles" element={<ShowArticles />} />
           <Route path="/articles/results" element={<ArticleSearch />} />
           <Route path="/articles-all" element={<AllArticles />} />
           <Route path="/article/:id" element={<ArticleShowcase />} />
+          {/* course */}
           <Route path="/courses" element={<ShowCourses />} />
           <Route path="/courses-all" element={<ShowAllCourses />} />
           <Route path="/course/:id" element={<CourseShowcase />} />
+          {/* video */}
           <Route path="/videos" element={<Showvideos />} />
+          <Route path="/videos/search" element={<VideoSearch />} />
           <Route path="/videos-all" element={<AllVideos />} />
           <Route path="/video/:id" element={<VideoShowcase />} />
 

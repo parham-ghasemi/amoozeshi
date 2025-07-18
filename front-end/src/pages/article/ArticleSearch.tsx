@@ -5,7 +5,7 @@ import type { ArticleShort } from 'types/article';
 import ArticleSearchBox from './article-search/ArticleSearchBox';
 import ArticleCard from '@/components/cards/ArticleCard';
 
-const SearchResults = () => {
+const ArticleSearch = () => {
   const [results, setResults] = useState<ArticleShort[]>([]);
   const [loading, setLoading] = useState(true);
   const location = useLocation();
@@ -34,22 +34,19 @@ const SearchResults = () => {
   if (loading) return <div>Loading...</div>;
 
   return (
-    <div className='w-full mt-16 flex flex-col items-center min-h-screen gap-20'>
+    <div className='w-full pt-16 flex flex-col items-center min-h-screen gap-20'>
       <ArticleSearchBox initSearchTerm={searchTerm ? searchTerm : ''} />
       <div className="w-6xl min-h-96 bg-slate-50 rounded-2xl grid grid-cols-4 gap-4">
         {
-          results.length > 0 ? (
+          results.length > 0 && (
             results.map((item, index) => (
               <ArticleCard key={`article-${index}`} article={item} />
             ))
-          ) : (
-            <p>nothing was found</p>
-          )
-        }
+          )}
       </div>
 
     </div>
   );
 };
 
-export default SearchResults;
+export default ArticleSearch;
