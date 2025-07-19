@@ -17,6 +17,7 @@ import Videos from "./Admin/Videos"
 import VideoSearch from "./pages/video/VideoSearch"
 
 import Layout from "@/pages/Layout";
+import Course from "./Admin/Course"
 
 function App() {
   return (
@@ -50,6 +51,7 @@ function App() {
           {/* Admin routes - no layout */}
           <Route path="/admin/article" element={<Articles />} />
           <Route path="/admin/video" element={<Videos />} />
+          <Route path="/admin/course" element={<Course />} />
         </Routes>
       </Router></div>
   );

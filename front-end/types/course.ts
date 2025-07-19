@@ -31,3 +31,11 @@ export interface Course {
   related: ObjectId[]; // or Course[] if populated
   createdAt: string;
 }
+
+export interface CourseShort {
+  _id: string
+  title: string
+  shortDesc: string
+  thumbnail: string
+}
+
