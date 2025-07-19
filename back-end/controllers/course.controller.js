@@ -1,5 +1,66 @@
 const mongoose = require('mongoose');
 const Course = require('../models/Course');
+// === Add a new course ===
+exports.addCourse = async (req, res) => {
+  try {
+    const {
+      title,
+      shortDesc,
+      thumbnail,
+      longDesc,
+      category,
+      time,
+      level,
+      goal,
+      topics,
+      questions,
+      content,
+      related = [],
+    } = req.body;
+
+    if (
+      !title || !shortDesc || !thumbnail || !longDesc || !category ||
+      !time || !level || !goal || !topics || !questions || !content
+    ) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    const parsedTopics = typeof topics === 'string' ? JSON.parse(topics) : topics;
+    const parsedQuestions = typeof questions === 'string' ? JSON.parse(questions) : questions;
+    const parsedContent = typeof content === 'string' ? JSON.parse(content) : content;
+    const parsedRelated = Array.isArray(related)
+      ? related.map(id => new mongoose.Types.ObjectId(id))
+      : [];
+
+    const parsedContentWithObjectIds = parsedContent.map(item => ({
+      itemId: new mongoose.Types.ObjectId(item.itemId),
+      itemType: item.itemType,
+    }));
+
+    const newCourse = new Course({
+      title,
+      shortDesc,
+      thumbnail,
+      longDesc,
+      category,
+      time,
+      level,
+      goal,
+      topics: parsedTopics,
+      questions: parsedQuestions,
+      content: parsedContentWithObjectIds,
+      related: parsedRelated,
+    });
+
+    await newCourse.save();
+
+    res.status(201).json({ message: 'Course added successfully', course: newCourse });
+  } catch (err) {
+    console.error('Add course error:', err);
+    res.status(500).json({ message: 'Failed to add course' });
+  }
+};
+
 
 // === Get all courses (short version) ===
 exports.getAllCourses = async (req, res) => {

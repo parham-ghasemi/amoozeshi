@@ -9,7 +9,7 @@ const {
   getCoursesByCategory,
   getNewestCourses,
   searchCourses,
-} = require('../controllers/CourseController');
+} = require('../controllers/course.controller');
 
 // Add a new course
 router.post('/courses', addCourse);
