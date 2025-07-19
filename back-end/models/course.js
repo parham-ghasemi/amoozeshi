@@ -7,7 +7,7 @@ const CourseSchema = new mongoose.Schema({
   thumbnail: { type: String, required: true }, // URL to the thumbnail vidoe
   longDesc: { type: String, required: true },
   category: { type: String, required: true, enum: ['Web Development', 'Data Science', 'Machine Learning', 'Mobile Development', 'Game development'] },
-  time: { type: Number, required: true }, // in minutes
+  time: { type: Number, required: true }, // in hours
   level: { type: String, required: true, enum: ['Beginner', 'Intermediate', 'Advanced'] },
   goal: { type: String, required: true },
   topics: { type: [{ head: String, body: String }], required: true },
