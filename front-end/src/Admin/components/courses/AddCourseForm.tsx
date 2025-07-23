@@ -288,14 +288,14 @@ export default function AddCourseForm() {
           type="number"
           min={1}
           placeholder="Time (hours)"
-          className="border rounded-xl px-4 py-3 w-full"
+          className="border rounded-lg px-4 py-3 w-full overflow-hidden"
           value={time}
           onChange={(e) => setTime(Number(e.target.value))}
         />
         <select
           value={level}
           onChange={(e) => setLevel(e.target.value)}
-          className="border rounded-xl px-4 py-3 w-full"
+          className="border rounded-lg px-4 py-3 w-full"
         >
           <option value="">Select Level</option>
           <option value="Beginner">Beginner</option>
@@ -307,7 +307,7 @@ export default function AddCourseForm() {
       <input
         type="text"
         placeholder="Course goal"
-        className="w-full border rounded-xl px-5 py-3 text-lg"
+        className="w-full border rounded-lg px-5 py-3 text-lg"
         value={goal}
         onChange={(e) => setGoal(e.target.value)}
         dir="rtl"
@@ -326,7 +326,7 @@ export default function AddCourseForm() {
                 newTopics[i].head = e.target.value;
                 setTopics(newTopics);
               }}
-              className="border rounded-xl p-2"
+              className="border rounded-lg p-2 text-right overflow-hidden"
             />
             <input
               placeholder="توضیح"
@@ -336,7 +336,7 @@ export default function AddCourseForm() {
                 newTopics[i].body = e.target.value;
                 setTopics(newTopics);
               }}
-              className="border rounded-xl p-2"
+              className="border rounded-lg p-2 text-right overflow-hidden"
             />
           </div>
         ))}
@@ -358,7 +358,7 @@ export default function AddCourseForm() {
                 newQs[i].question = e.target.value;
                 setQuestions(newQs);
               }}
-              className="border rounded-xl p-2"
+              className="border rounded-lg p-2 text-right overflow-hidden"
             />
             <input
               placeholder="پاسخ"
@@ -368,7 +368,7 @@ export default function AddCourseForm() {
                 newQs[i].answer = e.target.value;
                 setQuestions(newQs);
               }}
-              className="border rounded-xl p-2"
+              className="border rounded-lg p-2 text-right overflow-hidden"
             />
           </div>
         ))}

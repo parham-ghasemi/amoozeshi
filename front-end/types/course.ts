@@ -28,7 +28,7 @@ export interface Course {
   topics: CourseTopic[];
   questions: CourseQuestion[];
   content: CourseContentItem[];
-  related: ObjectId[]; // or Course[] if populated
+  related: CourseShort[]; // or Course[] if populated
   createdAt: string;
 }
 

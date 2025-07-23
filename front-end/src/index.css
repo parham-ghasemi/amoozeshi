@@ -119,4 +119,8 @@
     @apply bg-background text-foreground;
     font-family: "Noto Sans Arabic", sans-serif;
   }
+
+  input {
+    overflow: hidden !important;
+  }
 }

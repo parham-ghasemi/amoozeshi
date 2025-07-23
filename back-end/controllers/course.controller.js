@@ -31,6 +31,7 @@ exports.addCourse = async (req, res) => {
     const parsedRelated = Array.isArray(related)
       ? related.map(id => new mongoose.Types.ObjectId(id))
       : [];
+    const parsedLongDesc = typeof longDesc === 'string' ? JSON.parse(longDesc) : longDesc;
 
     const parsedContentWithObjectIds = parsedContent.map(item => ({
       itemId: new mongoose.Types.ObjectId(item.itemId),
@@ -41,7 +42,7 @@ exports.addCourse = async (req, res) => {
       title,
       shortDesc,
       thumbnail,
-      longDesc,
+      longDesc: parsedLongDesc,
       category,
       time,
       level,
@@ -92,11 +93,12 @@ exports.getCourseById = async (req, res) => {
 // === Get short course by ID ===
 exports.getShortCourseById = async (req, res) => {
   try {
-    const course = await Course.findById(req.params.id, { _id: 1, title: 1, shortDesc: 1, thumbnail: 1 });
+    // const course = await Course.findById(req.params.id, { _id: 1, title: 1, shortDesc: 1, thumbnail: 1 });
+    console.log(req.params.id);
 
-    if (!course) return res.status(404).json({ message: 'Course not found' });
+    // if (!course) return res.status(404).json({ message: 'Course not found' });
 
-    res.json({ course });
+    // res.json({ course });
   } catch (err) {
     console.error('Get short course error:', err);
     res.status(500).json({ message: 'Failed to fetch course' });
