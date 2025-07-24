@@ -32,6 +32,7 @@ export interface Course {
   questions: CourseQuestion[];
   content: CourseContent[];
   related: CourseShort[];
+  joinedBy: string[];
   createdAt: string;
 }
 

@@ -1,4 +1,5 @@
 import CourseCard from "@/components/cards/CourseCard";
+import axios from "axios";
 import clsx from "clsx";
 import { SquareCheck, SquareX } from "lucide-react";
 import React, { useEffect, useState } from "react";
@@ -16,6 +17,7 @@ const CourseShowcase = () => {
   const [course, setCourse] = useState<Course>();
   const [loading, setLoading] = useState(true);
   const [openTopic, setOpenTopic] = useState<number[]>([]);
+  const [isJoined, setIsJoined] = useState(false);
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -30,7 +32,12 @@ const CourseShowcase = () => {
         setLoading(false);
       }
     };
+    const checkIsJoined = () => {
+      const joinedCourses = JSON.parse(localStorage.getItem("joinedCourses") || '[]');
+      setIsJoined(joinedCourses.includes(id))
+    }
     fetchCourse();
+    checkIsJoined();
   }, [id]);
 
   const renderEditorContent = (content: any) => {
@@ -111,6 +118,15 @@ const CourseShowcase = () => {
     });
   };
 
+  const getAnonId = (): string => {
+    let anonId = localStorage.getItem("anonId");
+    if (!anonId) {
+      anonId = crypto.randomUUID();
+      localStorage.setItem("anonId", anonId);
+    }
+    return anonId;
+  };
+
   const handleTopicClick = (index: number) => {
     console.log(openTopic)
     if (openTopic.indexOf(index) >= 0) {
@@ -121,8 +137,26 @@ const CourseShowcase = () => {
     }
   }
 
-  const handleJoingClick = () => {
+  const handleJoingClick = async () => {
     navigate(`content`);
+    const joinedCourses = JSON.parse(localStorage.getItem("joinedCourses") || "[]");
+
+    if (joinedCourses.includes(course?._id)) {
+      return;
+    }
+
+    const anonId = getAnonId();
+
+    try {
+      await axios.post(`http://localhost:3000/courses/${course?._id}/join`, { anonId });
+
+      // Mark as joined locally
+      joinedCourses.push(course?._id);
+      localStorage.setItem("joinedCourses", JSON.stringify(joinedCourses));
+    } catch (err) {
+      console.error("Failed to join course:", err);
+      alert("Something went wrong.");
+    }
   }
 
   if (loading) return <div className="p-4 sm:p-6 text-center text-sm sm:text-base">Loading...</div>;
@@ -141,9 +175,11 @@ const CourseShowcase = () => {
         <div className="flex flex-col gap-5 w-fit">
           <div className="bg-white shadow-xl w-96 h-fit rounded-lg p-5 flex flex-col gap-7">
             <div className="w-full bg-blue-300 rounded-lg px-7 py-4 flex items-center gap-5 justify-end">
-              <p className="flex text-nowrap">
-                تعداد دانشجویان:
-                00
+              <p className="flex text-nowrap gap-1.5">
+                <span>
+                  {course.joinedBy.length}
+                </span>
+                :تعداد دانشجویان
               </p>
               <svg width="22" height="30" viewBox="0 0 22 30" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M20.7828 28.9859C20.7836 27.7051 20.532 26.4366 20.0424 25.2531C19.5528 24.0695 18.8347 22.9941 17.9293 22.0881C17.0239 21.1822 15.9489 20.4635 14.7656 19.9732C13.5824 19.4828 12.3141 19.2305 11.0333 19.2305C9.75245 19.2305 8.48418 19.4828 7.30093 19.9732C6.11768 20.4635 5.04263 21.1822 4.13723 22.0881C3.23182 22.9941 2.51379 24.0695 2.02418 25.2531C1.53456 26.4366 1.28295 27.7051 1.28372 28.9859H20.7828Z" stroke="black" />
@@ -203,7 +239,9 @@ const CourseShowcase = () => {
             </p>
 
             <button onClick={handleJoingClick} className="w-full rounded bg-green-300 text-green-700 py-2 font-bold hover:shadow-lg hover:-translate-y-1 hover:bg-green-400 hover:text-green-800 cursor-pointer transition-all">
-              شروع دوره
+              {
+                isJoined ? ' ادامه دوره ' : ' شروع دوره '
+              }
             </button>
           </div>
 

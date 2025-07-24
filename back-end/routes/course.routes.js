@@ -8,7 +8,8 @@ const {
   getCoursesByCategory,
   getNewestCourses,
   searchCourses,
-  getCourseContentById
+  getCourseContentById,
+  joinCourse
 } = require('../controllers/course.controller');
 
 // Add a new course
@@ -23,5 +24,8 @@ router.get('/course/content/:id', getCourseContentById)
 router.get('/courses/category/:category', getCoursesByCategory);
 router.get('/courses/newest', getNewestCourses);
 router.get('/courses/search', searchCourses);
+
+// joing course
+router.post("/courses/:id/join", joinCourse);
 
 module.exports = router;

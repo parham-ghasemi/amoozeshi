@@ -29,6 +29,7 @@ const CourseSchema = new mongoose.Schema({
     }
   }],
   related: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Course' }],
+  joinedBy: { type: [String], default: [] },
   createdAt: { type: Date, default: Date.now },
 });
 
