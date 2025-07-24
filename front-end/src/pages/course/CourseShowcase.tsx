@@ -1,8 +1,8 @@
 import CourseCard from "@/components/cards/CourseCard";
 import clsx from "clsx";
-import { GraduationCap, SquareCheck, SquareX } from "lucide-react";
+import { SquareCheck, SquareX } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import type { Course } from "types/course";
 
 const levelMap = {
@@ -16,6 +16,7 @@ const CourseShowcase = () => {
   const [course, setCourse] = useState<Course>();
   const [loading, setLoading] = useState(true);
   const [openTopic, setOpenTopic] = useState<number[]>([]);
+  const navigate = useNavigate()
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -120,6 +121,10 @@ const CourseShowcase = () => {
     }
   }
 
+  const handleJoingClick = () => {
+    navigate(`content`);
+  }
+
   if (loading) return <div className="p-4 sm:p-6 text-center text-sm sm:text-base">Loading...</div>;
   if (!course) return <div className="p-4 sm:p-6 text-center text-sm sm:text-base">Course not found.</div>;
 
@@ -197,7 +202,7 @@ const CourseShowcase = () => {
               </span>
             </p>
 
-            <button className="w-full rounded bg-green-300 text-green-700 py-2 font-bold hover:shadow-lg hover:-translate-y-1 hover:bg-green-400 hover:text-green-800 cursor-pointer transition-all">
+            <button onClick={handleJoingClick} className="w-full rounded bg-green-300 text-green-700 py-2 font-bold hover:shadow-lg hover:-translate-y-1 hover:bg-green-400 hover:text-green-800 cursor-pointer transition-all">
               شروع دوره
             </button>
           </div>

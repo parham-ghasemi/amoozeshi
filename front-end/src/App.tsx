@@ -18,6 +18,8 @@ import VideoSearch from "./pages/video/VideoSearch"
 
 import Layout from "@/pages/Layout";
 import Course from "./Admin/Course"
+import CourseContent from "./pages/course/CourseContent"
+import NotFound from "./pages/NotFound"
 
 function App() {
   return (
@@ -26,7 +28,7 @@ function App() {
         <Routes>
           {/* Non-admin routes use MainLayout */}
           <Route element={<Layout />}>
-            <Route path="/" element={<Home />} />
+            <Route path="/" index element={<Home />} />
             <Route path="/about-us" element={<About />} />
             <Route path="/login" element={<Login />} />
 
@@ -40,18 +42,23 @@ function App() {
             <Route path="/courses" element={<ShowCourses />} />
             <Route path="/courses-all" element={<ShowAllCourses />} />
             <Route path="/course/:id" element={<CourseShowcase />} />
+            <Route path="/course/:id/content" element={<CourseContent />} />
 
             {/* Videos */}
             <Route path="/videos" element={<Showvideos />} />
             <Route path="/videos/search" element={<VideoSearch />} />
             <Route path="/videos-all" element={<AllVideos />} />
             <Route path="/video/:id" element={<VideoShowcase />} />
+
+            {/* not found */}
+            <Route path="*" element={<NotFound />} />
           </Route>
 
           {/* Admin routes - no layout */}
           <Route path="/admin/article" element={<Articles />} />
           <Route path="/admin/video" element={<Videos />} />
           <Route path="/admin/course" element={<Course />} />
+
         </Routes>
       </Router></div>
   );
