@@ -1,3 +1,5 @@
+import type { ArticleShort } from "./article";
+import type { VideoShort } from "./video";
 import type { ObjectId, Category, CourseLevel } from "./common";
 
 export interface CourseTopic {
@@ -10,9 +12,10 @@ export interface CourseQuestion {
   answer: string;
 }
 
-export interface CourseContentItem {
-  itemId: ObjectId;
-  itemType: 'video' | 'article' | 'quiz';
+export interface CourseContent {
+  _id: ObjectId;
+  itemId : ArticleShort | VideoShort;
+  itemType: "Article" | "Video";
 }
 
 export interface Course {
@@ -27,8 +30,8 @@ export interface Course {
   goal: string;
   topics: CourseTopic[];
   questions: CourseQuestion[];
-  content: CourseContentItem[];
-  related: CourseShort[]; // or Course[] if populated
+  content: CourseContent[];
+  related: CourseShort[];
   createdAt: string;
 }
 

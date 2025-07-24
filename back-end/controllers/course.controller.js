@@ -90,20 +90,20 @@ exports.getCourseById = async (req, res) => {
   }
 };
 
-// === Get short course by ID ===
-exports.getShortCourseById = async (req, res) => {
+exports.getCourseContentById = async (req, res) => {
   try {
-    // const course = await Course.findById(req.params.id, { _id: 1, title: 1, shortDesc: 1, thumbnail: 1 });
-    console.log(req.params.id);
+    const course = await Course.findById(req.params.id)
+      .populate('content.itemId')
+      .populate('related', '_id title shortDesc thumbnail');
 
-    // if (!course) return res.status(404).json({ message: 'Course not found' });
+    if (!course) return res.status(404).json({ message: 'course not foudn' });
 
-    // res.json({ course });
+    res.json({ content: course.content, title: course.title })
   } catch (err) {
-    console.error('Get short course error:', err);
-    res.status(500).json({ message: 'Failed to fetch course' });
+    console.error('Get course content by ID error:', err);
+    res.status(500).json({ message: 'Failed to fetch course content' });
   }
-};
+}
 
 // === Get courses by category (short version) ===
 exports.getCoursesByCategory = async (req, res) => {

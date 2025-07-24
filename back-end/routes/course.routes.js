@@ -5,10 +5,10 @@ const {
   addCourse,
   getAllCourses,
   getCourseById,
-  getShortCourseById,
   getCoursesByCategory,
   getNewestCourses,
   searchCourses,
+  getCourseContentById
 } = require('../controllers/course.controller');
 
 // Add a new course
@@ -17,7 +17,7 @@ router.post('/courses', addCourse);
 // Fetch courses
 router.get('/courses', getAllCourses);
 router.get('/course/:id', getCourseById);
-router.get('/course/short/:id', getShortCourseById);
+router.get('/course/content/:id', getCourseContentById)
 
 // Filter & search
 router.get('/courses/category/:category', getCoursesByCategory);
