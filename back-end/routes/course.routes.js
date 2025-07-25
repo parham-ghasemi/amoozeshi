@@ -9,7 +9,8 @@ const {
   getNewestCourses,
   searchCourses,
   getCourseContentById,
-  joinCourse
+  joinCourse,
+  getMostPopularCourses,
 } = require('../controllers/course.controller');
 
 // Add a new course
@@ -24,6 +25,7 @@ router.get('/course/content/:id', getCourseContentById)
 router.get('/courses/category/:category', getCoursesByCategory);
 router.get('/courses/newest', getNewestCourses);
 router.get('/courses/search', searchCourses);
+router.get('/courses/most-popular', getMostPopularCourses)
 
 // joing course
 router.post("/courses/:id/join", joinCourse);

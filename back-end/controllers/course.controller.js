@@ -133,6 +133,33 @@ exports.getNewestCourses = async (req, res) => {
   }
 };
 
+exports.getMostPopularCourses = async (req, res) => {
+  try {
+    const [mostPopular] = await Course.aggregate([
+      {
+        $addFields: {
+          joinedCount: { $size: "$joinedBy" }
+        }
+      },
+      {
+        $sort: { joinedCount: -1 }
+      },
+      {
+        $limit: 20
+      }
+    ]);
+
+    if (!mostPopular) {
+      return res.status(404).json({ message: "No courses found" });
+    }
+
+    res.status(200).json(mostPopular);
+  } catch (err) {
+    console.error("Error getting most popular course:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 // === Search courses by title or shortDesc (short version) ===
 exports.searchCourses = async (req, res) => {
   const query = req.query.query;

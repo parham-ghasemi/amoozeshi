@@ -20,6 +20,7 @@ import Layout from "@/pages/Layout";
 import Course from "./Admin/Course"
 import CourseContent from "./pages/course/CourseContent"
 import NotFound from "./pages/NotFound"
+import CourseSearch from "./pages/course/CourseSearch"
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
             <Route path="/courses-all" element={<ShowAllCourses />} />
             <Route path="/course/:id" element={<CourseShowcase />} />
             <Route path="/course/:id/content" element={<CourseContent />} />
+            <Route path="/courses/search" element={<CourseSearch />} />
 
             {/* Videos */}
             <Route path="/videos" element={<Showvideos />} />

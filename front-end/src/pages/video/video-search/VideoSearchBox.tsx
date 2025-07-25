@@ -31,6 +31,7 @@ const VideoSearchBox = ({ initSearchTerm }: { initSearchTerm?: string }) => {
         className="h-full w-full px-3 border-none outline-none"
         onChange={(e) => setSearchTerm(e.target.value)}
         value={searchTerm}
+        dir='rtl'
       />
       <button className="p-3 cursor-pointer" type="submit">
         <Search size={26} className="hover:text-slate-700" />
