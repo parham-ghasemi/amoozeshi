@@ -50,10 +50,10 @@ const CourseContent = () => {
         <button onClick={() => nav(`/course/${id}`)} className="hover:-translate-x-0.5 cursor-pointer transition-transform">
           <ChevronLeft size={25}/>
         </button>
-        <p className="leading-[300%] text-lg font-bold">{title}</p>
+        <p className="leading-[300%] text-xs md:text-lg font-bold">{title}</p>
       </div>
 
-      <div className="w-full grid grid-cols-2 gap-4 ">
+      <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 ">
         {content && content.map((item, index) => (
           <div className="w-full" key={`${item.itemId.title} - ${index}`}>
             {
@@ -66,6 +66,7 @@ const CourseContent = () => {
                 <VideoCard video={item.itemId} />
               )
             }
+            <div className="w-full h-px bg-neutral-200 md:hidden"></div>
           </div>
         ))}
       </div>
