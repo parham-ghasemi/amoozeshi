@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 import Home from "./pages/Home"
 import ShowArticles from "./pages/article/ShowArticles"
 import AllArticles from "./pages/article/AllArticles"
@@ -18,9 +18,14 @@ import VideoSearch from "./pages/video/VideoSearch"
 
 import Layout from "@/pages/Layout";
 import Course from "./Admin/Course"
+
+// @ts-ignore
 import CourseContent from "./pages/course/CourseContent"
+
 import NotFound from "./pages/NotFound"
 import CourseSearch from "./pages/course/CourseSearch"
+import Dashboard from "./Admin/Dashboard"
+import AdminLayout from "./Admin/AdminLayout"
 
 function App() {
   return (
@@ -56,10 +61,14 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Route>
 
-          {/* Admin routes - no layout */}
-          <Route path="/admin/article" element={<Articles />} />
-          <Route path="/admin/video" element={<Videos />} />
-          <Route path="/admin/course" element={<Course />} />
+          {/* Admin routes */}
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="article" element={<Articles />} />
+            <Route path="video" element={<Videos />} />
+            <Route path="course" element={<Course />} />
+          </Route>
 
         </Routes>
       </Router></div>
