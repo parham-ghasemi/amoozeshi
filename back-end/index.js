@@ -32,6 +32,9 @@ app.use('/', videoRoutes);
 const courseRoutes = require('./routes/course.routes');
 app.use('/', courseRoutes);
 
+const visitRoutes = require('./routes/visit.routes');
+app.use('/', visitRoutes);
+
 // Serve /uploads folder
 const uploadPath = path.join(__dirname, 'uploads');
 app.use('/uploads', express.static(uploadPath));

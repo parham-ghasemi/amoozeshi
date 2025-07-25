@@ -135,19 +135,8 @@ exports.getNewestCourses = async (req, res) => {
 
 exports.getMostPopularCourses = async (req, res) => {
   try {
-    const [mostPopular] = await Course.aggregate([
-      {
-        $addFields: {
-          joinedCount: { $size: "$joinedBy" }
-        }
-      },
-      {
-        $sort: { joinedCount: -1 }
-      },
-      {
-        $limit: 20
-      }
-    ]);
+    const mostPopular = await Course.find({}, { title: 1, shortDesc: 1, thumbnail: 1 })
+      .sort({ joinedBy: -1 }).limit(20);
 
     if (!mostPopular) {
       return res.status(404).json({ message: "No courses found" });
