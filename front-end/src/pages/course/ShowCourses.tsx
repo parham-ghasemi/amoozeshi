@@ -26,7 +26,7 @@ const ShowCourses = () => {
           axios.get(`http://localhost:3000/courses/category/${encodeURIComponent(categoryName)}`),
         ])
 
-        setMostPopular([popularRes.data]) // Most popular returns single object
+        setMostPopular(popularRes.data)
         setNewest(newestRes.data)
         setCategoryCourses(categoryRes.data)
       } catch (err) {

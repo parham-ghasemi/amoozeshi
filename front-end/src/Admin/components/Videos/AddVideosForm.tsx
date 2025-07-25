@@ -57,7 +57,7 @@ export default function AddVideoForm() {
     ejInstance.current = editor;
 
     axios
-      .get('http://localhost:3000/vidoes') // yes, typo in backend route
+      .get('http://localhost:3000/videos') // yes, typo in backend route
       .then((res) => setAllVideos(res.data))
       .catch((err) => console.error('Failed to fetch videos', err));
 
