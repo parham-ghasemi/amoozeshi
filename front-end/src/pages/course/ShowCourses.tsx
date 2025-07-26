@@ -5,32 +5,44 @@ import CourseCard from '@/components/cards/CourseCard'
 import CourseSearchBox from './course-search/CourseSearchBox'
 import type { CourseShort } from 'types/course'
 
+interface Category {
+  _id: string
+  name: string
+}
+
 const ShowCourses = () => {
   const [mostPopular, setMostPopular] = useState<CourseShort[]>([])
   const [newest, setNewest] = useState<CourseShort[]>([])
   const [categoryCourses, setCategoryCourses] = useState<CourseShort[]>([])
   const [allCourses, setAllCourses] = useState<CourseShort[]>([])
-
+  const [categories, setCategories] = useState<Category[]>([])
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
 
   const [expandedSection, setExpandedSection] = useState<null | 'popular' | 'newest' | 'category'>(null)
   const [showAllCourses, setShowAllCourses] = useState(false)
 
-  const categoryName = 'Machine Learning'
-
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [popularRes, newestRes, categoryRes] = await Promise.all([
+        const [popularRes, newestRes, categoryList] = await Promise.all([
           axios.get('http://localhost:3000/courses/most-popular'),
           axios.get('http://localhost:3000/courses/newest'),
-          axios.get(`http://localhost:3000/courses/category/${encodeURIComponent(categoryName)}`),
+          axios.get('http://localhost:3000/categories'),
         ])
 
         setMostPopular(popularRes.data)
         setNewest(newestRes.data)
-        setCategoryCourses(categoryRes.data)
+        setCategories(categoryList.data.categories)
+
+        if (categoryList.data.categories.length > 0) {
+          const firstCategory = categoryList.data.categories[0]
+          setSelectedCategory(firstCategory)
+
+          const categoryRes = await axios.get(`http://localhost:3000/courses/category/${firstCategory._id}`)
+          setCategoryCourses(categoryRes.data)
+        }
       } catch (err) {
-        console.error('Error fetching courses:', err)
+        console.error('خطا در دریافت دوره‌ها:', err)
       }
     }
 
@@ -43,7 +55,7 @@ const ShowCourses = () => {
       setAllCourses(res.data)
       setShowAllCourses(true)
     } catch (err) {
-      console.error('Failed to fetch all courses:', err)
+      console.error('خطا در دریافت همه دوره‌ها:', err)
     }
   }
 
@@ -74,9 +86,9 @@ const ShowCourses = () => {
           />
         )}
 
-        {(expandedSection === 'category' || !isCollapsed) && (
+        {(selectedCategory && (expandedSection === 'category' || !isCollapsed)) && (
           <Section
-            title={`دوره‌های «${categoryName}»`}
+            title={`دوره‌های ${selectedCategory.name}`}
             courses={categoryCourses}
             showAll={expandedSection === 'category'}
             onShowAll={() => setExpandedSection('category')}
@@ -132,19 +144,17 @@ const Section = ({
             className="text-sm flex items-center gap-1 cursor-pointer hover:text-slate-700"
             onClick={onShowAll}
           >
-            بیشتر
+            مشاهده بیشتر
             <ChevronLeft size={17} />
           </p>
         ) : (
-          <div className="flex items-center gap-4">
-            <button
-              onClick={onBack}
-              className="flex items-center gap-1 text-sm hover:text-rose-700 cursor-pointer"
-            >
-              بازگشت
-              <ChevronLeft size={18} />
-            </button>
-          </div>
+          <button
+            onClick={onBack}
+            className="flex items-center gap-1 text-sm hover:text-rose-700 cursor-pointer"
+          >
+            بازگشت
+            <ChevronLeft size={18} />
+          </button>
         )}
       </div>
 

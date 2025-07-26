@@ -1,6 +1,4 @@
-"use client"
-
-import * as React from "react"
+import { useEffect, useState } from "react"
 import { CheckIcon, ChevronsUpDownIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -18,32 +16,37 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import axios from "axios"
 
-const categorys = [
-  {
-    value: "Web Development",
-    label: "Web Development",
-  },
-  {
-    value: 'Data Science',
-    label: "Data Science",
-  },
-  {
-    value: 'Machine Learning',
-    label: "Machine Learning",
-  },
-  {
-    value: 'Mobile Development',
-    label: "Mobile Development",
-  },
-  {
-    value: 'Game development',
-    label: "Game development",
-  },
-]
+interface Category {
+  _id: string
+  name: string
+}
 
-export function CategoryDropDown({ value, setValue }: { value: string, setValue: (value: string) => void }) {
-  const [open, setOpen] = React.useState(false)
+export function CategoryDropDown({
+  value,
+  setValue,
+}: {
+  value: string
+  setValue: (value: string) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const [categories, setCategories] = useState<Category[]>([])
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await axios.get("http://localhost:3000/categories")
+        setCategories(res.data.categories)
+      } catch (err) {
+        console.error("Error fetching categories:", err)
+      }
+    }
+
+    fetchCategories()
+  }, [])
+
+  const selectedCategory = categories.find((cat) => cat._id === value)
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -52,24 +55,22 @@ export function CategoryDropDown({ value, setValue }: { value: string, setValue:
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[200px] justify-between"
+          className="w-[250px] justify-between"
         >
-          {value
-            ? categorys.find((category) => category.value === value)?.label
-            : "Select category..."}
+          {selectedCategory ? selectedCategory.name : "انتخاب دسته‌بندی"}
           <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
+      <PopoverContent className="w-[250px] p-0" dir="rtl">
         <Command>
-          <CommandInput placeholder="Search category..." />
+          <CommandInput placeholder="جستجوی دسته‌بندی..." />
           <CommandList>
-            <CommandEmpty>No category found.</CommandEmpty>
+            <CommandEmpty>دسته‌ای پیدا نشد.</CommandEmpty>
             <CommandGroup>
-              {categorys.map((category) => (
+              {categories.map((category) => (
                 <CommandItem
-                  key={category.value}
-                  value={category.value}
+                  key={category._id}
+                  value={category._id}
                   onSelect={(currentValue) => {
                     setValue(currentValue === value ? "" : currentValue)
                     setOpen(false)
@@ -78,10 +79,10 @@ export function CategoryDropDown({ value, setValue }: { value: string, setValue:
                   <CheckIcon
                     className={cn(
                       "mr-2 h-4 w-4",
-                      value === category.value ? "opacity-100" : "opacity-0"
+                      value === category._id ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  {category.label}
+                  {category.name}
                 </CommandItem>
               ))}
             </CommandGroup>

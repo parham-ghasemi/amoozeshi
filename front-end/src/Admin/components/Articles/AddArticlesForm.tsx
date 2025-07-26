@@ -19,7 +19,6 @@ export default function AddArticleForm() {
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [isUploadingThumb, setIsUploadingThumb] = useState(false);
 
-
   useEffect(() => {
     const editor = new EditorJS({
       holder: 'editorjs',
@@ -39,7 +38,7 @@ export default function AddArticleForm() {
                   });
                   return response.data;
                 } catch (error) {
-                  console.error('Image upload failed:', error);
+                  console.error('بارگذاری تصویر ناموفق بود:', error);
                   return { success: 0 };
                 }
               },
@@ -47,7 +46,7 @@ export default function AddArticleForm() {
           },
         },
       },
-      placeholder: 'Write your article...',
+      placeholder: 'مقاله خود را بنویسید...',
       i18n: {
         direction: 'rtl'
       }
@@ -58,7 +57,7 @@ export default function AddArticleForm() {
     axios
       .get('http://localhost:3000/articles')
       .then((res) => setAllArticles(res.data))
-      .catch((err) => console.error('Failed to fetch articles', err));
+      .catch((err) => console.error('دریافت مقالات ناموفق بود', err));
 
     return () => {
       ejInstance.current?.destroy?.();
@@ -79,25 +78,24 @@ export default function AddArticleForm() {
       if (response.data?.success) {
         setThumbnail(response.data.file.url);
       } else {
-        alert('Thumbnail upload failed.');
+        alert('بارگذاری تصویر کوچک ناموفق بود.');
       }
     } catch (err) {
-      console.error('Thumbnail upload error:', err);
-      alert('Failed to upload thumbnail.');
+      console.error('خطا در بارگذاری تصویر کوچک:', err);
+      alert('بارگذاری تصویر کوچک ناموفق بود.');
     } finally {
       setIsUploadingThumb(false);
     }
   };
 
-
   const handleSubmit = async () => {
     const data = await ejInstance.current?.save();
     if (!title || !description || !data || !category || data.blocks.length === 0) {
-      alert('No title, description, content or category provided!');
+      alert('عنوان، توضیحات، محتوا یا دسته‌بندی وارد نشده است!');
       return;
     }
     if (!thumbnail) {
-      alert('Thumbnail is required!');
+      alert('تصویر کوچک الزامی است!');
       return;
     }
 
@@ -110,19 +108,19 @@ export default function AddArticleForm() {
         related: relatedArticles,
         thumbnail,
       });
-      alert('Article posted!');
+      alert('مقاله منتشر شد!');
     } catch (error: any) {
-      console.error('Error posting article:', error);
-      alert('Failed to post article :(');
+      console.error('خطا در انتشار مقاله:', error);
+      alert('انتشار مقاله ناموفق بود :(');
     }
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-8 space-y-6 bg-white shadow-lg rounded-3xl border border-gray-200">
+    <div className="max-w-3xl mx-auto p-8 space-y-6 bg-white shadow-lg rounded-3xl border border-gray-200" dir='rtl'>
       <input
         type="text"
         className="w-full border border-gray-200 rounded-xl px-5 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 transition-shadow"
-        placeholder="Article title"
+        placeholder="عنوان مقاله"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         dir='rtl'
@@ -130,16 +128,17 @@ export default function AddArticleForm() {
       <input
         type="text"
         className="w-full border border-gray-200 rounded-xl px-5 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 transition-shadow"
-        placeholder="Article description"
+        placeholder="توضیحات مقاله"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         dir='rtl'
       />
-      <div className="space-y-2">
-        <label className="block font-semibold text-gray-700">Thumbnail Image</label>
+      <div className="space-y-2" dir='rtl'>
+        <label className="block font-semibold text-gray-700">تصویر کوچک</label>
         <input
           type="file"
           accept="image/*"
+          
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (file) {
@@ -150,11 +149,11 @@ export default function AddArticleForm() {
           className="block w-full border border-gray-200 rounded-xl px-4 py-2 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition"
         />
         {isUploadingThumb ? (
-          <p className="text-sm text-gray-500 italic">Uploading...</p>
+          <p className="text-sm text-gray-500 italic">در حال بارگذاری...</p>
         ) : thumbnail ? (
           <img
             src={thumbnail}
-            alt="Thumbnail Preview"
+            alt="پیش‌نمایش تصویر کوچک"
             className="mt-2 w-full max-h-64 object-cover rounded-xl border"
           />
         ) : null}
@@ -175,7 +174,7 @@ export default function AddArticleForm() {
           className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
           onClick={handleSubmit}
         >
-          Publish Article
+          انتشار مقاله
         </button>
       </div>
     </div>

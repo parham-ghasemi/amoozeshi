@@ -26,6 +26,7 @@ import NotFound from "./pages/NotFound"
 import CourseSearch from "./pages/course/CourseSearch"
 import Dashboard from "./Admin/Dashboard"
 import AdminLayout from "./Admin/AdminLayout"
+import Settings from "./Admin/Settings"
 
 function App() {
   return (
@@ -68,6 +69,7 @@ function App() {
             <Route path="article" element={<Articles />} />
             <Route path="video" element={<Videos />} />
             <Route path="course" element={<Course />} />
+            <Route path="settings" element={<Settings />} />
           </Route>
 
         </Routes>

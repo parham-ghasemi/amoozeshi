@@ -118,10 +118,10 @@ export default function AddVideoForm() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-8 space-y-6 bg-white shadow-lg rounded-3xl border border-gray-200">
+    <div className="max-w-3xl mx-auto p-8 space-y-6 bg-white shadow-lg rounded-3xl border border-gray-200" dir='rtl'>
       <input
         type="text"
-        placeholder="Video title"
+        placeholder="عنوان ویدئو..."
         className="w-full border rounded-xl px-5 py-3 text-lg"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
@@ -129,14 +129,14 @@ export default function AddVideoForm() {
       />
       <input
         type="text"
-        placeholder="Short description"
+        placeholder="توضیحات ویدئو..."
         className="w-full border rounded-xl px-5 py-3 text-lg"
         value={shortDesc}
         onChange={(e) => setShortDesc(e.target.value)}
         dir="rtl"
       />
       <div className="space-y-2">
-        <label className="font-semibold text-gray-700">Thumbnail</label>
+        <label className="font-semibold text-gray-700">تصویر کوچک</label>
         <input
           type="file"
           accept="image/*"
@@ -154,7 +154,7 @@ export default function AddVideoForm() {
       </div>
 
       <div className="space-y-2">
-        <label className="font-semibold text-gray-700">Upload Video</label>
+        <label className="font-semibold text-gray-700">آپلود ویدئو</label>
         <input
           type="file"
           accept="video/*"

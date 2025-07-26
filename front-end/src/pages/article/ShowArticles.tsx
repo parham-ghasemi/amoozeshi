@@ -4,31 +4,44 @@ import ArticleSearchBox from './article-search/ArticleSearchBox'
 import ArticleCard from '@/components/cards/ArticleCard'
 import axios from 'axios'
 
+interface Category {
+  _id: string
+  name: string
+}
+
 const ShowArticles = () => {
   const [mostViewed, setMostViewed] = useState([])
   const [newest, setNewest] = useState([])
   const [categoryArticles, setCategoryArticles] = useState([])
   const [allArticles, setAllArticles] = useState([])
+  const [categories, setCategories] = useState<Category[]>([])
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
 
   const [expandedSection, setExpandedSection] = useState<null | 'viewed' | 'newest' | 'category'>(null)
   const [showAllArticles, setShowAllArticles] = useState(false)
 
-  const categoryName = 'Web Development'
-
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [viewedRes, newestRes, categoryRes] = await Promise.all([
+        const [viewedRes, newestRes, categoryList] = await Promise.all([
           axios.get('http://localhost:3000/articles/most-viewed'),
           axios.get('http://localhost:3000/articles/newest'),
-          axios.get(`http://localhost:3000/articles/category/${encodeURIComponent(categoryName)}`),
+          axios.get('http://localhost:3000/categories'),
         ])
 
         setMostViewed(viewedRes.data)
         setNewest(newestRes.data)
-        setCategoryArticles(categoryRes.data)
+        setCategories(categoryList.data.categories)
+
+        if (categoryList.data.categories.length > 0) {
+          const firstCategory = categoryList.data.categories[0]
+          setSelectedCategory(firstCategory)
+
+          const categoryRes = await axios.get(`http://localhost:3000/articles/category/${firstCategory._id}`)
+          setCategoryArticles(categoryRes.data)
+        }
       } catch (err) {
-        console.error('Error fetching articles:', err)
+        console.error('خطا در دریافت مقالات:', err)
       }
     }
 
@@ -41,7 +54,7 @@ const ShowArticles = () => {
       setAllArticles(res.data)
       setShowAllArticles(true)
     } catch (err) {
-      console.error('Failed to fetch all articles:', err)
+      console.error('خطا در دریافت همه مقالات:', err)
     }
   }
 
@@ -54,7 +67,7 @@ const ShowArticles = () => {
       <div className="w-6xl min-h-96 bg-slate-50 rounded-2xl flex flex-col gap-10 p-16" dir="rtl">
         {(expandedSection === 'viewed' || !isCollapsed) && (
           <Section
-            title="پر بازدید ترین مقاله ها"
+            title="مقاله‌های پربازدید"
             articles={mostViewed}
             showAll={expandedSection === 'viewed'}
             onShowAll={() => setExpandedSection('viewed')}
@@ -64,7 +77,7 @@ const ShowArticles = () => {
 
         {(expandedSection === 'newest' || !isCollapsed) && (
           <Section
-            title="جدید ترین مقاله ها"
+            title="جدیدترین مقاله‌ها"
             articles={newest}
             showAll={expandedSection === 'newest'}
             onShowAll={() => setExpandedSection('newest')}
@@ -72,9 +85,9 @@ const ShowArticles = () => {
           />
         )}
 
-        {(expandedSection === 'category' || !isCollapsed) && (
+        {(selectedCategory && (expandedSection === 'category' || !isCollapsed)) && (
           <Section
-            title={`مقاله های «${categoryName}»`}
+            title={`مقاله‌های ${selectedCategory.name}`}
             articles={categoryArticles}
             showAll={expandedSection === 'category'}
             onShowAll={() => setExpandedSection('category')}
@@ -84,7 +97,7 @@ const ShowArticles = () => {
 
         {showAllArticles && (
           <Section
-            title="همه مقاله ها"
+            title="همه مقاله‌ها"
             articles={allArticles}
             showAll={true}
             onShowAll={() => { }}
@@ -97,11 +110,10 @@ const ShowArticles = () => {
             onClick={handleShowAllArticles}
             className="mt-10 mb-20 w-full py-3 bg-blue-100 cursor-pointer hover:bg-blue-200 self-center rounded-2xl hover:shadow-2xl"
           >
-            نمایش همه مقاله‌ها
+            مشاهده همه مقاله‌ها
           </button>
         )}
       </div>
-
     </div>
   )
 }
@@ -131,19 +143,17 @@ const Section = ({
             className="text-sm flex items-center gap-1 cursor-pointer hover:text-slate-700"
             onClick={onShowAll}
           >
-            بیشتر
+            مشاهده بیشتر
             <ChevronLeft size={17} />
           </p>
         ) : (
-          <div className="flex items-center gap-4">
-            <button
-              onClick={onBack}
-              className="flex items-center gap-1 text-sm hover:text-rose-700 cursor-pointer"
-            >
-              بازگشت
-              <ChevronLeft size={18} />
-            </button>
-          </div>
+          <button
+            onClick={onBack}
+            className="flex items-center gap-1 text-sm hover:text-rose-700 cursor-pointer"
+          >
+            بازگشت
+            <ChevronLeft size={18} />
+          </button>
         )}
       </div>
 

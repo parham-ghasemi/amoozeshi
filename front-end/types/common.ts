@@ -1,9 +1,4 @@
-export type Category =
-  | 'Web Development'
-  | 'Data Science'
-  | 'Machine Learning'
-  | 'Mobile Development'
-  | 'Game development';
+export type Category = {name:string}
 
 export type CourseLevel = 'Beginner' | 'Intermediate' | 'Advanced';
 

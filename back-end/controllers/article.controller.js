@@ -4,6 +4,7 @@ const multer = require('multer');
 const mongoose = require('mongoose');
 
 const Article = require('../models/Article');
+const Category = require('../models/Category'); // Add this import
 
 // Multer setup
 const storage = multer.diskStorage({
@@ -38,13 +39,19 @@ exports.uploadImage = (req, res) => {
   });
 };
 
+
 exports.addArticle = async (req, res) => {
   try {
     const { title, description, content, category, related, thumbnail } = req.body;
 
-    // Basic validation
     if (!title || !description || !content || !category || !thumbnail) {
       return res.status(400).json({ message: 'Title, content, and category are required' });
+    }
+
+    // ✅ Check that the category exists
+    const categoryExists = await Category.findById(category);
+    if (!categoryExists) {
+      return res.status(400).json({ message: 'Invalid category ID' });
     }
 
     const parsedRelated = (related || []).map(id => new mongoose.Types.ObjectId(id));
@@ -52,7 +59,7 @@ exports.addArticle = async (req, res) => {
     const newArticle = new Article({
       title,
       description,
-      content: JSON.parse(content), // ⛏️ NOTE: Frontend is sending it stringified
+      content: JSON.parse(content), // still stringified
       category,
       related: parsedRelated,
       thumbnail,
@@ -68,13 +75,14 @@ exports.addArticle = async (req, res) => {
   }
 };
 
+
 exports.getArticleById = async (req, res) => {
   try {
     const article = await Article.findByIdAndUpdate(
       req.params.id,
       { $inc: { visits: 1 } },
       { new: true }
-    );
+    ).populate("category"); // ✅ populate category
 
     if (!article) return res.status(404).json({ message: 'Article not found' });
 
@@ -84,6 +92,7 @@ exports.getArticleById = async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch article' });
   }
 };
+
 
 exports.getShortArticleById = async (req, res) => {
   try {
@@ -136,18 +145,22 @@ exports.searchedArticles = async (req, res) => {
 exports.getArticlesByCategory = async (req, res) => {
   const { category } = req.params;
 
-  if (!category) {
-    return res.status(400).json({ message: 'Category is required' });
+  if (!mongoose.Types.ObjectId.isValid(category)) {
+    return res.status(400).json({ message: 'Invalid category ID' });
   }
 
   try {
-    const articles = await Article.find({ category }, { id: 1, thumbnail: 1, title: 1, description: 1 });
+    const articles = await Article.find(
+      { category: new mongoose.Types.ObjectId(category) },
+      { _id: 1, thumbnail: 1, title: 1, description: 1 }
+    );
     res.status(200).json(articles);
   } catch (error) {
     console.error('Error fetching category articles:', error);
     res.status(500).json({ message: 'Failed to fetch category articles' });
   }
 };
+
 
 // Get most viewed articles (top 10 by visits)
 exports.getMostViewedArticles = async (req, res) => {

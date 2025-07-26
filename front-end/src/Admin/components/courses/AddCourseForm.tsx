@@ -12,7 +12,7 @@ import type { ArticleShort } from 'types/article';
 
 interface ContentItem {
   itemId: string;
-  itemType: 'video' | 'article';
+  itemType: 'Video' | 'Article';
 }
 
 function ContentSelector({
@@ -27,9 +27,9 @@ function ContentSelector({
   setContentItems: React.Dispatch<React.SetStateAction<ContentItem[]>>;
 }) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [itemType, setItemType] = useState<'video' | 'article'>('video');
+  const [itemType, setItemType] = useState<'Video' | 'Article'>('Video');
 
-  const toggleContentItem = (id: string, type: 'video' | 'article') => {
+  const toggleContentItem = (id: string, type: 'Video' | 'Article') => {
     setContentItems((prev) => {
       const exists = prev.some((item) => item.itemId === id && item.itemType === type);
       if (exists) {
@@ -53,11 +53,11 @@ function ContentSelector({
       <div className="flex gap-4">
         <select
           value={itemType}
-          onChange={(e) => setItemType(e.target.value as 'video' | 'article')}
+          onChange={(e) => setItemType(e.target.value as 'Video' | 'Article')}
           className="border rounded-xl p-2"
         >
-          <option value="video">ویدیو</option>
-          <option value="article">مقاله</option>
+          <option value="Video">ویدیو</option>
+          <option value="Article">مقاله</option>
         </select>
         <input
           type="text"
@@ -69,15 +69,15 @@ function ContentSelector({
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
-        {itemType === 'video'
+        {itemType === 'Video'
           ? filteredVideos.map((video) => {
             const isSelected = contentItems.some(
-              (item) => item.itemId === video._id && item.itemType === 'video'
+              (item) => item.itemId === video._id && item.itemType === 'Video'
             );
             return (
               <div
                 key={video._id}
-                onClick={() => toggleContentItem(video._id, 'video')}
+                onClick={() => toggleContentItem(video._id, 'Video')}
                 className={`cursor-pointer rounded-xl border transition-all shadow-sm overflow-hidden hover:shadow-xl hover:scale-95
                     ${isSelected ? 'border-blue-400 bg-blue-50' : 'border-gray-200 bg-white hover:bg-gray-50'}`}
               >
@@ -97,12 +97,12 @@ function ContentSelector({
           })
           : filteredArticles.map((article) => {
             const isSelected = contentItems.some(
-              (item) => item.itemId === article._id && item.itemType === 'article'
+              (item) => item.itemId === article._id && item.itemType === 'Article'
             );
             return (
               <div
                 key={article._id}
-                onClick={() => toggleContentItem(article._id, 'article')}
+                onClick={() => toggleContentItem(article._id, 'Article')}
                 className={`cursor-pointer rounded-xl border transition-all shadow-sm overflow-hidden hover:shadow-xl hover:scale-95
                     ${isSelected ? 'border-blue-400 bg-blue-50' : 'border-gray-200 bg-white hover:bg-gray-50'}`}
               >
@@ -139,7 +139,6 @@ export default function AddCourseForm() {
   const [topics, setTopics] = useState([{ head: '', body: '' }]);
   const [questions, setQuestions] = useState([{ question: '', answer: '' }]);
   const [contentItems, setContentItems] = useState<ContentItem[]>([]);
-
   const [relatedCourses, setRelatedCourses] = useState<string[]>([]);
   const [allCourses, setAllCourses] = useState<CourseShort[]>([]);
   const [allVideos, setAllVideos] = useState<VideoShort[]>([]);
@@ -178,19 +177,19 @@ export default function AddCourseForm() {
     axios
       .get('http://localhost:3000/courses')
       .then((res) => setAllCourses(res.data))
-      .catch((err) => console.error('Failed to fetch courses', err));
+      .catch((err) => console.error('خطا در دریافت دوره‌ها', err));
 
     // Fetch videos
     axios
       .get('http://localhost:3000/videos')
       .then((res) => setAllVideos(res.data))
-      .catch((err) => console.error('Failed to fetch videos', err));
+      .catch((err) => console.error('خطا در دریافت ویدیوها', err));
 
     // Fetch articles
     axios
       .get('http://localhost:3000/articles')
       .then((res) => setAllArticles(res.data))
-      .catch((err) => console.error('Failed to fetch articles', err));
+      .catch((err) => console.error('خطا در دریافت مقالات', err));
 
     return () => {
       ejInstance.current?.destroy?.();
@@ -207,9 +206,9 @@ export default function AddCourseForm() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       if (res.data?.success) setThumbnail(res.data.file.url);
-      else alert('Thumbnail upload failed');
+      else alert('بارگذاری تصویر بند انگشتی ناموفق بود');
     } catch {
-      alert('Failed to upload thumbnail');
+      alert('خطا در بارگذاری تصویر بند انگشتی');
     } finally {
       setIsUploadingThumb(false);
     }
@@ -219,7 +218,7 @@ export default function AddCourseForm() {
     const longDescData = await ejInstance.current?.save();
 
     if (!title || !shortDesc || !thumbnail || !category || !level || !goal || !longDescData || time <= 0) {
-      alert('All fields are required');
+      alert('همه فیلدها الزامی هستند');
       return;
     }
 
@@ -228,7 +227,7 @@ export default function AddCourseForm() {
         title,
         shortDesc,
         thumbnail,
-        longDesc: JSON.stringify(longDescData), // Stringify EditorJS output
+        longDesc: JSON.stringify(longDescData),
         category,
         time,
         level,
@@ -238,19 +237,19 @@ export default function AddCourseForm() {
         content: contentItems,
         related: relatedCourses,
       });
-      alert('Course uploaded!');
+      alert('دوره با موفقیت بارگذاری شد!');
       window.location.reload();
     } catch (err) {
-      console.error('Upload error:', err);
-      alert('Failed to upload course');
+      console.error('خطا در بارگذاری:', err);
+      alert('خطا در بارگذاری دوره');
     }
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-8 space-y-6 bg-white shadow-lg rounded-3xl border border-gray-200">
+    <div className="max-w-3xl mx-auto p-8 space-y-6 bg-white shadow-lg rounded-3xl border border-gray-200" dir='rtl'>
       <input
         type="text"
-        placeholder="Course title"
+        placeholder="عنوان دوره"
         className="w-full border rounded-xl px-5 py-3 text-lg"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
@@ -258,7 +257,7 @@ export default function AddCourseForm() {
       />
       <input
         type="text"
-        placeholder="Short description"
+        placeholder="توضیح کوتاه"
         className="w-full border rounded-xl px-5 py-3 text-lg"
         value={shortDesc}
         onChange={(e) => setShortDesc(e.target.value)}
@@ -266,7 +265,7 @@ export default function AddCourseForm() {
       />
 
       <div className="space-y-2">
-        <label className="font-semibold text-gray-700">Thumbnail</label>
+        <label className="font-semibold text-gray-700">عکس</label>
         <input
           type="file"
           accept="image/*"
@@ -276,37 +275,40 @@ export default function AddCourseForm() {
           }}
           className="block w-full border px-4 py-2 text-sm file:bg-blue-50 file:text-blue-700 file:rounded-lg"
         />
-        {isUploadingThumb && <p className="text-sm text-gray-500">Uploading...</p>}
+        {isUploadingThumb && <p className="text-sm text-gray-500">در حال بارگذاری...</p>}
         {thumbnail && <img src={thumbnail} className="mt-2 w-full max-h-64 object-cover rounded-xl" />}
       </div>
 
       <div id="editorjs" className="min-h-[300px] border rounded-xl p-4 bg-gray-50" />
       <CategoryDropDown value={category} setValue={setCategory} />
 
-      <div className="grid grid-cols-2 gap-4">
-        <input
-          type="number"
-          min={1}
-          placeholder="Time (hours)"
-          className="border rounded-lg px-4 py-3 w-full overflow-hidden"
-          value={time}
-          onChange={(e) => setTime(Number(e.target.value))}
-        />
-        <select
-          value={level}
-          onChange={(e) => setLevel(e.target.value)}
-          className="border rounded-lg px-4 py-3 w-full"
-        >
-          <option value="">Select Level</option>
-          <option value="Beginner">Beginner</option>
-          <option value="Intermediate">Intermediate</option>
-          <option value="Advanced">Advanced</option>
-        </select>
+      <div className="flex flex-col gap-2">
+        <p className='font-semibold text-gray-700'>تایین سطح و زمان</p>
+        <div className="grid grid-cols-2 gap-4">
+          <input
+            type="number"
+            min={1}
+            placeholder="مدت زمان (ساعت)"
+            className="border rounded-lg px-4 py-3 w-full overflow-hidden"
+            value={time}
+            onChange={(e) => setTime(Number(e.target.value))}
+          />
+          <select
+            value={level}
+            onChange={(e) => setLevel(e.target.value)}
+            className="border rounded-lg px-4 py-3 w-full"
+          >
+            <option value="">انتخاب سطح</option>
+            <option value="Beginner">مبتدی</option>
+            <option value="Intermediate">متوسط</option>
+            <option value="Advanced">پیشرفته</option>
+          </select>
+        </div>
       </div>
 
       <input
         type="text"
-        placeholder="Course goal"
+        placeholder="هدف دوره"
         className="w-full border rounded-lg px-5 py-3 text-lg"
         value={goal}
         onChange={(e) => setGoal(e.target.value)}
@@ -315,7 +317,7 @@ export default function AddCourseForm() {
 
       {/* Topics */}
       <div className="space-y-2">
-        <label className="font-semibold">Course Topics</label>
+        <label className="font-semibold">موضوعات دوره</label>
         {topics.map((t, i) => (
           <div key={i} className="grid grid-cols-2 gap-2">
             <input
@@ -341,13 +343,13 @@ export default function AddCourseForm() {
           </div>
         ))}
         <button onClick={() => setTopics([...topics, { head: '', body: '' }])} className="text-sm text-blue-500">
-          + Add Topic
+          + افزودن موضوع
         </button>
       </div>
 
       {/* Questions */}
       <div className="space-y-2">
-        <label className="font-semibold">FAQs</label>
+        <label className="font-semibold">سوالات متداول</label>
         {questions.map((q, i) => (
           <div key={i} className="grid grid-cols-2 gap-2">
             <input
@@ -376,7 +378,7 @@ export default function AddCourseForm() {
           onClick={() => setQuestions([...questions, { question: '', answer: '' }])}
           className="text-sm text-blue-500"
         >
-          + Add Question
+          + افزودن سوال
         </button>
       </div>
 
@@ -399,7 +401,7 @@ export default function AddCourseForm() {
           onClick={handleSubmit}
           className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl transition-all"
         >
-          Create Course
+          ایجاد دوره
         </button>
       </div>
     </div>

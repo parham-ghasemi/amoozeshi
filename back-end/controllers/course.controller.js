@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const Course = require('../models/Course');
+const Category = require('../models/Category');
+
 // === Add a new course ===
 exports.addCourse = async (req, res) => {
   try {
@@ -23,6 +25,12 @@ exports.addCourse = async (req, res) => {
       !time || !level || !goal || !topics || !questions || !content
     ) {
       return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    // ✅ Validate category
+    const categoryExists = await Category.findById(category);
+    if (!categoryExists) {
+      return res.status(400).json({ message: 'Invalid category ID' });
     }
 
     const parsedTopics = typeof topics === 'string' ? JSON.parse(topics) : topics;
@@ -63,6 +71,7 @@ exports.addCourse = async (req, res) => {
 };
 
 
+
 // === Get all courses (short version) ===
 exports.getAllCourses = async (req, res) => {
   try {
@@ -78,8 +87,9 @@ exports.getAllCourses = async (req, res) => {
 exports.getCourseById = async (req, res) => {
   try {
     const course = await Course.findById(req.params.id)
-      .populate('content.itemId') // dynamically loads article or video
-      .populate('related', '_id title shortDesc thumbnail');
+      .populate('content.itemId')
+      .populate('related', '_id title shortDesc thumbnail')
+      .populate('category', 'name'); // ✅ category name only
 
     if (!course) return res.status(404).json({ message: 'Course not found' });
 
@@ -89,6 +99,7 @@ exports.getCourseById = async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch course' });
   }
 };
+
 
 exports.getCourseContentById = async (req, res) => {
   try {
@@ -108,16 +119,24 @@ exports.getCourseContentById = async (req, res) => {
 // === Get courses by category (short version) ===
 exports.getCoursesByCategory = async (req, res) => {
   const { category } = req.params;
-  if (!category) return res.status(400).json({ message: 'Category is required' });
+
+  if (!mongoose.Types.ObjectId.isValid(category)) {
+    return res.status(400).json({ message: 'Invalid category ID' });
+  }
 
   try {
-    const courses = await Course.find({ category }, { _id: 1, title: 1, shortDesc: 1, thumbnail: 1 });
+    const courses = await Course.find(
+      { category: new mongoose.Types.ObjectId(category) },
+      { _id: 1, title: 1, shortDesc: 1, thumbnail: 1 }
+    );
+
     res.status(200).json(courses);
   } catch (err) {
     console.error('Fetch category courses error:', err);
     res.status(500).json({ message: 'Failed to fetch category courses' });
   }
 };
+
 
 // === Get newest courses (short version) ===
 exports.getNewestCourses = async (req, res) => {

@@ -35,6 +35,9 @@ app.use('/', courseRoutes);
 const visitRoutes = require('./routes/visit.routes');
 app.use('/', visitRoutes);
 
+const categoryRoutes = require('./routes/category.routes')
+app.use('/', categoryRoutes);
+
 // Serve /uploads folder
 const uploadPath = path.join(__dirname, 'uploads');
 app.use('/uploads', express.static(uploadPath));

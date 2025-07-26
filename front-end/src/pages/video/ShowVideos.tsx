@@ -1,32 +1,45 @@
 import { useEffect, useState } from 'react'
 import { ChevronLeft } from 'lucide-react'
-import VideoSearchBox from './video-search/VideoSearchBox'
-import VideoCard from '@/components/cards/VideoCard'
 import axios from 'axios'
+import VideoCard from '@/components/cards/VideoCard'
+import VideoSearchBox from './video-search/VideoSearchBox'
+
+interface Category {
+  _id: string
+  name: string
+}
 
 const ShowVideos = () => {
   const [mostViewed, setMostViewed] = useState([])
   const [newest, setNewest] = useState([])
   const [categoryVideos, setCategoryVideos] = useState([])
   const [allVideos, setAllVideos] = useState([])
+  const [categories, setCategories] = useState<Category[]>([])
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
 
   const [expandedSection, setExpandedSection] = useState<null | 'viewed' | 'newest' | 'category'>(null)
   const [showAllVideos, setShowAllVideos] = useState(false)
 
-  const categoryName = 'Machine Learning'
-
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [viewedRes, newestRes, categoryRes] = await Promise.all([
+        const [viewedRes, newestRes, categoryList] = await Promise.all([
           axios.get('http://localhost:3000/videos/most-viewed'),
           axios.get('http://localhost:3000/videos/newest'),
-          axios.get(`http://localhost:3000/videos/category/${encodeURIComponent(categoryName)}`),
+          axios.get('http://localhost:3000/categories'),
         ])
 
         setMostViewed(viewedRes.data)
         setNewest(newestRes.data)
-        setCategoryVideos(categoryRes.data)
+        setCategories(categoryList.data.categories)
+
+        if (categoryList.data.categories.length > 0) {
+          const firstCategory = categoryList.data.categories[0]
+          setSelectedCategory(firstCategory)
+
+          const categoryRes = await axios.get(`http://localhost:3000/videos/category/${firstCategory._id}`)
+          setCategoryVideos(categoryRes.data)
+        }
       } catch (err) {
         console.error('Error fetching videos:', err)
       }
@@ -72,9 +85,9 @@ const ShowVideos = () => {
           />
         )}
 
-        {(expandedSection === 'category' || !isCollapsed) && (
+        {(selectedCategory && (expandedSection === 'category' || !isCollapsed)) && (
           <Section
-            title={`ویدیوهای «${categoryName}»`}
+            title={`ویدیوهای ${selectedCategory.name}`}
             videos={categoryVideos}
             showAll={expandedSection === 'category'}
             onShowAll={() => setExpandedSection('category')}
@@ -130,19 +143,17 @@ const Section = ({
             className="text-sm flex items-center gap-1 cursor-pointer hover:text-slate-700"
             onClick={onShowAll}
           >
-            بیشتر
+            مشاهده بیشتر
             <ChevronLeft size={17} />
           </p>
         ) : (
-          <div className="flex items-center gap-4">
-            <button
-              onClick={onBack}
-              className="flex items-center gap-1 text-sm hover:text-rose-700 cursor-pointer"
-            >
-              بازگشت
-              <ChevronLeft size={18} />
-            </button>
-          </div>
+          <button
+            onClick={onBack}
+            className="flex items-center gap-1 text-sm hover:text-rose-700 cursor-pointer"
+          >
+            بازگشت
+            <ChevronLeft size={18} />
+          </button>
         )}
       </div>
 

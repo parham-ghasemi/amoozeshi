@@ -29,13 +29,13 @@ export function RelatedArticlesSelector({
   return (
     <div className="space-y-4 border p-5 rounded-lg" dir="rtl">
       <label className="block text-gray-800 font-semibold text-sm">
-        Select Related Articles
+        مقاله های مشابه را انتخاب کنید
       </label>
 
       {/* Search input */}
       <input
         type="text"
-        placeholder="Search articles by title..."
+        placeholder="سرچ مقاله بر اساس عنوان"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
