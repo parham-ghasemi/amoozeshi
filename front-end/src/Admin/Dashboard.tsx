@@ -10,6 +10,7 @@ import type { VideoShort } from 'types/video';
 import ArticleCard from '@/components/cards/ArticleCard';
 import VideoCard from '@/components/cards/VideoCard';
 import CourseCard from '@/components/cards/CourseCard';
+import authAxios from "@/lib/authAxios";
 
 type VisitDataPoint = {
   _id: string;
@@ -55,7 +56,7 @@ const AdminDashboard: React.FC = () => {
   const [mostViewedCourses, setMostViewedCourses] = useState<CourseShort[]>([]);
 
   useEffect(() => {
-    axios
+    authAxios
       .get<VisitStats>('http://localhost:3000/admin/visits')
       .then((res) => {
         setStats(res.data);

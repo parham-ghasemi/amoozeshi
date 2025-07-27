@@ -7,6 +7,7 @@ import ImageTool from '@editorjs/image';
 import { CategoryDropDown } from '../CategoryDropDown';
 import { RelatedVideosSelector } from './RelatedVideosSelector'; // <-- Use the one we made
 import type { VideoShort } from 'types/video';
+import authAxios from '@/lib/authAxios';
 
 export default function AddVideoForm() {
   const ejInstance = useRef<EditorJS | null>(null);
@@ -38,7 +39,7 @@ export default function AddVideoForm() {
                 const formData = new FormData();
                 formData.append('image', file);
                 try {
-                  const res = await axios.post('http://localhost:3000/upload', formData, {
+                  const res = await authAxios.post('http://localhost:3000/upload', formData, {
                     headers: { 'Content-Type': 'multipart/form-data' },
                   });
                   return res.data;
@@ -72,7 +73,7 @@ export default function AddVideoForm() {
     formData.append('image', file);
     setIsUploadingThumb(true);
     try {
-      const res = await axios.post('http://localhost:3000/upload', formData, {
+      const res = await authAxios.post('http://localhost:3000/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       if (res.data?.success) {
@@ -104,7 +105,7 @@ export default function AddVideoForm() {
 
     try {
       setIsUploadingVideo(true);
-      await axios.post('http://localhost:3000/videos', formData, {
+      await authAxios.post('http://localhost:3000/videos', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       alert('Video uploaded!');

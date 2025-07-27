@@ -10,7 +10,6 @@ import Showvideos from "./pages/video/ShowVideos"
 import AllVideos from "./pages/video/AllVideos"
 import About from "./pages/About"
 import VideoShowcase from "./pages/video/VideoShowcase"
-import Login from "./pages/login/Login"
 import Articles from "./Admin/Articles"
 import ArticleSearch from "./pages/article/ArticleSearch"
 import Videos from "./Admin/Videos"
@@ -27,6 +26,8 @@ import CourseSearch from "./pages/course/CourseSearch"
 import Dashboard from "./Admin/Dashboard"
 import AdminLayout from "./Admin/AdminLayout"
 import Settings from "./Admin/Settings"
+import AuthForm from "./pages/authForm/AuthForm"
+import Logout from "./pages/Logout"
 
 function App() {
   return (
@@ -37,7 +38,7 @@ function App() {
           <Route element={<Layout />}>
             <Route path="/" index element={<Home />} />
             <Route path="/about-us" element={<About />} />
-            <Route path="/login" element={<Login />} />
+            <Route path="/auth" element={<AuthForm />} />
 
             {/* Articles */}
             <Route path="/articles" element={<ShowArticles />} />
@@ -58,6 +59,9 @@ function App() {
             <Route path="/videos-all" element={<AllVideos />} />
             <Route path="/video/:id" element={<VideoShowcase />} />
 
+            {/* logout */}
+            <Route path="/logout" element={<Logout />} />
+
             {/* not found */}
             <Route path="*" element={<NotFound />} />
           </Route>
@@ -70,7 +74,10 @@ function App() {
             <Route path="video" element={<Videos />} />
             <Route path="course" element={<Course />} />
             <Route path="settings" element={<Settings />} />
+            <Route path="logout" element={<Logout />} />
           </Route>
+          <Route path="/logout" element={<Logout />} />
+
 
         </Routes>
       </Router></div>

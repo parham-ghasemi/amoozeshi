@@ -12,9 +12,11 @@ const {
   joinCourse,
   getMostPopularCourses,
 } = require('../controllers/course.controller');
+const authenticate = require('../middleware/auth.middleware');
+const authorizeAdmin = require('../middleware/authorizeAdmin');
 
 // Add a new course
-router.post('/courses', addCourse);
+router.post('/courses', authenticate, authorizeAdmin, addCourse);
 
 // Fetch courses
 router.get('/courses', getAllCourses);

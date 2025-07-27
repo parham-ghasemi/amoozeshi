@@ -18,6 +18,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import authAxios from "@/lib/authAxios";
 
 interface Category {
   _id: string;
@@ -43,7 +44,7 @@ const CategoryManager: React.FC = () => {
     if (!newCategory.trim()) return;
     setLoading(true);
     try {
-      await axios.post("http://localhost:3000/categories", { name: newCategory });
+      await authAxios.post("http://localhost:3000/categories", { name: newCategory });
       setNewCategory("");
       fetchCategories();
     } catch (err) {
@@ -56,7 +57,7 @@ const CategoryManager: React.FC = () => {
   const handleDeleteCategory = async () => {
     if (!selectedToDelete) return;
     try {
-      await axios.delete(`http://localhost:3000/categories/${selectedToDelete._id}`);
+      await authAxios.delete(`http://localhost:3000/categories/${selectedToDelete._id}`);
       fetchCategories();
     } catch (err) {
       console.error("خطا در حذف دسته‌بندی", err);

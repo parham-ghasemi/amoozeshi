@@ -1,6 +1,10 @@
+import LogoutButton from "@/components/logout/Logout"
+
 const Home = () => {
   return (
-    <div>Home</div>
+    <div>
+      <LogoutButton />
+    </div>
   )
 }
 

@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 
 const items = [
   { name: "داشبورد", path: "/dashboard" },
@@ -13,7 +13,7 @@ const items = [
 
 const SideBar = () => {
   const [currentItem, setCurrentItem] = useState<undefined | { name: string, path: string }>(undefined);
-  const location = useLocation();
+
 
   useEffect(() => {
     const handleSetCurrentItem = () => {

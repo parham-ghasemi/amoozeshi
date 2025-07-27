@@ -21,7 +21,7 @@ mongoose.connect(process.env.MONGO_URI, {
 
 // Routes
 const authRoutes = require('./routes/auth.routes');
-app.use('/', authRoutes);
+app.use('/auth', authRoutes);
 
 const articleRoutes = require('./routes/article.routes');
 app.use('/', articleRoutes);
@@ -37,6 +37,7 @@ app.use('/', visitRoutes);
 
 const categoryRoutes = require('./routes/category.routes')
 app.use('/', categoryRoutes);
+
 
 // Serve /uploads folder
 const uploadPath = path.join(__dirname, 'uploads');

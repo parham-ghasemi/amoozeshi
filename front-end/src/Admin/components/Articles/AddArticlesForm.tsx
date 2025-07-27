@@ -7,6 +7,7 @@ import axios from 'axios';
 import { CategoryDropDown } from '../CategoryDropDown';
 import { RelatedArticlesSelector } from './RelatedArticlesSelector';
 import type { ArticleShort } from '@/../types/article'
+import authAxios from '@/lib/authAxios';
 
 export default function AddArticleForm() {
   const ejInstance = useRef<EditorJS | null>(null);
@@ -33,7 +34,7 @@ export default function AddArticleForm() {
                 const formData = new FormData();
                 formData.append('image', file);
                 try {
-                  const response = await axios.post('http://localhost:3000/upload', formData, {
+                  const response = await authAxios.post('http://localhost:3000/upload', formData, {
                     headers: { 'Content-Type': 'multipart/form-data' },
                   });
                   return response.data;
@@ -71,7 +72,7 @@ export default function AddArticleForm() {
     setIsUploadingThumb(true);
 
     try {
-      const response = await axios.post('http://localhost:3000/upload', formData, {
+      const response = await authAxios.post('http://localhost:3000/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
@@ -100,7 +101,7 @@ export default function AddArticleForm() {
     }
 
     try {
-      await axios.post('http://localhost:3000/articles', {
+      await authAxios.post('http://localhost:3000/articles', {
         title,
         description,
         content: JSON.stringify(data),

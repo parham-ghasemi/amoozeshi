@@ -9,6 +9,7 @@ import { RelatedCoursesSelector } from './RelatedCourseSelector';
 import type { CourseShort } from 'types/course';
 import type { VideoShort } from 'types/video';
 import type { ArticleShort } from 'types/article';
+import authAxios from '@/lib/authAxios';
 
 interface ContentItem {
   itemId: string;
@@ -158,7 +159,7 @@ export default function AddCourseForm() {
               async uploadByFile(file: File) {
                 const formData = new FormData();
                 formData.append('image', file);
-                const res = await axios.post('http://localhost:3000/upload', formData, {
+                const res = await authAxios.post('http://localhost:3000/upload', formData, {
                   headers: { 'Content-Type': 'multipart/form-data' },
                 });
                 return res.data;
@@ -202,7 +203,7 @@ export default function AddCourseForm() {
     formData.append('image', file);
     setIsUploadingThumb(true);
     try {
-      const res = await axios.post('http://localhost:3000/upload', formData, {
+      const res = await authAxios.post('http://localhost:3000/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       if (res.data?.success) setThumbnail(res.data.file.url);
@@ -223,7 +224,7 @@ export default function AddCourseForm() {
     }
 
     try {
-      await axios.post('http://localhost:3000/courses', {
+      await authAxios.post('http://localhost:3000/courses', {
         title,
         shortDesc,
         thumbnail,

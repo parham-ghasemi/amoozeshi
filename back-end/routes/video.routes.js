@@ -14,12 +14,14 @@ const {
   getNewestVideos,
   searchedVideos
 } = require('../controllers/video.controller');
+const authenticate = require('../middleware/auth.middleware');
+const authorizeAdmin = require('../middleware/authorizeAdmin');
 
 // Upload a video file and create entry
-router.post('/videos', uploadVideoMiddleware, uploadVideo);
+router.post('/videos', authenticate, authorizeAdmin, uploadVideoMiddleware, uploadVideo);
 
 // EditorJS-compatible image upload (thumbnail, etc.)
-router.post('/videos/upload', uploadVideoThumbnail, uploadImage);
+router.post('/videos/upload', authenticate, authorizeAdmin, uploadVideoThumbnail, uploadImage);
 
 // Fetch videos
 router.get('/videos', getAllVideos);
