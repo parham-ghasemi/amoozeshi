@@ -1,96 +1,108 @@
-import { useEffect, useState } from 'react'
-import { ChevronLeft } from 'lucide-react'
-import ArticleSearchBox from './article-search/ArticleSearchBox'
-import ArticleCard from '@/components/cards/ArticleCard'
-import axios from 'axios'
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { ChevronLeft } from "lucide-react";
+import ArticleSearchBox from "./article-search/ArticleSearchBox";
+import ArticleCard from "@/components/cards/ArticleCard";
+import axios from "axios";
 
 interface Category {
-  _id: string
-  name: string
+  _id: string;
+  name: string;
 }
 
-const ShowArticles = () => {
-  const [mostViewed, setMostViewed] = useState([])
-  const [newest, setNewest] = useState([])
-  const [categoryArticles, setCategoryArticles] = useState([])
-  const [allArticles, setAllArticles] = useState([])
-  const [categories, setCategories] = useState<Category[]>([])
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
+const fetchMostViewed = () => axios.get("http://localhost:3000/articles/most-viewed").then(res => res.data);
+const fetchNewest = () => axios.get("http://localhost:3000/articles/newest").then(res => res.data);
+const fetchCategories = () => axios.get("http://localhost:3000/categories").then(res => res.data.categories);
+const fetchArticlesByCategory = (id: string) => axios.get(`http://localhost:3000/articles/category/${id}`).then(res => res.data);
+const fetchAllArticles = () => axios.get("http://localhost:3000/articles").then(res => res.data);
 
-  const [expandedSection, setExpandedSection] = useState<null | 'viewed' | 'newest' | 'category'>(null)
-  const [showAllArticles, setShowAllArticles] = useState(false)
+const ShowArticles = () => {
+  const [expandedSection, setExpandedSection] = useState<null | "viewed" | "newest" | "category">(null);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [showAllArticles, setShowAllArticles] = useState(false);
+
+  const isCollapsed = expandedSection !== null || showAllArticles;
+
+  const { data: mostViewed = [], isLoading: loadingViewed } = useQuery({
+    queryKey: ["articles", "mostViewed"],
+    queryFn: fetchMostViewed,
+  });
+
+  const { data: newest = [], isLoading: loadingNewest } = useQuery({
+    queryKey: ["articles", "newest"],
+    queryFn: fetchNewest,
+  });
+
+  const { data: categories = [], isLoading: loadingCategories } = useQuery({
+    queryKey: ["categories"],
+    queryFn: fetchCategories,
+  });
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [viewedRes, newestRes, categoryList] = await Promise.all([
-          axios.get('http://localhost:3000/articles/most-viewed'),
-          axios.get('http://localhost:3000/articles/newest'),
-          axios.get('http://localhost:3000/categories'),
-        ])
-
-        setMostViewed(viewedRes.data)
-        setNewest(newestRes.data)
-        setCategories(categoryList.data.categories)
-
-        if (categoryList.data.categories.length > 0) {
-          const firstCategory = categoryList.data.categories[0]
-          setSelectedCategory(firstCategory)
-
-          const categoryRes = await axios.get(`http://localhost:3000/articles/category/${firstCategory._id}`)
-          setCategoryArticles(categoryRes.data)
-        }
-      } catch (err) {
-        console.error('خطا در دریافت مقالات:', err)
-      }
+    if (!selectedCategory && categories.length > 0) {
+      setSelectedCategory(categories[0]);
     }
+  }, [categories, selectedCategory]);
 
-    fetchData()
-  }, [])
+
+  const {
+    data: categoryArticles = [],
+    isLoading: loadingCategoryArticles,
+  } = useQuery({
+    queryKey: ["articles", "category", selectedCategory?._id],
+    queryFn: () => fetchArticlesByCategory(selectedCategory!._id),
+    enabled: !!selectedCategory,
+  });
+
+  const {
+    data: allArticles = [],
+    isLoading: loadingAllArticles,
+    refetch: refetchAllArticles,
+  } = useQuery({
+    queryKey: ["articles", "all"],
+    queryFn: fetchAllArticles,
+    enabled: false,
+  });
 
   const handleShowAllArticles = async () => {
-    try {
-      const res = await axios.get('http://localhost:3000/articles')
-      setAllArticles(res.data)
-      setShowAllArticles(true)
-    } catch (err) {
-      console.error('خطا در دریافت همه مقالات:', err)
-    }
-  }
-
-  const isCollapsed = expandedSection !== null || showAllArticles
+    await refetchAllArticles();
+    setShowAllArticles(true);
+  };
 
   return (
     <div className="min-h-screen w-full flex flex-col gap-15 items-center pt-16">
       {!isCollapsed && <ArticleSearchBox />}
 
       <div className="w-6xl min-h-96 bg-slate-50 rounded-2xl flex flex-col gap-10 p-16" dir="rtl">
-        {(expandedSection === 'viewed' || !isCollapsed) && (
+        {(expandedSection === "viewed" || !isCollapsed) && (
           <Section
             title="مقاله‌های پربازدید"
             articles={mostViewed}
-            showAll={expandedSection === 'viewed'}
-            onShowAll={() => setExpandedSection('viewed')}
+            loading={loadingViewed}
+            showAll={expandedSection === "viewed"}
+            onShowAll={() => setExpandedSection("viewed")}
             onBack={() => setExpandedSection(null)}
           />
         )}
 
-        {(expandedSection === 'newest' || !isCollapsed) && (
+        {(expandedSection === "newest" || !isCollapsed) && (
           <Section
             title="جدیدترین مقاله‌ها"
             articles={newest}
-            showAll={expandedSection === 'newest'}
-            onShowAll={() => setExpandedSection('newest')}
+            loading={loadingNewest}
+            showAll={expandedSection === "newest"}
+            onShowAll={() => setExpandedSection("newest")}
             onBack={() => setExpandedSection(null)}
           />
         )}
 
-        {(selectedCategory && (expandedSection === 'category' || !isCollapsed)) && (
+        {selectedCategory && (expandedSection === "category" || !isCollapsed) && (
           <Section
             title={`مقاله‌های ${selectedCategory.name}`}
             articles={categoryArticles}
-            showAll={expandedSection === 'category'}
-            onShowAll={() => setExpandedSection('category')}
+            loading={loadingCategoryArticles}
+            showAll={expandedSection === "category"}
+            onShowAll={() => setExpandedSection("category")}
             onBack={() => setExpandedSection(null)}
           />
         )}
@@ -99,6 +111,7 @@ const ShowArticles = () => {
           <Section
             title="همه مقاله‌ها"
             articles={allArticles}
+            loading={loadingAllArticles}
             showAll={true}
             onShowAll={() => { }}
             onBack={() => setShowAllArticles(false)}
@@ -115,23 +128,25 @@ const ShowArticles = () => {
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
 const Section = ({
   title,
   articles,
+  loading,
   showAll,
   onShowAll,
   onBack,
 }: {
-  title: string
-  articles: any[]
-  showAll: boolean
-  onShowAll: () => void
-  onBack: () => void
+  title: string;
+  articles: any[];
+  loading: boolean;
+  showAll: boolean;
+  onShowAll: () => void;
+  onBack: () => void;
 }) => {
-  const displayedArticles = showAll ? articles : articles.slice(0, 4)
+  const displayedArticles = showAll ? articles : articles.slice(0, 4);
 
   return (
     <div className="flex flex-col gap-7">
@@ -139,31 +154,29 @@ const Section = ({
         <p className="font-bold text-xl">{title}</p>
 
         {!showAll ? (
-          <p
-            className="text-sm flex items-center gap-1 cursor-pointer hover:text-slate-700"
-            onClick={onShowAll}
-          >
+          <p className="text-sm flex items-center gap-1 cursor-pointer hover:text-slate-700" onClick={onShowAll}>
             مشاهده بیشتر
             <ChevronLeft size={17} />
           </p>
         ) : (
-          <button
-            onClick={onBack}
-            className="flex items-center gap-1 text-sm hover:text-rose-700 cursor-pointer"
-          >
+          <button onClick={onBack} className="flex items-center gap-1 text-sm hover:text-rose-700 cursor-pointer">
             بازگشت
             <ChevronLeft size={18} />
           </button>
         )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-        {displayedArticles.map((article) => (
-          <ArticleCard key={article._id} article={article} />
-        ))}
-      </div>
+      {loading ? (
+        <p className="text-sm text-gray-500">در حال بارگذاری...</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          {displayedArticles.map((article) => (
+            <ArticleCard key={article._id} article={article} />
+          ))}
+        </div>
+      )}
     </div>
-  )
-}
+  );
+};
 
-export default ShowArticles
+export default ShowArticles;

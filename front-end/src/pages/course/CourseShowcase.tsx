@@ -2,43 +2,68 @@ import CourseCard from "@/components/cards/CourseCard";
 import axios from "axios";
 import clsx from "clsx";
 import { SquareCheck, SquareX } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Course } from "types/course";
 
 const levelMap = {
-  'beginner': 'مبتدی',
-  'intermediate': 'متوسط',
-  'advanced': 'پیشرفته',
-}
+  beginner: "مبتدی",
+  intermediate: "متوسط",
+  advanced: "پیشرفته",
+};
+
+const fetchCourse = async (id: string) => {
+  const res = await fetch(`http://localhost:3000/course/${id}`);
+  const data = await res.json();
+  return data.course as Course;
+};
+
+const checkIsJoined = (id: string): boolean => {
+  const joinedCourses = JSON.parse(localStorage.getItem("joinedCourses") || "[]");
+  return joinedCourses.includes(id);
+};
 
 const CourseShowcase = () => {
-  const { id } = useParams();
-  const [course, setCourse] = useState<Course>();
-  const [loading, setLoading] = useState(true);
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [openTopic, setOpenTopic] = useState<number[]>([]);
-  const [isJoined, setIsJoined] = useState(false);
-  const navigate = useNavigate()
 
-  useEffect(() => {
-    const fetchCourse = async () => {
-      try {
-        const res = await fetch(`http://localhost:3000/course/${id}`);
-        const data = await res.json();
-        setCourse(data.course);
-      } catch (err) {
-        console.error("Failed to fetch course:", err);
-      } finally {
-        setLoading(false);
+  // Fetch course data using useQuery
+  const { data: course, isLoading, error } = useQuery({
+    queryKey: ["course", id],
+    queryFn: () => fetchCourse(id!),
+    enabled: !!id,
+  });
+
+  // Check if user is joined
+  const { data: isJoined } = useQuery({
+    queryKey: ["isJoined", id],
+    queryFn: () => checkIsJoined(id!),
+    enabled: !!id,
+  });
+
+  // Mutation for joining course
+  const joinCourseMutation = useMutation({
+    mutationFn: async () => {
+      const anonId = getAnonId();
+      await axios.post(`http://localhost:3000/courses/${course?._id}/join`, { anonId });
+      const joinedCourses = JSON.parse(localStorage.getItem("joinedCourses") || "[]");
+      if (!joinedCourses.includes(course?._id)) {
+        joinedCourses.push(course?._id);
+        localStorage.setItem("joinedCourses", JSON.stringify(joinedCourses));
       }
-    };
-    const checkIsJoined = () => {
-      const joinedCourses = JSON.parse(localStorage.getItem("joinedCourses") || '[]');
-      setIsJoined(joinedCourses.includes(id))
-    }
-    fetchCourse();
-    checkIsJoined();
-  }, [id]);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["isJoined", id] });
+      navigate(`content`);
+    },
+    onError: (err) => {
+      console.error("Failed to join course:", err);
+      alert("Something went wrong.");
+    },
+  });
 
   const renderEditorContent = (content: any) => {
     if (!content || !content.blocks) return null;
@@ -128,39 +153,23 @@ const CourseShowcase = () => {
   };
 
   const handleTopicClick = (index: number) => {
-    console.log(openTopic)
-    if (openTopic.indexOf(index) >= 0) {
-      const updatedItems = openTopic.filter(item => item !== index);
-      setOpenTopic(updatedItems);
+    if (openTopic.includes(index)) {
+      setOpenTopic(openTopic.filter((item) => item !== index));
     } else {
-      setOpenTopic((prev) => [...prev, index]);
+      setOpenTopic([...openTopic, index]);
     }
-  }
+  };
 
-  const handleJoingClick = async () => {
-    navigate(`content`);
-    const joinedCourses = JSON.parse(localStorage.getItem("joinedCourses") || "[]");
-
-    if (joinedCourses.includes(course?._id)) {
-      return;
+  const handleJoinClick = () => {
+    if (isJoined) {
+      navigate(`content`);
+    } else {
+      joinCourseMutation.mutate();
     }
+  };
 
-    const anonId = getAnonId();
-
-    try {
-      await axios.post(`http://localhost:3000/courses/${course?._id}/join`, { anonId });
-
-      // Mark as joined locally
-      joinedCourses.push(course?._id);
-      localStorage.setItem("joinedCourses", JSON.stringify(joinedCourses));
-    } catch (err) {
-      console.error("Failed to join course:", err);
-      alert("Something went wrong.");
-    }
-  }
-
-  if (loading) return <div className="p-4 sm:p-6 text-center text-sm sm:text-base">Loading...</div>;
-  if (!course) return <div className="p-4 sm:p-6 text-center text-sm sm:text-base">Course not found.</div>;
+  if (isLoading) return <div className="p-4 sm:p-6 text-center text-sm sm:text-base">Loading...</div>;
+  if (error || !course) return <div className="p-4 sm:p-6 text-center text-sm sm:text-base">Course not found.</div>;
 
   return (
     <div className="w-full max-w-[95%] lg:max-w-7xl mx-auto p-4 sm:p-6 md:p-8 space-y-6 flex flex-col items-center min-h-screen">
@@ -200,7 +209,7 @@ const CourseShowcase = () => {
               <span>{levelMap[course.level.toLowerCase() as keyof typeof levelMap]}</span>
               :سطح دوره
               <svg width="25" height="22" viewBox="0 0 25 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12.25 8.99902V20.999M12.25 8.99902C12.25 6.19876 12.25 4.79864 11.705 3.72907C11.2256 2.78826 10.4607 2.02336 9.51995 1.54399C8.45039 0.999023 7.05026 0.999023 4.25 0.999023H3C2.29994 0.999023 1.9499 0.999024 1.68251 1.13526C1.44731 1.25511 1.25609 1.44634 1.13624 1.68154C1 1.94892 1 2.29896 1 2.99902V16.499C1 17.1991 1 17.5491 1.13624 17.8165C1.25609 18.0518 1.44731 18.2429 1.68251 18.3628C1.9499 18.499 2.29994 18.499 3 18.499H6.68335C7.35859 18.499 7.6962 18.499 8.02268 18.5573C8.31244 18.6089 8.59513 18.6944 8.86489 18.8123C9.1688 18.9449 9.44971 19.1321 10.0115 19.5068L12.25 20.999M12.25 8.99902C12.25 6.19876 12.25 4.79864 12.795 3.72907C13.2744 2.78826 14.0393 2.02336 14.98 1.54399C16.0496 0.999023 17.4497 0.999023 20.25 0.999023H21.5C22.2001 0.999023 22.5501 0.999024 22.8175 1.13526C23.0528 1.25511 23.2439 1.44634 23.3638 1.68154C23.5 1.94892 23.5 2.29896 23.5 2.99902V16.499C23.5 17.1991 23.5 17.5491 23.3638 17.8165C23.2439 18.0518 23.0528 18.2429 22.8175 18.3628C22.5501 18.499 22.2001 18.499 21.5 18.499H17.8166C17.1414 18.499 16.8037 18.499 16.4774 18.5573C16.1875 18.6089 15.9049 18.6944 15.6351 18.8123C15.3313 18.9449 15.0503 19.1321 14.4885 19.5068L12.25 20.999" stroke="#555555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M12.25 8.99902V20.999M12.25 8.99902C12.25 6.19876 12.25 4.79864 11.705 3.72907C11.2256 2.78826 10.4607 2.02336 9.51995 1.54399C8.45039 0.999023 7.05026 0.999023 4.25 0.999023H3C2.29994 0.999023 1.9499 0.999024 1.68251 1.13526C1.44731 1.25511 1.25609 1.44634 1.13624 1.68154C1 1.94892 1 2.29896 1 2.99902V16.499C1 17.1991 1 17.5491 1.13624 17.8165C1.25609 18.0518 1.44731 18.2429 1.68251 18.3628C1.9499 18.499 2.29994 18.499 3 18.499H6.68335C7.35859 18.499 7.6962 18.499 8.02268 18.5573C8.31244 18.6089 8.59513 18.6944 8.86489 18.8123C9.1688 18.9449 9.44971 19.1321 10.0115 19.5068L12.25 20.999M12.25 8.99902C12.25 6.19876 12.25 4.79864 12.795 3.72907C13.2744 2.78826 14.0393 2.02336 14.98 1.54399C16.0496 0.999023 17.4497 0.999023 20.25 0.999023H21.5C22.2001 0.999023 22.5501 0.999024 22.8175 1.13526C22.0528 1.25511 23.2439 1.44634 23.3638 1.68154C23.5 1.94892 23.5 2.29896 23.5 2.99902V16.499C23.5 17.1991 23.5 17.5491 23.3638 17.8165C23.2439 18.0518 23.0528 18.2429 22.8175 18.3628C22.5501 18.499 22.2001 18.499 21.5 18.499H17.8166C17.1414 18.499 16.8037 18.499 16.4774 18.5573C16.1875 18.6089 15.9049 18.6944 15.6351 18.8123C15.3313 18.9449 15.0503 19.1321 14.4885 19.5068L12.25 20.999" stroke="#555555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
             </p>
             <p className="flex justify-end gap-3 text-sm sm:text-base">
@@ -223,10 +232,11 @@ const CourseShowcase = () => {
               </span>
             </p>
             <button
-              onClick={handleJoingClick}
-              className="w-full rounded bg-green-300 text-green-700 py-2 font-bold hover:shadow-lg hover:-translate-y-1 hover:bg-green-400 hover:text-green-800 cursor-pointer transition-all text-sm sm:text-base"
+              onClick={handleJoinClick}
+              disabled={joinCourseMutation.isPending}
+              className="w-full rounded bg-green-300 text-green-700 py-2 font-bold hover:shadow-lg hover:-translate-y-1 hover:bg-green-400 hover:text-green-800 cursor-pointer transition-all text-sm sm:text-base disabled:opacity-50"
             >
-              {isJoined ? " ادامه دوره " : " شروع دوره "}
+              {joinCourseMutation.isPending ? "Joining..." : isJoined ? "ادامه دوره" : "شروع دوره"}
             </button>
           </div>
           <div className="w-full bg-white shadow-xl rounded-lg p-4 sm:p-5 sm:py-8 flex flex-col items-center gap-5 md:gap-7">
@@ -295,10 +305,10 @@ const CourseShowcase = () => {
                     onClick={() => handleTopicClick(index)}
                     className={clsx(
                       "border border-gray-400 hover:border-gray-600 transition-all rounded w-full py-2 sm:py-2.5 px-4 sm:px-5 cursor-pointer flex gap-2.5 text-sm sm:text-base",
-                      openTopic.indexOf(index) >= 0 && "border-b-0 rounded-b-none border-gray-600"
+                      openTopic.includes(index) && "border-b-0 rounded-b-none border-gray-600"
                     )}
                   >
-                    {openTopic.indexOf(index) > -1 ? (
+                    {openTopic.includes(index) ? (
                       <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M14 11H8" stroke="black" stroke-width="1.5" stroke-linecap="round" />
                         <path d="M21 11C21 15.714 21 18.0711 19.5355 19.5355C18.0711 21 15.714 21 11 21C6.28595 21 3.92893 21 2.46447 19.5355C1 18.0711 1 15.714 1 11C1 6.28595 1 3.92893 2.46447 2.46447C3.92893 1 6.28595 1 11 1C15.714 1 18.0711 1 19.5355 2.46447C20.5093 3.43821 20.8356 4.80655 20.9449 7" stroke="black" stroke-width="1.5" stroke-linecap="round" />
@@ -314,7 +324,7 @@ const CourseShowcase = () => {
                   <p
                     className={clsx(
                       "text-xs sm:text-sm font-light border-b border-l border-r p-2 sm:p-2.5 rounded border-gray-600 rounded-t-none transition-all duration-700 ease-in-out",
-                      openTopic.indexOf(index) >= 0 ? "opacity-100 max-h-[300px] overflow-auto" : "opacity-0 max-h-0 overflow-hidden"
+                      openTopic.includes(index) ? "opacity-100 max-h-[300px] overflow-auto" : "opacity-0 max-h-0 overflow-hidden"
                     )}
                   >
                     {topic.body}

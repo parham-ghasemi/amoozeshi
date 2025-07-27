@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const mongoose = require('mongoose');
 const Video = require('../models/Video');
-const Category = require('../models/Category'); // ✅ Add this line
+const Category = require('../models/Category');
 
 // === Multer setup for video files ===
 const videoStorage = multer.diskStorage({
@@ -64,7 +64,6 @@ exports.uploadVideo = async (req, res) => {
       return res.status(400).json({ message: 'No video file uploaded' });
     }
 
-    // ✅ Check if category exists
     const categoryExists = await Category.findById(category);
     if (!categoryExists) {
       return res.status(400).json({ message: 'Invalid category ID' });

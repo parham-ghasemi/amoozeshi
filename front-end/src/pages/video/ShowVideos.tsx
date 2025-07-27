@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { ChevronLeft } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
 import VideoCard from '@/components/cards/VideoCard'
 import VideoSearchBox from './video-search/VideoSearchBox'
@@ -9,56 +10,75 @@ interface Category {
   name: string
 }
 
-const ShowVideos = () => {
-  const [mostViewed, setMostViewed] = useState([])
-  const [newest, setNewest] = useState([])
-  const [categoryVideos, setCategoryVideos] = useState([])
-  const [allVideos, setAllVideos] = useState([])
-  const [categories, setCategories] = useState<Category[]>([])
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
+const fetchMostViewed = () => axios.get('http://localhost:3000/videos/most-viewed').then(res => res.data)
+const fetchNewest = () => axios.get('http://localhost:3000/videos/newest').then(res => res.data)
+const fetchCategories = () => axios.get('http://localhost:3000/categories').then(res => res.data.categories)
+const fetchCategoryVideos = (id: string) => axios.get(`http://localhost:3000/videos/category/${id}`).then(res => res.data)
+const fetchAllVideos = () => axios.get('http://localhost:3000/videos').then(res => res.data)
 
+const ShowVideos = () => {
   const [expandedSection, setExpandedSection] = useState<null | 'viewed' | 'newest' | 'category'>(null)
   const [showAllVideos, setShowAllVideos] = useState(false)
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [viewedRes, newestRes, categoryList] = await Promise.all([
-          axios.get('http://localhost:3000/videos/most-viewed'),
-          axios.get('http://localhost:3000/videos/newest'),
-          axios.get('http://localhost:3000/categories'),
-        ])
+  const {
+    data: mostViewed = [],
+    isLoading: loadingViewed,
+    isError: errorViewed,
+  } = useQuery({ queryKey: ['mostViewedVideos'], queryFn: fetchMostViewed })
 
-        setMostViewed(viewedRes.data)
-        setNewest(newestRes.data)
-        setCategories(categoryList.data.categories)
+  const {
+    data: newest = [],
+    isLoading: loadingNewest,
+    isError: errorNewest,
+  } = useQuery({ queryKey: ['newestVideos'], queryFn: fetchNewest })
 
-        if (categoryList.data.categories.length > 0) {
-          const firstCategory = categoryList.data.categories[0]
-          setSelectedCategory(firstCategory)
+  const {
+    data: categories = [],
+    isLoading: loadingCategories,
+    isError: errorCategories,
+  } = useQuery({
+    queryKey: ['categories'],
+    queryFn: fetchCategories,
+  })
 
-          const categoryRes = await axios.get(`http://localhost:3000/videos/category/${firstCategory._id}`)
-          setCategoryVideos(categoryRes.data)
-        }
-      } catch (err) {
-        console.error('Error fetching videos:', err)
-      }
-    }
+  useEffect(() => (
+    console.log()
+  ), [categories, selectedCategory])
 
-    fetchData()
-  }, [])
+  const {
+    data: categoryVideos = [],
+    isLoading: loadingCategoryVideos,
+    isError: errorCategoryVideos,
+  } = useQuery({
+    queryKey: ['categoryVideos', selectedCategory?._id],
+    queryFn: () => fetchCategoryVideos(selectedCategory!._id),
+    enabled: !!selectedCategory,
+  })
+
+  const {
+    data: allVideos = [],
+    isLoading: loadingAll,
+    isError: errorAll,
+    refetch: refetchAll,
+  } = useQuery({
+    queryKey: ['allVideos'],
+    queryFn: fetchAllVideos,
+    enabled: false,
+  })
 
   const handleShowAllVideos = async () => {
-    try {
-      const res = await axios.get('http://localhost:3000/videos')
-      setAllVideos(res.data)
-      setShowAllVideos(true)
-    } catch (err) {
-      console.error('Failed to fetch all videos:', err)
-    }
+    await refetchAll()
+    setShowAllVideos(true)
   }
 
   const isCollapsed = expandedSection !== null || showAllVideos
+
+  if (loadingViewed || loadingNewest || loadingCategories || (selectedCategory && loadingCategoryVideos))
+    return <div className="pt-20">در حال بارگذاری...</div>
+
+  if (errorViewed || errorNewest || errorCategories || errorCategoryVideos)
+    return <div className="pt-20 text-red-600">خطا در دریافت اطلاعات</div>
 
   return (
     <div className="min-h-screen w-full flex flex-col gap-15 items-center pt-16">

@@ -1,30 +1,60 @@
 import VideoCard from "@/components/cards/VideoCard";
 import { SquareCheck, SquareX } from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import type { Video, VideoShort } from "types/video";
 import Plyr from "plyr";
 import "plyr/dist/plyr.css";
+import { useQuery } from "@tanstack/react-query";
+
+const fetchVideo = async (id: string): Promise<Video> => {
+  const res = await fetch(`http://localhost:3000/video/${id}`);
+  const data = await res.json();
+  return data.video;
+};
+
+const fetchRelatedVideo = async (id: string): Promise<VideoShort> => {
+  const res = await fetch(`http://localhost:3000/video/short/${id}`);
+  const data = await res.json();
+  return data.videoObject;
+};
 
 const VideoShowcase = () => {
-  const { id } = useParams();
-  const [video, setVideo] = useState<Video | null>(null);
-  const [relatedVideos, setRelatedVideos] = useState<VideoShort[] | null>(null);
-  const [loading, setLoading] = useState(true);
-  const playerRef = useRef<HTMLVideoElement | null>(null);
-  const plyrInstanceRef = useRef<Plyr | null>(null);
+  const { id = "" } = useParams();
   const playerContainerRef = useRef<HTMLDivElement | null>(null);
+  const plyrInstanceRef = useRef<Plyr | null>(null);
 
+  const {
+    data: video,
+    isLoading: loadingVideo,
+    isError: errorVideo,
+  } = useQuery({
+    queryKey: ["video", id],
+    queryFn: () => fetchVideo(id),
+    enabled: !!id,
+  });
+
+  const {
+    data: relatedVideos,
+    isLoading: loadingRelated,
+  } = useQuery({
+    queryKey: ["relatedVideos", video?.related],
+    queryFn: async () => {
+      if (!video?.related?.length) return [];
+      return await Promise.all(video.related.map(fetchRelatedVideo));
+    },
+    enabled: !!video?.related?.length,
+  });
+
+  // Plyr player setup
   useEffect(() => {
     if (!video?.content || !playerContainerRef.current) return;
 
-    // Clear any previous instance
     if (plyrInstanceRef.current) {
       plyrInstanceRef.current.destroy();
       plyrInstanceRef.current = null;
     }
 
-    // Clear previous HTML
     playerContainerRef.current.innerHTML = "";
 
     const videoElement = document.createElement("video");
@@ -39,7 +69,6 @@ const VideoShowcase = () => {
     videoElement.appendChild(source);
     playerContainerRef.current.appendChild(videoElement);
 
-    // Initialize Plyr
     const player = new Plyr(videoElement, {
       controls: [
         "play",
@@ -66,42 +95,10 @@ const VideoShowcase = () => {
     };
   }, [video?.content]);
 
+  if (loadingVideo) return <div className="p-4 text-center text-sm">Loading...</div>;
+  if (errorVideo || !video) return <div className="p-4 text-center text-sm">Video not found.</div>;
 
-  useEffect(() => {
-    const fetchVideo = async () => {
-      try {
-        const res = await fetch(`http://localhost:3000/video/${id}`);
-        const data = await res.json();
-        setVideo(data.video);
-      } catch (err) {
-        console.error("Failed to fetch video:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchVideo();
-  }, [id]);
-
-  useEffect(() => {
-    const fetchRelatedVideos = async () => {
-      if (!video?.related || video.related.length === 0) return;
-
-      try {
-        const videos: VideoShort[] = await Promise.all(
-          video.related.map(async (relatedVideoId) => {
-            const res = await fetch(`http://localhost:3000/video/short/${relatedVideoId}`);
-            const data = await res.json();
-            return data.videoObject;
-          })
-        );
-        setRelatedVideos(videos);
-      } catch (error: any) {
-        console.error("Error fetching related videos:", error);
-      }
-    };
-
-    fetchRelatedVideos();
-  }, [video]);
+  const longDesc = typeof video.longDesc === "string" ? JSON.parse(video.longDesc) : video.longDesc;
 
 
   const renderEditorContent = (content: any) => {
@@ -179,11 +176,6 @@ const VideoShowcase = () => {
     });
   };
 
-  if (loading) return <div className="p-4 text-center text-sm">Loading...</div>;
-  if (!video) return <div className="p-4 text-center text-sm">Video not found.</div>;
-
-  const longDesc = typeof video.longDesc === "string" ? JSON.parse(video.longDesc) : video.longDesc;
-
   return (
     <div className="w-full max-w-[90%] lg:max-w-6xl mx-auto p-4 sm:p-6 space-y-6 flex items-center justify-center flex-col min-h-screen">
       <div className="absolute top-0 left-0 right-0 opacity-20 -z-10">
@@ -197,10 +189,9 @@ const VideoShowcase = () => {
         {video.title}
       </h1>
 
-      {/* Plyr Video Player */}
       {video.content && (
         <div className="w-full max-w-3xl rounded-xl overflow-hidden border border-gray-300 bg-black">
-          <div ref={playerContainerRef} key={video.content} />
+          <div ref={playerContainerRef} />
         </div>
       )}
 
@@ -214,7 +205,7 @@ const VideoShowcase = () => {
         {renderEditorContent(longDesc)}
       </div>
 
-      {video.related && video.related.length > 0 && relatedVideos?.length ? (
+      {video.related && relatedVideos?.length ? (
         <div className="bg-gray-50 py-10 px-6 border border-gray-300 rounded-xl w-full flex flex-col" dir="rtl">
           <h1 className="text-xl font-bold mb-8">ویدیوهای مشابه</h1>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
