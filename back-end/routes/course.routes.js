@@ -11,6 +11,7 @@ const {
   getCourseContentById,
   joinCourse,
   getMostPopularCourses,
+  checkIsJoined
 } = require('../controllers/course.controller');
 const authenticate = require('../middleware/auth.middleware');
 const authorizeAdmin = require('../middleware/authorizeAdmin');
@@ -30,6 +31,7 @@ router.get('/courses/search', searchCourses);
 router.get('/courses/most-popular', getMostPopularCourses)
 
 // joing course
-router.post("/courses/:id/join", joinCourse);
+router.post("/courses/join/:id", authenticate, joinCourse);
+router.get("/courses/is-joined/:id", authenticate, checkIsJoined);
 
 module.exports = router;

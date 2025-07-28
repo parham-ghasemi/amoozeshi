@@ -189,23 +189,41 @@ exports.searchCourses = async (req, res) => {
 };
 
 exports.joinCourse = async (req, res) => {
-  const courseId = req.params.id;
-  const { anonId } = req.body;
-
-  if (!anonId) return res.status(400).json({ error: "anonId is required" });
-
   try {
-    const course = await Course.findById(courseId);
-    if (!course) return res.status(404).json({ error: "Course not found" });
+    const userId = req.user.id;
+    const { id: courseId } = req.params;
 
-    if (!course.joinedBy.includes(anonId)) {
-      course.joinedBy.push(anonId);
-      await course.save();
+    const course = await Course.findById(courseId);
+
+    if (!course) return res.status(404).json({ message: "Course not found" });
+
+    if (course.joinedBy && course.joinedBy.includes(userId)) {
+      return res.status(400).json({ message: "Already joined" });
     }
 
-    return res.status(200).json({ success: true, joinedCount: course.joinedBy.length });
+    course.joinedBy.push(userId);
+    await course.save();
+
+    res.json({ message: "Successfully joined course" });
   } catch (err) {
-    console.error("Join error:", err);
-    return res.status(500).json({ error: "Server error" });
+    console.error('error joining course: ', err)
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.checkIsJoined = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id: courseId } = req.params;
+
+    const course = await Course.findById(courseId);
+    if (!course) return res.status(404).json({ message: "Course not found" });
+
+    const isJoined = course.joinedBy?.some(id => id.equals(userId)) || false;
+
+    res.json({ isJoined });
+  } catch (err) {
+    console.error("error checking if the user is joined", err);
+    res.status(500).json({ message: "Server error" });
   }
 };
