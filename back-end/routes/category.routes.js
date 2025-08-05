@@ -10,6 +10,6 @@ const authorizeAdmin = require('../middleware/authorizeAdmin');
 
 router.post('/categories', authenticate, authorizeAdmin, addCategory);
 router.delete('/categories/:id', authenticate, authorizeAdmin, deleteCategory);
-router.get('/categories',authenticate, authorizeAdmin ,getAllCategories);
+router.get('/categories', getAllCategories);
 
 module.exports = router;

@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Course = require('../models/Course');
 const Category = require('../models/Category');
+const User = require("../models/User");
 
 // === Add a new course ===
 exports.addCourse = async (req, res) => {
@@ -89,7 +90,7 @@ exports.getCourseById = async (req, res) => {
     const course = await Course.findById(req.params.id)
       .populate('content.itemId')
       .populate('related', '_id title shortDesc thumbnail')
-      .populate('category', 'name'); // ✅ category name only
+      .populate('category', 'name');
 
     if (!course) return res.status(404).json({ message: 'Course not found' });
 
@@ -188,28 +189,36 @@ exports.searchCourses = async (req, res) => {
   }
 };
 
+
 exports.joinCourse = async (req, res) => {
   try {
     const userId = req.user.id;
     const { id: courseId } = req.params;
 
     const course = await Course.findById(courseId);
-
     if (!course) return res.status(404).json({ message: "Course not found" });
 
-    if (course.joinedBy && course.joinedBy.includes(userId)) {
+    // Check if user already joined the course
+    if (course.joinedBy.includes(userId)) {
       return res.status(400).json({ message: "Already joined" });
     }
 
+    // Add user to course's joinedBy
     course.joinedBy.push(userId);
     await course.save();
 
+    // Add course to user's joinedCourses
+    await User.findByIdAndUpdate(userId, {
+      $addToSet: { joinedCourses: courseId } // ensures no duplicates
+    });
+
     res.json({ message: "Successfully joined course" });
   } catch (err) {
-    console.error('error joining course: ', err)
+    console.error('error joining course:', err);
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 exports.checkIsJoined = async (req, res) => {
   try {

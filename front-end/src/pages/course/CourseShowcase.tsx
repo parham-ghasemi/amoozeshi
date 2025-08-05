@@ -55,10 +55,6 @@ const CourseShowcase = () => {
     enabled: !!id,
   });
 
-  useEffect(()=>{
-    console.log(isJoined)
-  }, [isJoined])
-
   const joinCourseMutation = useMutation({
     mutationFn: async () => {
       const token = localStorage.getItem("token");
@@ -92,7 +88,7 @@ const CourseShowcase = () => {
       navigate(`content`);
     } else {
       if (!localStorage.getItem("token")) {
-        navigate("/login");
+        navigate("/auth");
         return;
       }
       joinCourseMutation.mutate();
@@ -166,8 +162,7 @@ const CourseShowcase = () => {
             </p>
             <button
               onClick={handleJoinClick}
-              disabled={joinCourseMutation.isPending}
-              className="w-full rounded bg-green-301 text-green-700 py-2 font-bold hover:shadow-lg hover:-translate-y-1 bg-green-300  hover:bg-green-400 hover:text-green-800 cursor-pointer transition-all text-sm sm:text-base disabled:opacity-50"
+              disabled={joinCourseMutation.isPending} className={clsx("w-full rounded bg-green-301 text-green-700 py-2 font-bold hover:shadow-lg hover:-translate-y-1 bg-green-300  hover:bg-green-400 hover:text-green-800 cursor-pointer transition-all text-sm sm:text-base disabled:opacity-50")}
             >
               {joinCourseMutation.isPending ? "Joining..." : isJoined ? "ادامه دوره" : "شروع دوره"}
             </button>

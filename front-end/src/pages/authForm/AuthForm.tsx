@@ -10,14 +10,16 @@ interface FormState {
   userName: string;
   phoneNumber: string;
   password: string;
+  otp: string;
 }
 
 const AuthForm: React.FC = () => {
-  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [mode, setMode] = useState<"login" | "signup" | "otp">("login");
   const [form, setForm] = useState<FormState>({
     userName: "",
     phoneNumber: "",
     password: "",
+    otp: "",
   });
   const navigate = useNavigate();
 
@@ -31,24 +33,34 @@ const AuthForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const endpoint = `http://localhost:3000${mode === "signup" ? "/auth/signup" : "/auth/login"}`
+      if (mode === "otp") {
+        alert("OTP submitted!");
+        setForm({ userName: "", phoneNumber: "", password: "", otp: "" });
+        setMode("login");
+        navigate("/");
+        return;
+      }
+      const endpoint = `http://localhost:3000${mode === "signup" ? "/auth/signup" : "/auth/login"}`;
       const { data }: { data: { token: string } } = await axios.post(endpoint, form);
-      alert(`${mode === "signup" ? "Signup" : "Login"} successful!`);
+      alert(`${mode === "signup" ? "ثبت‌نام" : "ورود"} موفق!`);
       localStorage.setItem("token", data.token);
-      navigate("/")
-      // You can store token in localStorage or context here
+      if (mode === "signup") {
+        setMode("otp"); // Show OTP input after signup
+      } else {
+        navigate("/");
+      }
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
-      alert(error?.response?.data?.message || "Something went wrong");
+      alert(error?.response?.data?.message || "خطایی رخ داد");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4" dir="rtl">
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader>
           <CardTitle className="text-center text-2xl font-bold capitalize">
-            {mode}
+            {mode === "signup" ? "ثبت‌نام" : mode === "otp" ? "تأیید کد یک‌بارمصرف" : "ورود"}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -62,46 +74,65 @@ const AuthForm: React.FC = () => {
               onSubmit={handleSubmit}
               className="space-y-4"
             >
-              {mode === "signup" && (
+              {mode === "otp" ? (
                 <Input
-                  name="userName"
-                  placeholder="Username"
-                  value={form.userName}
+                  name="otp"
+                  placeholder="کد یک‌بارمصرف"
+                  value={form.otp}
                   onChange={handleChange}
                   required
+                  type="text"
+                  pattern="[0-9]*"
+                  inputMode="numeric"
+                  className=""
                 />
+              ) : (
+                <>
+                  {mode === "signup" && (
+                    <Input
+                      name="userName"
+                      placeholder="نام کاربری"
+                      value={form.userName}
+                      onChange={handleChange}
+                      required
+                    />
+                  )}
+                  <Input
+                    name="phoneNumber"
+                    placeholder="شماره تلفن"
+                    value={form.phoneNumber}
+                    onChange={handleChange}
+                    required
+                    type="tel"
+                    className="text-end"
+                  />
+                  <Input
+                    name="password"
+                    placeholder="رمز عبور"
+                    value={form.password}
+                    onChange={handleChange}
+                    required
+                    type="password"
+                  />
+                </>
               )}
-              <Input
-                name="phoneNumber"
-                placeholder="Phone Number"
-                value={form.phoneNumber}
-                onChange={handleChange}
-                required
-                type="tel"
-              />
-              <Input
-                name="password"
-                placeholder="Password"
-                value={form.password}
-                onChange={handleChange}
-                required
-                type="password"
-              />
               <Button type="submit" className="w-full">
-                {mode === "signup" ? "Sign Up" : "Log In"}
+                {mode === "signup" ? "ثبت‌نام" : mode === "otp" ? "تأیید کد" : "ورود"}
               </Button>
             </motion.form>
           </AnimatePresence>
-          <div className="text-center mt-4">
-            <button
-              onClick={toggleMode}
-              className="text-sm text-blue-500 hover:underline"
-            >
-              {mode === "signup"
-                ? "Already have an account? Log in"
-                : "Don't have an account? Sign up"}
-            </button>
-          </div>
+          {mode !== "otp" && (
+            <div className="text-center mt-4">
+              <button
+                onClick={toggleMode}
+                className="text-sm text-blue-500 hover:underline"
+              >
+                {mode === "signup"
+                  ? "حساب کاربری دارید؟ وارد شوید"
+                  : "حساب کاربری ندارید؟ ثبت‌نام کنید"}
+              </button>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
