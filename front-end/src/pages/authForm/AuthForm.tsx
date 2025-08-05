@@ -56,14 +56,14 @@ const AuthForm: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4" dir="rtl">
-      <Card className="w-full max-w-md shadow-xl">
+    <div className="min-h-screen flex items-center justify-center bg-white md:bg-gray-100 md:px-4" dir="rtl">
+      <Card className="w-full max-w-md md:shadow-xl">
         <CardHeader>
           <CardTitle className="text-center text-2xl font-bold capitalize">
             {mode === "signup" ? "ثبت‌نام" : mode === "otp" ? "تأیید کد یک‌بارمصرف" : "ورود"}
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent >
           <AnimatePresence mode="wait">
             <motion.form
               key={mode}
