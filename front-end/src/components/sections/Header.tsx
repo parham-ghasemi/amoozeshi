@@ -1,15 +1,46 @@
 import { Link, useNavigate } from "react-router-dom"
 import { useState } from "react"
 import { Menu, X } from "lucide-react"
+import axios from "axios"
+import { useQuery } from "@tanstack/react-query"
 
 const Header = () => {
   const [open, setOpen] = useState(false)
+  const nav = useNavigate();
+
+  const getUser = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return false;
+    try {
+      const res = await axios.get(`http://localhost:3000/user/me`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      return res.data;
+    } catch {
+      return false;
+    }
+  }
+  const { data: user } = useQuery({
+    queryKey: ["get-user-w-jwt"],
+    queryFn: getUser,
+  });
+
+  const onClick = () => {
+    if (!user) {
+      nav('/auth');
+      return;
+    }
+    nav('/profile');
+  }
 
   return (
     <div className="w-full flex md:justify-between justify-start items-center h-16 md:h-20 sticky top-0 left-0 right-0 px-6 xl:px-96 md:px-24 border-b backdrop-blur-lg z-50 bg-[#f1f5f9100a1] hover:bg-slate-100 hover:shadow-xl transition-all duration-300">
-      <Link to='/auth' className=" hidden md:block bg-blue-500 py-2 px-5 rounded-lg text-white hover:shadow hover:bg-blue-700 cursor-pointer transition" >
-        ثبت نام | ورود
-      </Link>
+      <button onClick={onClick} className=" hidden md:block py-2 px-5 rounded-lg hover:shadow hover:text-cyan-500 cursor-pointer transition" >
+        {
+          // @ts-ignore
+          user && user?.userName ? user.userName : ' ثبت نام | ورود'
+        }
+      </button>
 
       <div className="md:flex hidden items-center justify-center gap-6">
         <Link to="/">تماس با ما</Link>
