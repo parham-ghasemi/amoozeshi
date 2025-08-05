@@ -28,6 +28,7 @@ import AdminLayout from "./Admin/AdminLayout"
 import Settings from "./Admin/Settings"
 import AuthForm from "./pages/authForm/AuthForm"
 import Logout from "./pages/Logout"
+import Profile from "./pages/profile/profile"
 
 function App() {
   return (
@@ -61,6 +62,8 @@ function App() {
 
             {/* logout */}
             <Route path="/logout" element={<Logout />} />
+
+            <Route path="/profile" element={<Profile />} />
 
             {/* not found */}
             <Route path="*" element={<NotFound />} />
