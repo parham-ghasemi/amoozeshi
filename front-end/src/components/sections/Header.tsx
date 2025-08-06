@@ -1,8 +1,8 @@
 import { Link, useNavigate } from "react-router-dom"
 import { useState } from "react"
 import { Menu, X } from "lucide-react"
-import axios from "axios"
 import { useQuery } from "@tanstack/react-query"
+import authAxios from "@/lib/authAxios"
 
 const Header = () => {
   const [open, setOpen] = useState(false)
@@ -12,9 +12,7 @@ const Header = () => {
     const token = localStorage.getItem("token");
     if (!token) return false;
     try {
-      const res = await axios.get(`http://localhost:3000/user/me`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await authAxios.get(`/user/me`);
       return res.data;
     } catch {
       return false;
@@ -23,7 +21,10 @@ const Header = () => {
   const { data: user } = useQuery({
     queryKey: ["get-user-w-jwt"],
     queryFn: getUser,
+    enabled: !!localStorage.getItem("token"), // ⛔ prevents firing when logged out
+    staleTime: 0, // no caching delay
   });
+
 
   const onClick = () => {
     if (!user) {

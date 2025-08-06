@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface FormState {
   userName: string;
@@ -14,6 +15,7 @@ interface FormState {
 }
 
 const AuthForm: React.FC = () => {
+  const queryClient = useQueryClient();
   const [mode, setMode] = useState<"login" | "signup" | "otp">("login");
   const [form, setForm] = useState<FormState>({
     userName: "",
@@ -30,6 +32,7 @@ const AuthForm: React.FC = () => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
@@ -40,12 +43,18 @@ const AuthForm: React.FC = () => {
         navigate("/");
         return;
       }
+
       const endpoint = `http://localhost:3000${mode === "signup" ? "/auth/signup" : "/auth/login"}`;
       const { data }: { data: { token: string } } = await axios.post(endpoint, form);
+
       alert(`${mode === "signup" ? "ثبت‌نام" : "ورود"} موفق!`);
       localStorage.setItem("token", data.token);
+
+      // @ts-ignore
+      queryClient.invalidateQueries(["get-user-w-jwt"]);
+
       if (mode === "signup") {
-        setMode("otp"); // Show OTP input after signup
+        setMode("otp");
       } else {
         navigate("/");
       }
@@ -54,6 +63,7 @@ const AuthForm: React.FC = () => {
       alert(error?.response?.data?.message || "خطایی رخ داد");
     }
   };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white md:bg-gray-100 md:px-4" dir="rtl">

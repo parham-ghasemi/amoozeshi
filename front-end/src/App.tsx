@@ -27,8 +27,7 @@ import Dashboard from "./Admin/Dashboard"
 import AdminLayout from "./Admin/AdminLayout"
 import Settings from "./Admin/Settings"
 import AuthForm from "./pages/authForm/AuthForm"
-import Logout from "./pages/Logout"
-import Profile from "./pages/profile/profile"
+import Profile from "./pages/profile/Profile"
 
 function App() {
   return (
@@ -60,9 +59,6 @@ function App() {
             <Route path="/videos-all" element={<AllVideos />} />
             <Route path="/video/:id" element={<VideoShowcase />} />
 
-            {/* logout */}
-            <Route path="/logout" element={<Logout />} />
-
             <Route path="/profile" element={<Profile />} />
 
             {/* not found */}
@@ -77,10 +73,7 @@ function App() {
             <Route path="video" element={<Videos />} />
             <Route path="course" element={<Course />} />
             <Route path="settings" element={<Settings />} />
-            <Route path="logout" element={<Logout />} />
           </Route>
-          <Route path="/logout" element={<Logout />} />
-
 
         </Routes>
       </Router></div>

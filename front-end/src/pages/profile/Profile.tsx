@@ -1,17 +1,16 @@
 import ArticleCard from "@/components/cards/ArticleCard";
 import CourseCard from "@/components/cards/CourseCard";
 import VideoCard from "@/components/cards/VideoCard";
+import LogoutButton from "@/components/logout/LogoutButton";
+import authAxios from "@/lib/authAxios";
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 
 const Profile = () => {
   const getUser = async () => {
     const token = localStorage.getItem("token");
     if (!token) return false;
     try {
-      const res = await axios.get(`http://localhost:3000/user/me`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await authAxios.get('/user/me')
       return res.data;
     } catch {
       return false;
@@ -42,7 +41,7 @@ const Profile = () => {
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl" dir="rtl">
       {/* User Info Section */}
-      <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+      <div className="bg-white rounded-xl shadow-lg p-6 mb-8 relative">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4">
           پروفایل کاربر
         </h1>
@@ -56,6 +55,10 @@ const Profile = () => {
           <p className="text-gray-600">
             <span className="font-semibold">نقش:</span> {user.role}
           </p>
+        </div>
+        
+        <div className=" absolute left-3 bottom-3">
+          <LogoutButton />
         </div>
       </div>
 
