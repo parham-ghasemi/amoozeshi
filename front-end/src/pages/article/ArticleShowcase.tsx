@@ -75,7 +75,6 @@ const ArticleShowcase = () => {
       return data;
     },
     onSuccess: () => {
-      toast.success("وضعیت علاقه‌مندی مقاله تغییر کرد");
       // @ts-ignore
       queryClient.invalidateQueries(["me"]);
     },

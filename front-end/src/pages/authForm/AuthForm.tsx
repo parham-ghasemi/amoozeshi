@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 interface FormState {
   userName: string;
@@ -47,7 +48,6 @@ const AuthForm: React.FC = () => {
       const endpoint = `http://localhost:3000${mode === "signup" ? "/auth/signup" : "/auth/login"}`;
       const { data }: { data: { token: string } } = await axios.post(endpoint, form);
 
-      alert(`${mode === "signup" ? "ثبت‌نام" : "ورود"} موفق!`);
       localStorage.setItem("token", data.token);
 
       // @ts-ignore
@@ -56,11 +56,11 @@ const AuthForm: React.FC = () => {
       if (mode === "signup") {
         setMode("otp");
       } else {
-        navigate("/");
+        navigate("/", { state: { showToast: true } });
       }
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
-      alert(error?.response?.data?.message || "خطایی رخ داد");
+      toast.error(error?.response?.data?.message || "خطایی رخ داد");
     }
   };
 

@@ -83,7 +83,6 @@ const VideoShowcase = () => {
       return data;
     },
     onSuccess: () => {
-      toast.success("وضعیت علاقه‌مندی ویدیو تغییر کرد");
       // @ts-ignore
       queryClient.invalidateQueries(['get-user-w-jwt']);
     },

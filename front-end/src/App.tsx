@@ -28,10 +28,12 @@ import AdminLayout from "./Admin/AdminLayout"
 import Settings from "./Admin/Settings"
 import AuthForm from "./pages/authForm/AuthForm"
 import Profile from "./pages/profile/Profile"
+import { Toaster } from "react-hot-toast"
 
 function App() {
   return (
     <div className="bg-slate-100">
+      <Toaster />
       <Router>
         <Routes>
           <Route path="/auth" element={<AuthForm />} />
