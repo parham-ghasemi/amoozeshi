@@ -1,11 +1,13 @@
 import VideoCard from "@/components/cards/VideoCard";
-import { SquareCheck, SquareX } from "lucide-react";
+import { Heart, HeartCrack, SquareCheck, SquareX } from "lucide-react";
 import React, { useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import type { Video, VideoShort } from "types/video";
 import Plyr from "plyr";
 import "plyr/dist/plyr.css";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
+import authAxios from "@/lib/authAxios";
 
 const fetchVideo = async (id: string): Promise<Video> => {
   const res = await fetch(`http://localhost:3000/video/${id}`);
@@ -19,8 +21,20 @@ const fetchRelatedVideo = async (id: string): Promise<VideoShort> => {
   return data.videoObject;
 };
 
+const getUser = async () => {
+  const token = localStorage.getItem("token");
+  if (!token) return false;
+  try {
+    const res = await authAxios.get(`/user/me`);
+    return res.data;
+  } catch {
+    return false;
+  }
+}
+
 const VideoShowcase = () => {
   const { id = "" } = useParams();
+  const queryClient = useQueryClient();
   const playerContainerRef = useRef<HTMLDivElement | null>(null);
   const plyrInstanceRef = useRef<Plyr | null>(null);
 
@@ -44,6 +58,38 @@ const VideoShowcase = () => {
       return await Promise.all(video.related.map(fetchRelatedVideo));
     },
     enabled: !!video?.related?.length,
+  });
+
+  const {
+    data: currentUser,
+  } = useQuery({
+    queryKey: ["get-user-w-jwt"],
+    queryFn: getUser,
+    enabled: !!localStorage.getItem("token"),
+  });
+  // @ts-ignore
+  const isFavorited = currentUser?.favoriteVideos?.some(v => v._id === id);
+
+
+  const toggleFavoriteMutation = useMutation({
+    mutationFn: async () => {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`http://localhost:3000/user/favorite/video/${id}`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "خطا در افزودن ویدیو به علاقه‌مندی‌ها");
+      return data;
+    },
+    onSuccess: () => {
+      toast.success("وضعیت علاقه‌مندی ویدیو تغییر کرد");
+      // @ts-ignore
+      queryClient.invalidateQueries(['get-user-w-jwt']);
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "مشکلی در افزودن علاقه‌مندی پیش آمد");
+    },
   });
 
   // Plyr player setup
@@ -100,7 +146,6 @@ const VideoShowcase = () => {
 
   const longDesc = typeof video.longDesc === "string" ? JSON.parse(video.longDesc) : video.longDesc;
 
-
   const renderEditorContent = (content: any) => {
     if (!content || !content.blocks) return null;
 
@@ -113,14 +158,12 @@ const VideoShowcase = () => {
               {block.data.text}
             </Tag>
           );
-
         case "paragraph":
           return (
             <p key={index} className="text-gray-700 leading-7 my-1 sm:my-2 text-sm sm:text-base">
               {block.data.text}
             </p>
           );
-
         case "list":
           if (block.data.style === "unordered") {
             return (
@@ -155,7 +198,6 @@ const VideoShowcase = () => {
             );
           }
           break;
-
         case "image":
           return (
             <div key={index} className="my-4 self-center w-full">
@@ -169,7 +211,6 @@ const VideoShowcase = () => {
               )}
             </div>
           );
-
         default:
           return null;
       }
@@ -184,6 +225,17 @@ const VideoShowcase = () => {
           <div className="bg-gradient-to-t from-[#f1f1f1] h-[50vh] sm:h-96 absolute top-0 left-0 right-0 z-[-1]" />
         </div>
       </div>
+      {currentUser &&
+        <button
+          onClick={() => toggleFavoriteMutation.mutate()}
+          className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-full shadow-md flex items-center gap-2 text-sm font-medium cursor-pointer ${isFavorited ? "bg-red-600 text-white hover:bg-red-800" : "bg-white text-red-600 border border-red-600 hover:bg-red-200"
+            }`}
+        >
+          {isFavorited ? <HeartCrack size={20} /> : <Heart size={20} fill="#dc2626" />}
+          <span>{isFavorited ? " حذف از علاقه‌مندی‌ها" : "️ افزودن به علاقه‌مندی‌ها"}</span>
+        </button>
+      }
+
 
       <h1 className="max-w-[90%] sm:max-w-[600px] text-center text-2xl sm:text-3xl font-bold leading-[150%]">
         {video.title}

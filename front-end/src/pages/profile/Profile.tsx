@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 
 const Profile = () => {
   const getUser = async () => {
+    console.log('res:____')
     const token = localStorage.getItem("token");
     if (!token) return false;
     try {
@@ -56,7 +57,7 @@ const Profile = () => {
             <span className="font-semibold">نقش:</span> {user.role}
           </p>
         </div>
-        
+
         <div className=" absolute left-3 bottom-3">
           <LogoutButton />
         </div>
@@ -95,22 +96,6 @@ const Profile = () => {
         </div>
       )}
 
-      {/* Favorite Videos Section */}
-      {user.favoriteVideos?.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4">
-            ویدیوهای مورد علاقه
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {
-              //@ts-ignore
-              user.favoriteVideos.map((video) => (
-                <VideoCard key={video._id} video={video} />
-              ))}
-          </div>
-        </div>
-      )}
-
       {/* Favorite Articles Section */}
       {user.favoriteArticles?.length > 0 && (
         <div className="mb-8">
@@ -122,6 +107,22 @@ const Profile = () => {
               // @ts-ignore
               user.favoriteArticles.map((article) => (
                 <ArticleCard key={article._id} article={article} />
+              ))}
+          </div>
+        </div>
+      )}
+
+      {/* Favorite Videos Section */}
+      {user.favoriteVideos?.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4">
+            ویدیوهای مورد علاقه
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {
+              //@ts-ignore
+              user.favoriteVideos.map((video) => (
+                <VideoCard key={video._id} video={video} />
               ))}
           </div>
         </div>

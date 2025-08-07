@@ -7,6 +7,7 @@ export interface Video {
   longDesc: any;
   thumbnail: string;
   content: string;
+  visits: Number;
   category: Category;
   related: ObjectId[];
   createdAt: string;
