@@ -34,11 +34,11 @@ function App() {
     <div className="bg-slate-100">
       <Router>
         <Routes>
+          <Route path="/auth" element={<AuthForm />} />
           {/* Non-admin routes use MainLayout */}
           <Route element={<Layout />}>
             <Route path="/" index element={<Home />} />
             <Route path="/about-us" element={<About />} />
-            <Route path="/auth" element={<AuthForm />} />
 
             {/* Articles */}
             <Route path="/articles" element={<ShowArticles />} />

@@ -3,11 +3,14 @@ import CourseCard from "@/components/cards/CourseCard";
 import VideoCard from "@/components/cards/VideoCard";
 import LogoutButton from "@/components/logout/LogoutButton";
 import authAxios from "@/lib/authAxios";
+import { motion } from 'framer-motion';
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
+import { Lock } from "lucide-react";
+import UnauthorizedProfile from "../unauthorized/UnauthorizedProfile";
 
 const Profile = () => {
   const getUser = async () => {
-    console.log('res:____')
     const token = localStorage.getItem("token");
     if (!token) return false;
     try {
@@ -33,9 +36,7 @@ const Profile = () => {
 
   if (error || !user) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <p className="text-red-500 text-lg">خطا در بارگذاری اطلاعات کاربر</p>
-      </div>
+      <UnauthorizedProfile />
     );
   }
 

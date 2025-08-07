@@ -21,8 +21,8 @@ const Header = () => {
   const { data: user } = useQuery({
     queryKey: ["get-user-w-jwt"],
     queryFn: getUser,
-    enabled: !!localStorage.getItem("token"), // ⛔ prevents firing when logged out
-    staleTime: 0, // no caching delay
+    enabled: !!localStorage.getItem("token"),
+    staleTime: 0,
   });
 
 
@@ -35,7 +35,7 @@ const Header = () => {
   }
 
   return (
-    <div className="w-full flex md:justify-between justify-start items-center h-16 md:h-20 sticky top-0 left-0 right-0 px-6 xl:px-96 md:px-24 border-b backdrop-blur-lg z-50 bg-[#f1f5f9100a1] hover:bg-slate-100 hover:shadow-xl transition-all duration-300">
+    <div className="w-full flex md:justify-between justify-start items-center h-16 md:h-20 sticky top-0 left-0 right-0 px-6 xl:px-96 md:px-24 border-b backdrop-blur-lg z-50 bg-[#f1f5f9100a1] hover:bg-slate-100 transition-all duration-300">
       <button onClick={onClick} className=" hidden md:block py-2 px-5 rounded-lg hover:shadow hover:text-cyan-500 cursor-pointer transition" >
         {
           // @ts-ignore
