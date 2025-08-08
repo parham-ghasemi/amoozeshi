@@ -189,3 +189,64 @@ exports.getNewestArticles = async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch newest articles' });
   }
 };
+
+exports.editArticle = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid article ID" });
+    }
+
+    const { title, description, content, category, related, thumbnail } = req.body;
+
+    const updateData = {};
+
+    if (title) updateData.title = title;
+    if (description) updateData.description = description;
+    if (thumbnail) updateData.thumbnail = thumbnail;
+    if (content) {
+      try {
+        updateData.content = typeof content === "string" ? JSON.parse(content) : content;
+      } catch {
+        return res.status(400).json({ message: "Invalid content format" });
+      }
+    }
+
+    if (category) {
+      if (!mongoose.Types.ObjectId.isValid(category)) {
+        return res.status(400).json({ message: "Invalid category ID" });
+      }
+      const categoryExists = await Category.findById(category);
+      if (!categoryExists) {
+        return res.status(400).json({ message: "Category not found" });
+      }
+      updateData.category = category;
+    }
+
+    if (related) {
+      if (!Array.isArray(related)) {
+        return res.status(400).json({ message: "Related must be an array" });
+      }
+      updateData.related = related.map(id => new mongoose.Types.ObjectId(id));
+    }
+
+    const updatedArticle = await Article.findByIdAndUpdate(
+      id,
+      { $set: updateData },
+      { new: true }
+    );
+
+    if (!updatedArticle) {
+      return res.status(404).json({ message: "Article not found" });
+    }
+
+    res.status(200).json({
+      message: "Article updated successfully",
+      article: updatedArticle,
+    });
+
+  } catch (error) {
+    console.error("Edit article error:", error);
+    res.status(500).json({ message: "Failed to update article" });
+  }
+};

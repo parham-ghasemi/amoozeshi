@@ -29,6 +29,7 @@ import Settings from "./Admin/Settings"
 import AuthForm from "./pages/authForm/AuthForm"
 import Profile from "./pages/profile/Profile"
 import { Toaster } from "react-hot-toast"
+import EditArticleForm from "./Admin/components/Articles/EditArticleForm"
 
 function App() {
   return (
@@ -72,6 +73,7 @@ function App() {
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="article" element={<Articles />} />
+            <Route path="article/edit/:id" element={<EditArticleForm />} />
             <Route path="video" element={<Videos />} />
             <Route path="course" element={<Course />} />
             <Route path="settings" element={<Settings />} />

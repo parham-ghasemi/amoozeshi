@@ -12,12 +12,14 @@ const {
   searchedArticles,
   getArticlesByCategory,
   getNewestArticles,
-  getMostViewedArticles
+  getMostViewedArticles,
+  editArticle
 } = require('../controllers/article.controller');
 const authenticate = require('../middleware/auth.middleware');
 const authorizeAdmin = require('../middleware/authorizeAdmin');
 
-router.post('/articles', addArticle);
+router.post('/articles', authenticate, authorizeAdmin, addArticle);
+router.patch('/article/:id', authenticate, authorizeAdmin, editArticle);
 router.post('/upload', authenticate, authorizeAdmin, uploadMiddleware, uploadImage);
 
 router.get('/article/:id', getArticleById);
