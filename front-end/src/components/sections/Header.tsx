@@ -44,7 +44,7 @@ const Header = () => {
       </button>
 
       <div className="md:flex hidden items-center justify-center gap-6">
-        <Link to="/">تماس با ما</Link>
+        <Link to="/about">درباره ما</Link>
         <Link to="/courses">دوره ها</Link>
         <Link to="/videos">ویدئو ها</Link>
         <Link to="/articles">مقالات</Link>
@@ -59,7 +59,7 @@ const Header = () => {
 
       {open && (
         <div className="absolute top-16 left-0 w-full bg-white border-b shadow-md flex flex-col items-center gap-4 py-4 md:hidden">
-          <Link to="/" onClick={() => setOpen(false)}>تماس با ما</Link>
+          <Link to="/about" onClick={() => setOpen(false)}>درباره ما</Link>
           <Link to="/courses" onClick={() => setOpen(false)}>دوره ها</Link>
           <Link to="/videos" onClick={() => setOpen(false)}>ویدئو ها</Link>
           <Link to="/articles" onClick={() => setOpen(false)}>مقالات</Link>

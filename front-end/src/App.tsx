@@ -43,7 +43,7 @@ function App() {
           {/* Non-admin routes use MainLayout */}
           <Route element={<Layout />}>
             <Route path="/" index element={<Home />} />
-            <Route path="/about-us" element={<About />} />
+            <Route path="/about" element={<About />} />
 
             {/* Articles */}
             <Route path="/articles" element={<ShowArticles />} />
