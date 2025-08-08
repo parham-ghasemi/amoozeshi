@@ -3,11 +3,10 @@ import CourseCard from "@/components/cards/CourseCard";
 import VideoCard from "@/components/cards/VideoCard";
 import LogoutButton from "@/components/logout/LogoutButton";
 import authAxios from "@/lib/authAxios";
-import { motion } from 'framer-motion';
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
-import { Lock } from "lucide-react";
 import UnauthorizedProfile from "../unauthorized/UnauthorizedProfile";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const Profile = () => {
   const getUser = async () => {
@@ -55,11 +54,18 @@ const Profile = () => {
             <span className="font-semibold">شماره تلفن:</span> {user.phoneNumber}
           </p>
           <p className="text-gray-600">
-            <span className="font-semibold">نقش:</span> {user.role}
+            <span className="font-semibold">نقش:</span> {user.role === 'admin'?'ادمین':'یوزر'}
           </p>
         </div>
 
-        <div className=" absolute left-3 bottom-3">
+        <div className=" absolute left-3 bottom-3 flex gap-1.5">
+          {
+            user.role === 'admin' ?
+              <Link to='/admin'>
+                <Button variant='outline' className="cursor-pointer">داشبورد ادمین</Button>
+              </Link>
+              : ''
+          }
           <LogoutButton />
         </div>
       </div>
