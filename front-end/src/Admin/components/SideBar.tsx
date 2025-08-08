@@ -8,7 +8,7 @@ const items = [
   { name: "مقالات", path: "/article" },
   { name: "دوره ها", path: "/course" },
   { name: "تنظیمات", path: "/settings" },
-  { name: "خروج", path: "/logout" },
+  { name: "خروج", path: "/" },
 ];
 
 const SideBar = () => {
@@ -31,7 +31,7 @@ const SideBar = () => {
       <div className="flex flex-col items-end pt-5">
         {items.map((item, index) => (
           <Link
-            to={`/admin${item.path}`}
+            to={item.path === '/' ? '/' : `/admin${item.path}`}
             key={`path-${index}`}
             className={clsx(
               "h-14 w-full flex items-center pe-10 rounded-sm overflow-hidden",
