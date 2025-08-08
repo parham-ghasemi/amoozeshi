@@ -30,6 +30,7 @@ import AuthForm from "./pages/authForm/AuthForm"
 import Profile from "./pages/profile/Profile"
 import { Toaster } from "react-hot-toast"
 import EditArticleForm from "./Admin/components/Articles/EditArticleForm"
+import EditVideoForm from "./Admin/components/Videos/EditVideoForm"
 
 function App() {
   return (
@@ -75,6 +76,7 @@ function App() {
             <Route path="article" element={<Articles />} />
             <Route path="article/edit/:id" element={<EditArticleForm />} />
             <Route path="video" element={<Videos />} />
+            <Route path="video/edit/:id" element={<EditVideoForm />} />
             <Route path="course" element={<Course />} />
             <Route path="settings" element={<Settings />} />
           </Route>

@@ -209,3 +209,64 @@ exports.searchedVideos = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+exports.editVideo = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, shortDesc, longDesc, thumbnail, category, related } = req.body;
+
+    // Find existing video
+    const existingVideo = await Video.findById(id);
+    if (!existingVideo) {
+      return res.status(404).json({ message: 'Video not found' });
+    }
+
+    // If category changed, validate it
+    if (category && category.toString() !== existingVideo.category.toString()) {
+      const categoryExists = await Category.findById(category);
+      if (!categoryExists) {
+        return res.status(400).json({ message: 'Invalid category ID' });
+      }
+      existingVideo.category = category;
+    }
+
+    // Update video file if a new one is uploaded
+    if (req.file) {
+      const videoUrl = `http://localhost:3000/uploads/videos/${req.file.filename}`;
+      existingVideo.content = videoUrl;
+    }
+
+    // Update text fields if provided
+    if (title) existingVideo.title = title;
+    if (shortDesc) existingVideo.shortDesc = shortDesc;
+    if (longDesc) {
+      try {
+        existingVideo.longDesc = typeof longDesc === "string" ? JSON.parse(longDesc) : longDesc;
+      } catch (e) {
+        return res.status(400).json({ message: 'Invalid longDesc JSON format' });
+      }
+    }
+    if (thumbnail) existingVideo.thumbnail = thumbnail;
+
+    // Handle related videos update
+    if (related !== undefined) {
+      try {
+        let parsedRelated = Array.isArray(related)
+          ? related
+          : JSON.parse(related || '[]');
+        parsedRelated = parsedRelated.map(id => new mongoose.Types.ObjectId(id));
+        existingVideo.related = parsedRelated;
+      } catch (e) {
+        console.warn('Failed to parse related:', related);
+        existingVideo.related = [];
+      }
+    }
+
+    await existingVideo.save();
+
+    res.status(200).json({ message: 'Video updated successfully', video: existingVideo });
+  } catch (err) {
+    console.error('Edit video error:', err);
+    res.status(500).json({ message: 'Failed to edit video' });
+  }
+};

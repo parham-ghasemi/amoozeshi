@@ -12,13 +12,15 @@ const {
   getVideosByCategory,
   getMostViewedVideos,
   getNewestVideos,
-  searchedVideos
+  searchedVideos,
+  editVideo
 } = require('../controllers/video.controller');
 const authenticate = require('../middleware/auth.middleware');
 const authorizeAdmin = require('../middleware/authorizeAdmin');
 
 // Upload a video file and create entry
 router.post('/videos', authenticate, authorizeAdmin, uploadVideoMiddleware, uploadVideo);
+router.patch('/videos/:id', authenticate, authorizeAdmin, uploadVideoMiddleware, editVideo);
 
 // EditorJS-compatible image upload (thumbnail, etc.)
 router.post('/videos/upload', authenticate, authorizeAdmin, uploadVideoThumbnail, uploadImage);
