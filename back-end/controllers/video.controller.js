@@ -180,7 +180,7 @@ exports.getMostViewedVideos = async (req, res) => {
 
 exports.getNewestVideos = async (req, res) => {
   try {
-    const videos = await Video.find({}, { id: 1, thumbnail: 1, title: 1, createdAt: 1 })
+    const videos = await Video.find({}, { id: 1, thumbnail: 1, title: 1, createdAt: 1, visits: 1 })
       .sort({ createdAt: -1 })
       .limit(20);
 

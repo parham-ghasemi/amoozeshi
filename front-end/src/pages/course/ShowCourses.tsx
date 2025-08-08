@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { ChevronLeft } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import CourseCard from '@/components/cards/CourseCard';
 import CourseSearchBox from './course-search/CourseSearchBox';
 import type { CourseShort } from 'types/course';
@@ -10,6 +11,7 @@ interface Category {
   name: string;
 }
 
+// Fetchers
 const fetchMostPopular = async (): Promise<CourseShort[]> =>
   (await fetch('http://localhost:3000/courses/most-popular')).json();
 
@@ -51,7 +53,7 @@ const ShowCourses = () => {
     onSuccess: () => setShowAllCourses(true),
   });
 
-  // Initialize selected category + fetch categoryCourses when categories arrive
+  // Initialize selected category
   if (!selectedCategory && categoriesLoaded && categories.length > 0) {
     setSelectedCategory(categories[0]);
   }
@@ -60,58 +62,89 @@ const ShowCourses = () => {
 
   return (
     <div className="min-h-screen w-full flex flex-col gap-15 items-center pt-16">
-      {!isCollapsed && <CourseSearchBox />}
-
-      <div className="w-6xl min-h-96 bg-slate-50 rounded-2xl flex flex-col gap-10 p-16" dir="rtl">
-        {(expandedSection === 'popular' || !isCollapsed) && (
-          <Section
-            title="محبوب‌ترین دوره‌ها"
-            courses={mostPopular}
-            showAll={expandedSection === 'popular'}
-            onShowAll={() => setExpandedSection('popular')}
-            onBack={() => setExpandedSection(null)}
-          />
-        )}
-
-        {(expandedSection === 'newest' || !isCollapsed) && (
-          <Section
-            title="جدیدترین دوره‌ها"
-            courses={newest}
-            showAll={expandedSection === 'newest'}
-            onShowAll={() => setExpandedSection('newest')}
-            onBack={() => setExpandedSection(null)}
-          />
-        )}
-
-        {selectedCategory && (expandedSection === 'category' || !isCollapsed) && (
-          <Section
-            title={`دوره‌های ${selectedCategory.name}`}
-            courses={categoryCourses}
-            showAll={expandedSection === 'category'}
-            onShowAll={() => setExpandedSection('category')}
-            onBack={() => setExpandedSection(null)}
-          />
-        )}
-
-        {showAllCourses && (
-          <Section
-            title="همه دوره‌ها"
-            courses={allCourses}
-            showAll={true}
-            onShowAll={() => { }}
-            onBack={() => setShowAllCourses(false)}
-          />
-        )}
-
+      <AnimatePresence>
         {!isCollapsed && (
-          <button
-            onClick={() => fetchAll()}
-            className="mt-10 mb-20 w-full py-3 bg-blue-100 cursor-pointer hover:bg-blue-200 self-center rounded-2xl hover:shadow-2xl"
+          <motion.div
+            key="searchbox"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
           >
-            نمایش همه دوره‌ها
-          </button>
+            <CourseSearchBox />
+          </motion.div>
         )}
-      </div>
+      </AnimatePresence>
+
+      <motion.div
+        className="w-6xl min-h-96 bg-slate-50 rounded-2xl flex flex-col gap-10 p-16"
+        dir="rtl"
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        <AnimatePresence mode="wait">
+          {(expandedSection === 'popular' || !isCollapsed) && (
+            <Section
+              key="popular"
+              title="محبوب‌ترین دوره‌ها"
+              courses={mostPopular}
+              showAll={expandedSection === 'popular'}
+              onShowAll={() => setExpandedSection('popular')}
+              onBack={() => setExpandedSection(null)}
+            />
+          )}
+
+          {(expandedSection === 'newest' || !isCollapsed) && (
+            <Section
+              key="newest"
+              title="جدیدترین دوره‌ها"
+              courses={newest}
+              showAll={expandedSection === 'newest'}
+              onShowAll={() => setExpandedSection('newest')}
+              onBack={() => setExpandedSection(null)}
+            />
+          )}
+
+          {selectedCategory && (expandedSection === 'category' || !isCollapsed) && (
+            <Section
+              key="category"
+              title={`دوره‌های ${selectedCategory.name}`}
+              courses={categoryCourses}
+              showAll={expandedSection === 'category'}
+              onShowAll={() => setExpandedSection('category')}
+              onBack={() => setExpandedSection(null)}
+            />
+          )}
+
+          {showAllCourses && (
+            <Section
+              key="allcourses"
+              title="همه دوره‌ها"
+              courses={allCourses}
+              showAll={true}
+              onShowAll={() => { }}
+              onBack={() => setShowAllCourses(false)}
+            />
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {!isCollapsed && (
+            <motion.button
+              key="showallbtn"
+              onClick={() => fetchAll()}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              className="mt-10 mb-20 w-full py-3 bg-blue-100 cursor-pointer hover:bg-blue-200 self-center rounded-2xl hover:shadow-2xl"
+            >
+              نمایش همه دوره‌ها
+            </motion.button>
+          )}
+        </AnimatePresence>
+      </motion.div>
     </div>
   );
 };
@@ -132,29 +165,61 @@ const Section = ({
   const displayedCourses = showAll ? courses : courses.slice(0, 4);
 
   return (
-    <div className="flex flex-col gap-7">
+    <motion.div
+      className="flex flex-col gap-7"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
+    >
       <div className="flex justify-between items-center">
         <p className="font-bold text-xl">{title}</p>
 
         {!showAll ? (
-          <p className="text-sm flex items-center gap-1 cursor-pointer hover:text-slate-700" onClick={onShowAll}>
+          <p
+            className="text-sm flex items-center gap-1 cursor-pointer hover:text-slate-700"
+            onClick={onShowAll}
+          >
             مشاهده بیشتر
             <ChevronLeft size={17} />
           </p>
         ) : (
-          <button onClick={onBack} className="flex items-center gap-1 text-sm hover:text-rose-700 cursor-pointer">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-1 text-sm hover:text-rose-700 cursor-pointer"
+          >
             بازگشت
             <ChevronLeft size={18} />
           </button>
         )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+      <motion.div
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5"
+        variants={{
+          hidden: { opacity: 0 },
+          visible: {
+            opacity: 1,
+            transition: { staggerChildren: 0.07 },
+          },
+        }}
+        initial="hidden"
+        animate="visible"
+      >
         {displayedCourses.map((course) => (
-          <CourseCard key={course._id} course={course} />
+          <motion.div
+            key={course._id}
+            variants={{
+              hidden: { opacity: 0, scale: 0.95 },
+              visible: { opacity: 1, scale: 1 },
+            }}
+            transition={{ duration: 0.25 }}
+          >
+            <CourseCard course={course} />
+          </motion.div>
         ))}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
