@@ -236,3 +236,86 @@ exports.checkIsJoined = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+exports.editCourse = async (req, res) => {
+  try {
+    const courseId = req.params.id;
+
+    // Validate course ID
+    if (!mongoose.Types.ObjectId.isValid(courseId)) {
+      return res.status(400).json({ message: 'Invalid course ID' });
+    }
+
+    // Find existing course
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
+
+    // Destructure fields from request body
+    const {
+      title,
+      shortDesc,
+      thumbnail,
+      longDesc,
+      category,
+      time,
+      level,
+      goal,
+      topics,
+      questions,
+      content,
+      related,
+    } = req.body;
+
+    // Validate required fields (you can adjust as needed)
+    if (
+      !title || !shortDesc || !thumbnail || !longDesc || !category ||
+      !time || !level || !goal || !topics || !questions || !content
+    ) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    // Validate category exists
+    const categoryExists = await Category.findById(category);
+    if (!categoryExists) {
+      return res.status(400).json({ message: 'Invalid category ID' });
+    }
+
+    // Parse fields if passed as JSON strings
+    const parsedTopics = typeof topics === 'string' ? JSON.parse(topics) : topics;
+    const parsedQuestions = typeof questions === 'string' ? JSON.parse(questions) : questions;
+    const parsedContent = typeof content === 'string' ? JSON.parse(content) : content;
+    const parsedRelated = Array.isArray(related)
+      ? related.map(id => new mongoose.Types.ObjectId(id))
+      : [];
+
+    const parsedLongDesc = typeof longDesc === 'string' ? JSON.parse(longDesc) : longDesc;
+
+    const parsedContentWithObjectIds = parsedContent.map(item => ({
+      itemId: new mongoose.Types.ObjectId(item.itemId),
+      itemType: item.itemType,
+    }));
+
+    // Update fields
+    course.title = title;
+    course.shortDesc = shortDesc;
+    course.thumbnail = thumbnail;
+    course.longDesc = parsedLongDesc;
+    course.category = category;
+    course.time = time;
+    course.level = level;
+    course.goal = goal;
+    course.topics = parsedTopics;
+    course.questions = parsedQuestions;
+    course.content = parsedContentWithObjectIds;
+    course.related = parsedRelated;
+
+    await course.save();
+
+    res.json({ message: 'Course updated successfully', course });
+  } catch (err) {
+    console.error('Edit course error:', err);
+    res.status(500).json({ message: 'Failed to update course' });
+  }
+};
