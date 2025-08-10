@@ -32,6 +32,7 @@ import { Toaster } from "react-hot-toast"
 import EditArticleForm from "./Admin/components/Articles/EditArticleForm"
 import EditVideoForm from "./Admin/components/Videos/EditVideoForm"
 import EditCourseForm from "./Admin/components/courses/EditCourseForm"
+import HomePage from "./pages/Home2"
 
 function App() {
   return (
@@ -42,7 +43,7 @@ function App() {
           <Route path="/auth" element={<AuthForm />} />
           {/* Non-admin routes use MainLayout */}
           <Route element={<Layout />}>
-            <Route path="/" index element={<Home />} />
+            <Route path="/" index element={<HomePage />} />
             <Route path="/about" element={<About />} />
 
             {/* Articles */}
