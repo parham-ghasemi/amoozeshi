@@ -27,79 +27,116 @@ const images2 = [
 const image3 = 'http://localhost:3000/uploads/images/1751034700437-760365097.jpeg';
 
 const HeroMosaic: React.FC = () => {
+  const isSmallScreen = typeof window !== 'undefined' && window.innerWidth < 1024; // lg breakpoint in Tailwind
+  const combinedImages = [...images1, ...images2];
+
   return (
     <motion.div
-      className="w-full max-w-xl h-[600px] mx-auto flex gap-4 mb-12"
+      className="w-full lg:max-w-xl h-[200px] sm:h-[300px] lg:h-[600px] flex flex-col sm:flex-row gap-2 sm:gap-4 mb-8 sm:mb-12 lg:mb-20"
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, ease: "easeOut" }}
     >
-      <Swiper
-        direction="vertical"
-        modules={[Autoplay]}
-        slidesPerView="auto"
-        spaceBetween={20}
-        loop
-        speed={4000}
-        autoplay={{
-          delay: 1,
-          disableOnInteraction: false,
-        }}
-        allowTouchMove={false}
-        className="w-[283px]"
-      >
-        {images1.map((src, idx) => (
-          <SwiperSlide
-            key={idx}
-            className="!h-[300px]"
+      {isSmallScreen ? (
+        <Swiper
+          direction="horizontal"
+          modules={[Autoplay]}
+          slidesPerView={1}
+          spaceBetween={0}
+          loop
+          speed={4000}
+          autoplay={{
+            delay: 2000,
+            disableOnInteraction: false,
+          }}
+          allowTouchMove={true}
+          className="w-full h-[200px] sm:h-[300px]"
+        >
+          {combinedImages.map((src, idx) => (
+            <SwiperSlide
+              key={idx}
+              className="!w-full !h-full"
+            >
+              <motion.img
+                src={src}
+                alt={`img-${idx}`}
+                className="w-full h-full object-cover"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+              />
+            </SwiperSlide>
+          ))}
+        </Swiper>
+      ) : (
+        <>
+          <Swiper
+            direction="vertical"
+            modules={[Autoplay]}
+            slidesPerView="auto"
+            spaceBetween={10}
+            loop
+            speed={4000}
+            autoplay={{
+              delay: 4000,
+              disableOnInteraction: false,
+            }}
+            allowTouchMove={false}
+            className="w-full sm:w-[48%] h-full"
           >
-            <motion.img
-              src={src}
-              alt={`img-${idx}`}
-              className="w-[283px] h-[300px] object-cover"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-            />
-          </SwiperSlide>
-        ))}
-      </Swiper>
+            {images1.map((src, idx) => (
+              <SwiperSlide
+                key={idx}
+                className="!h-[150px] sm:!h-[200px] lg:!h-[300px]"
+              >
+                <motion.img
+                  src={src}
+                  alt={`img-${idx}`}
+                  className="w-full h-full object-cover"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                />
+              </SwiperSlide>
+            ))}
+          </Swiper>
 
-      <Swiper
-        direction="vertical"
-        modules={[Autoplay]}
-        slidesPerView="auto"
-        spaceBetween={20}
-        loop
-        speed={5000}
-        autoplay={{
-          delay: 1,
-          disableOnInteraction: false,
-          reverseDirection: true,
-        }}
-        allowTouchMove={false}
-        className="w-[283px] translate-y-12"
-      >
-        {images2.map((src, idx) => (
-          <SwiperSlide
-            key={idx}
-            className="!h-[365px]"
+          <Swiper
+            direction="vertical"
+            modules={[Autoplay]}
+            slidesPerView="auto"
+            spaceBetween={10}
+            loop
+            speed={5000}
+            autoplay={{
+              delay: 1,
+              disableOnInteraction: false,
+              reverseDirection: true,
+            }}
+            allowTouchMove={false}
+            className="w-full sm:w-[48%] h-full translate-y-4 sm:translate-y-8 lg:translate-y-12"
           >
-            <motion.img
-              src={src}
-              alt={`img-${idx}`}
-              className="w-[283px] h-[365px] object-cover"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-            />
-          </SwiperSlide>
-        ))}
-      </Swiper>
+            {images2.map((src, idx) => (
+              <SwiperSlide
+                key={idx}
+                className="!h-[150px] sm:!h-[200px] lg:!h-[365px]"
+              >
+                <motion.img
+                  src={src}
+                  alt={`img-${idx}`}
+                  className="w-full h-full object-cover"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                />
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </>
+      )}
     </motion.div>
   );
 };
-
 
 const FeatureCard: React.FC<{ title?: string; desc?: string; image?: string; index: number }> = ({ title, desc, image, index }) => {
   return (
@@ -111,12 +148,12 @@ const FeatureCard: React.FC<{ title?: string; desc?: string; image?: string; ind
       <Card className="shadow-sm border flex flex-col h-full">
         <CardHeader>
           <div className="flex items-center justify-end">
-            <CardTitle className="text-sm text-end">{title}</CardTitle>
-            <img src={image} className="w-10 h-10 rounded ml-3 object-cover" alt={title} />
+            <CardTitle className="text-xs sm:text-sm text-end">{title}</CardTitle>
+            <img src={image} className="w-8 h-8 sm:w-10 sm:h-10 rounded ml-2 sm:ml-3 object-cover" alt={title} />
           </div>
         </CardHeader>
         <CardContent className="flex-grow">
-          <CardDescription className="text-sm leading-relaxed text-end">{desc}</CardDescription>
+          <CardDescription className="text-xs sm:text-sm leading-relaxed text-end">{desc}</CardDescription>
         </CardContent>
         <CardFooter className="justify-end">
           <motion.span
@@ -135,10 +172,6 @@ const FeatureCard: React.FC<{ title?: string; desc?: string; image?: string; ind
 const fetchMostViewed = (): Promise<ArticleShort[]> => axios.get("http://localhost:3000/articles/most-viewed").then(res => res.data);
 
 export default function HomePage() {
-  const title = "یادگیری، الهام و رشد در یک مکان";
-  const paragraph =
-    "در این وب‌سایت می‌توانید به مجموعه‌ای از مقالات تخصصی، ویدئوهای آموزشی، پادکست‌های الهام‌بخش و دوره‌های کاربردی دسترسی پیدا کنید. هدف ما کمک به ارتقای مهارت‌ها و توسعه فردی شماست.";
-
   const { data: mostViewedArticles = [], isLoading: loadingViewed } = useQuery({
     queryKey: ["articles", "mostViewed"],
     queryFn: fetchMostViewed,
@@ -151,23 +184,23 @@ export default function HomePage() {
       animate={{ opacity: 1 }}
       transition={{ duration: 1 }}
     >
-      <main className="container mx-auto px-4 py-12">
-        <section className="grid lg:grid-cols-2 gap-12 items-center">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-12 items-center">
           <div className="flex justify-center">
             <HeroMosaic />
           </div>
 
           <motion.div
-            className="max-w-xl text-right"
+            className="max-w-full sm:pr-5 text-right"
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
           >
-            <h1 className="text-3xl lg:text-4xl font-extrabold mb-4">{title}</h1>
-            <p className="text-sm leading-relaxed mb-6 text-muted-foreground">{paragraph}</p>
-            <div className="flex gap-3 justify-end">
+            <h1 className="text-xl sm:text-2xl lg:text-4xl font-extrabold mb-4">یادگیری، الهام و رشد در یک مکان</h1>
+            <p className="text-xs sm:text-sm leading-relaxed mb-6 text-muted-foreground">در این وب‌سایت می‌توانید به مجموعه‌ای از مقالات تخصصی، ویدئوهای آموزشی، پادکست‌های الهام‌بخش و دوره‌های کاربردی دسترسی پیدا کنید. هدف ما کمک به ارتقای مهارت‌ها و توسعه فردی شماست.</p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-end">
               <motion.button
-                className="px-4 py-2 rounded-lg hover:bg-neutral-100 cursor-pointer transition"
+                className="px-4 py-2 rounded-lg hover:bg-neutral-100 cursor-pointer transition w-full sm:w-auto"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -176,8 +209,9 @@ export default function HomePage() {
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                className="w-full sm:w-auto"
               >
-                <Button variant="default" className="cursor-pointer">
+                <Button variant="default" className="cursor-pointer w-full sm:w-auto">
                   مشاهده دوره‌ها
                 </Button>
               </motion.div>
@@ -186,7 +220,7 @@ export default function HomePage() {
         </section>
 
         <motion.section
-          className="mt-8 text-center text-sm text-muted-foreground"
+          className="mt-8 text-center text-xs sm:text-sm text-muted-foreground"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
@@ -196,7 +230,7 @@ export default function HomePage() {
           </p>
         </motion.section>
 
-        <section className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <section className="mt-8 sm:mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {mostViewedArticles && mostViewedArticles.length > 2
             ? mostViewedArticles.slice(0, 3).map((article, index) => (
               <FeatureCard
@@ -211,7 +245,7 @@ export default function HomePage() {
         </section>
 
         <motion.section
-          className="mt-16 grid lg:grid-cols-2 gap-12 items-center"
+          className="mt-12 sm:mt-16 grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center"
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
@@ -219,7 +253,7 @@ export default function HomePage() {
           <motion.img
             src={image3}
             alt="آموزش آنلاین"
-            className="h-80 rounded object-fit"
+            className="w-full h-48 sm:h-64 lg:h-80 rounded object-cover"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6 }}
@@ -230,8 +264,8 @@ export default function HomePage() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-2xl font-bold mb-3">مسیر یادگیری خود را آغاز کنید</h2>
-            <p className="text-sm leading-relaxed text-muted-foreground mb-6">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-3">مسیر یادگیری خود را آغاز کنید</h2>
+            <p className="text-xs sm:text-sm leading-relaxed text-muted-foreground mb-6">
               با دوره‌های آموزشی متنوع، پادکست‌های انگیزشی و مقالات تخصصی، هر روز گامی به سمت پیشرفت و موفقیت بردارید.
             </p>
           </motion.div>
@@ -239,31 +273,31 @@ export default function HomePage() {
       </main>
 
       <motion.footer
-        className="mt-20 bg-neutral-200 py-10"
+        className="mt-12 sm:mt-20 bg-neutral-200 py-8 sm:py-10"
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.6 }}
       >
-        <div className="container mx-auto px-4 flex flex-col lg:flex-row items-center justify-between">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center justify-between">
           <motion.div
             className="text-right"
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h3 className="text-xl font-bold">همراه شما در مسیر یادگیری</h3>
-            <p className="text-sm text-muted-foreground mt-2">
+            <h3 className="text-lg sm:text-xl font-bold">همراه شما در مسیر یادگیری</h3>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-2">
               با محتوای آموزشی متنوع و به‌روز، مهارت‌های خود را ارتقا دهید و آینده‌ای بهتر بسازید.
             </p>
           </motion.div>
           <motion.div
-            className="mt-4 lg:mt-0 flex gap-3"
+            className="mt-4 lg:mt-0 flex flex-col sm:flex-row gap-3"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
             <motion.button
-              className="px-4 py-2 rounded hover:bg-neutral-300 cursor-pointer transition"
+              className="px-4 py-2 rounded hover:bg-neutral-300 cursor-pointer transition w-full sm:w-auto"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -272,8 +306,9 @@ export default function HomePage() {
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              className="w-full sm:w-auto"
             >
-              <Button variant="default" className="cursor-pointer">
+              <Button variant="default" className="cursor-pointer w-full sm:w-auto">
                 مشاهده دوره‌ها
               </Button>
             </motion.div>
