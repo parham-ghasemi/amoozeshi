@@ -9,6 +9,7 @@ import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import type { ArticleShort } from "types/article";
+import { useNavigate } from "react-router-dom";
 
 const images1 = [
   'http://localhost:3000/uploads/images/1751034700437-760365097.jpeg',
@@ -27,7 +28,7 @@ const images2 = [
 const image3 = 'http://localhost:3000/uploads/images/1751034700437-760365097.jpeg';
 
 const HeroMosaic: React.FC = () => {
-  const isSmallScreen = typeof window !== 'undefined' && window.innerWidth < 1024; // lg breakpoint in Tailwind
+  const isSmallScreen = typeof window !== 'undefined' && window.innerWidth < 1024;
   const combinedImages = [...images1, ...images2];
 
   return (
@@ -172,6 +173,8 @@ const FeatureCard: React.FC<{ title?: string; desc?: string; image?: string; ind
 const fetchMostViewed = (): Promise<ArticleShort[]> => axios.get("http://localhost:3000/articles/most-viewed").then(res => res.data);
 
 export default function HomePage() {
+  const navigator = useNavigate();
+
   const { data: mostViewedArticles = [], isLoading: loadingViewed } = useQuery({
     queryKey: ["articles", "mostViewed"],
     queryFn: fetchMostViewed,
@@ -201,6 +204,7 @@ export default function HomePage() {
             <div className="flex flex-col sm:flex-row gap-3 justify-end">
               <motion.button
                 className="px-4 py-2 rounded-lg hover:bg-neutral-100 cursor-pointer transition w-full sm:w-auto"
+                onClick={() => navigator('/auth')}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -211,7 +215,7 @@ export default function HomePage() {
                 whileTap={{ scale: 0.95 }}
                 className="w-full sm:w-auto"
               >
-                <Button variant="default" className="cursor-pointer w-full sm:w-auto">
+                <Button variant="default" className="cursor-pointer w-full sm:w-auto" onClick={() => navigator('/courses')} >
                   مشاهده دوره‌ها
                 </Button>
               </motion.div>
@@ -300,6 +304,7 @@ export default function HomePage() {
               className="px-4 py-2 rounded hover:bg-neutral-300 cursor-pointer transition w-full sm:w-auto"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => navigator('/auth')}
             >
               ثبت‌نام
             </motion.button>
@@ -308,7 +313,7 @@ export default function HomePage() {
               whileTap={{ scale: 0.95 }}
               className="w-full sm:w-auto"
             >
-              <Button variant="default" className="cursor-pointer w-full sm:w-auto">
+              <Button variant="default" className="cursor-pointer w-full sm:w-auto" onClick={() => navigator('/courses')} >
                 مشاهده دوره‌ها
               </Button>
             </motion.div>
