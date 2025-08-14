@@ -6,7 +6,7 @@ import type { Video, VideoShort } from "types/video";
 import Plyr from "plyr";
 import "plyr/dist/plyr.css";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import toast from "react-hot-toast";
+import {toast} from "sonner";
 import authAxios from "@/lib/authAxios";
 
 const fetchVideo = async (id: string): Promise<Video> => {

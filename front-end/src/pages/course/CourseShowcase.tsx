@@ -8,7 +8,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Course } from "types/course";
 import useRenderEditorContent from "@/hooks/useRenderEditorContent";
 import authAxios from "@/lib/authAxios";
-import toast from "react-hot-toast";
+import {toast} from "sonner";
 
 const levelMap = {
   beginner: "مبتدی",

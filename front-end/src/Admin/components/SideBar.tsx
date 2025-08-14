@@ -7,7 +7,8 @@ const items = [
   { name: "ویدئو ها", path: "/video" },
   { name: "مقالات", path: "/article" },
   { name: "دوره ها", path: "/course" },
-  { name: "تنظیمات", path: "/settings" },
+  { name: " صفحه اصلی", path: "/homepage" },
+  { name: "سایر تنظیمات", path: "/settings" },
   { name: "خروج", path: "/" },
 ];
 

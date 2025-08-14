@@ -11,23 +11,7 @@ import { motion } from "framer-motion";
 import type { ArticleShort } from "types/article";
 import { useNavigate } from "react-router-dom";
 
-const images1 = [
-  'http://localhost:3000/uploads/images/1751034700437-760365097.jpeg',
-  'http://localhost:3000/uploads/images/1751034700437-760365097.jpeg',
-  'http://localhost:3000/uploads/images/1751034700437-760365097.jpeg',
-  'http://localhost:3000/uploads/images/1751034700437-760365097.jpeg',
-  'http://localhost:3000/uploads/images/1751034700437-760365097.jpeg',
-];
-const images2 = [
-  'http://localhost:3000/uploads/images/1751034700437-760365097.jpeg',
-  'http://localhost:3000/uploads/images/1751034700437-760365097.jpeg',
-  'http://localhost:3000/uploads/images/1751034700437-760365097.jpeg',
-  'http://localhost:3000/uploads/images/1751034700437-760365097.jpeg',
-  'http://localhost:3000/uploads/images/1751034700437-760365097.jpeg',
-];
-const image3 = 'http://localhost:3000/uploads/images/1751034700437-760365097.jpeg';
-
-const HeroMosaic: React.FC = () => {
+const HeroMosaic = ({ images1, images2 }: { images1: string[], images2: string[] }) => {
   const isSmallScreen = typeof window !== 'undefined' && window.innerWidth < 1024;
   const combinedImages = [...images1, ...images2];
 
@@ -170,7 +154,22 @@ const FeatureCard: React.FC<{ title?: string; desc?: string; image?: string; ind
   );
 };
 
+interface HomePageData {
+  heroTitle: string;
+  heroDescription: string;
+  middleText: string;
+  sectionTitle: string;
+  sectionDescription: string;
+  footerTitle: string;
+  footerDescription: string;
+  mosaicImages1: string[];
+  mosaicImages2: string[];
+  sectionImage: string;
+}
+
+
 const fetchMostViewed = (): Promise<ArticleShort[]> => axios.get("http://localhost:3000/articles/most-viewed").then(res => res.data);
+const fetchHomePage = (): Promise<HomePageData> => axios.get("http://localhost:3000/homepage").then(res => res.data);
 
 export default function HomePage() {
   const navigator = useNavigate();
@@ -179,6 +178,12 @@ export default function HomePage() {
     queryKey: ["articles", "mostViewed"],
     queryFn: fetchMostViewed,
   });
+  const { data: homepage, isLoading: loadinghomepage } = useQuery({
+    queryKey: ['homepage-stuff'],
+    queryFn: fetchHomePage,
+  });
+
+  console.log(homepage)
 
   return (
     <motion.div
@@ -190,7 +195,7 @@ export default function HomePage() {
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-12 items-center">
           <div className="flex justify-center">
-            <HeroMosaic />
+            {homepage?.mosaicImages1 && homepage.mosaicImages2 && <HeroMosaic images1={homepage?.mosaicImages1} images2={homepage?.mosaicImages2} />}
           </div>
 
           <motion.div
@@ -199,8 +204,8 @@ export default function HomePage() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
           >
-            <h1 className="text-xl sm:text-2xl lg:text-4xl font-extrabold mb-4">یادگیری، الهام و رشد در یک مکان</h1>
-            <p className="text-xs sm:text-sm leading-relaxed mb-6 text-muted-foreground">در این وب‌سایت می‌توانید به مجموعه‌ای از مقالات تخصصی، ویدئوهای آموزشی، پادکست‌های الهام‌بخش و دوره‌های کاربردی دسترسی پیدا کنید. هدف ما کمک به ارتقای مهارت‌ها و توسعه فردی شماست.</p>
+            <h1 className="text-xl sm:text-2xl lg:text-4xl font-extrabold mb-4">{homepage?.heroTitle}</h1>
+            <p className="text-xs sm:text-sm leading-relaxed mb-6 text-muted-foreground">{homepage?.heroDescription}</p>
             <div className="flex flex-col sm:flex-row gap-3 justify-end">
               <motion.button
                 className="px-4 py-2 rounded-lg hover:bg-neutral-100 cursor-pointer transition w-full sm:w-auto"
@@ -230,7 +235,7 @@ export default function HomePage() {
           transition={{ duration: 0.6, delay: 0.2 }}
         >
           <p>
-            ما فضایی فراهم کرده‌ایم تا بتوانید از محتوای آموزشی باکیفیت در قالب‌های مختلف بهره‌مند شوید. از تازه‌ترین مقالات گرفته تا دوره‌های تخصصی، همه در خدمت رشد و یادگیری شماست.
+            {homepage?.middleText}
           </p>
         </motion.section>
 
@@ -255,7 +260,7 @@ export default function HomePage() {
           transition={{ duration: 0.8, delay: 0.4 }}
         >
           <motion.img
-            src={image3}
+            src={homepage?.sectionImage}
             alt="آموزش آنلاین"
             className="w-full h-48 sm:h-64 lg:h-80 rounded object-cover"
             initial={{ opacity: 0, scale: 0.9 }}
@@ -268,9 +273,9 @@ export default function HomePage() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-3">مسیر یادگیری خود را آغاز کنید</h2>
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-3">{homepage?.sectionTitle}</h2>
             <p className="text-xs sm:text-sm leading-relaxed text-muted-foreground mb-6">
-              با دوره‌های آموزشی متنوع، پادکست‌های انگیزشی و مقالات تخصصی، هر روز گامی به سمت پیشرفت و موفقیت بردارید.
+              {homepage?.sectionDescription}
             </p>
           </motion.div>
         </motion.section>
@@ -289,9 +294,9 @@ export default function HomePage() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h3 className="text-lg sm:text-xl font-bold">همراه شما در مسیر یادگیری</h3>
+            <h3 className="text-lg sm:text-xl font-bold">{homepage?.footerTitle}</h3>
             <p className="text-xs sm:text-sm text-muted-foreground mt-2">
-              با محتوای آموزشی متنوع و به‌روز، مهارت‌های خود را ارتقا دهید و آینده‌ای بهتر بسازید.
+              {homepage?.footerDescription}
             </p>
           </motion.div>
           <motion.div

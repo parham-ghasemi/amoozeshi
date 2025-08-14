@@ -28,11 +28,13 @@ import AdminLayout from "./Admin/AdminLayout"
 import Settings from "./Admin/Settings"
 import AuthForm from "./pages/authForm/AuthForm"
 import Profile from "./pages/profile/Profile"
-import { Toaster } from "react-hot-toast"
+// import { Toaster } from "react-hot-toast"
+import { Toaster } from "sonner"
 import EditArticleForm from "./Admin/components/Articles/EditArticleForm"
 import EditVideoForm from "./Admin/components/Videos/EditVideoForm"
 import EditCourseForm from "./Admin/components/courses/EditCourseForm"
 import HomePage from "./pages/Home2"
+import HomePageSettings from "./Admin/components/HomeSettings"
 
 function App() {
   return (
@@ -82,10 +84,13 @@ function App() {
             <Route path="course" element={<Course />} />
             <Route path="course/edit/:id" element={<EditCourseForm />} />
             <Route path="settings" element={<Settings />} />
+            <Route path="homepage" element={<HomePageSettings />} />
           </Route>
 
         </Routes>
-      </Router></div>
+      </Router>
+      <Toaster />
+    </div>
   );
 }
 

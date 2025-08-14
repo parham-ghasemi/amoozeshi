@@ -41,6 +41,9 @@ app.use('/', categoryRoutes);
 const userRoutes = require('./routes/user.routes')
 app.use('/', userRoutes);
 
+const homePageRoutes = require('./routes/homepage.routes');
+app.use('/', homePageRoutes);
+
 
 // Serve /uploads folder
 const uploadPath = path.join(__dirname, 'uploads');
