@@ -29,6 +29,9 @@ app.use('/', articleRoutes);
 const videoRoutes = require('./routes/video.routes');
 app.use('/', videoRoutes);
 
+const podcastRoutes = require('./routes/podcast.routes');
+app.use('/', podcastRoutes);
+
 const courseRoutes = require('./routes/course.routes');
 app.use('/', courseRoutes);
 

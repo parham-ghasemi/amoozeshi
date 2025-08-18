@@ -5,6 +5,7 @@ import { Link, useLocation } from "react-router-dom";
 const items = [
   { name: "داشبورد", path: "/dashboard" },
   { name: "ویدئو ها", path: "/video" },
+  { name: "پادکست ها", path: "/podcast" },
   { name: "مقالات", path: "/article" },
   { name: "دوره ها", path: "/course" },
   { name: " صفحه اصلی", path: "/homepage" },

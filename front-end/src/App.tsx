@@ -35,6 +35,8 @@ import EditVideoForm from "./Admin/components/Videos/EditVideoForm"
 import EditCourseForm from "./Admin/components/courses/EditCourseForm"
 import HomePage from "./pages/Home2"
 import HomePageSettings from "./Admin/components/HomeSettings"
+import Podcasts from "./Admin/Podcast"
+import EditPodcastForm from "./Admin/components/Articles/EditPodcastForm"
 
 function App() {
   return (
@@ -81,6 +83,8 @@ function App() {
             <Route path="article/edit/:id" element={<EditArticleForm />} />
             <Route path="video" element={<Videos />} />
             <Route path="video/edit/:id" element={<EditVideoForm />} />
+            <Route path="podcast" element={<Podcasts />} />
+            <Route path="podcast/edit/:id" element={<EditPodcastForm />} />
             <Route path="course" element={<Course />} />
             <Route path="course/edit/:id" element={<EditCourseForm />} />
             <Route path="settings" element={<Settings />} />
