@@ -47,6 +47,7 @@ const Header = () => {
         <Link to="/about">درباره ما</Link>
         <Link to="/courses">دوره ها</Link>
         <Link to="/videos">ویدئو ها</Link>
+        <Link to="/podcasts">پادکست ها</Link>
         <Link to="/articles">مقالات</Link>
         <Link to="/">خانه</Link>
       </div>

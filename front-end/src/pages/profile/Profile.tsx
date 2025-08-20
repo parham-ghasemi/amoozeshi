@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import UnauthorizedProfile from "../unauthorized/UnauthorizedProfile";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import PodcastCard from "@/components/cards/PodcastCard";
 
 const Profile = () => {
   const getUser = async () => {
@@ -54,7 +55,7 @@ const Profile = () => {
             <span className="font-semibold">شماره تلفن:</span> {user.phoneNumber}
           </p>
           <p className="text-gray-600">
-            <span className="font-semibold">نقش:</span> {user.role === 'admin'?'ادمین':'یوزر'}
+            <span className="font-semibold">نقش:</span> {user.role === 'admin' ? 'ادمین' : 'یوزر'}
           </p>
         </div>
 
@@ -134,6 +135,23 @@ const Profile = () => {
           </div>
         </div>
       )}
+
+      {/* Favorite Podcasts Section */}
+      {user.favoritePodcasts?.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4">
+            پادکست های مورد علاقه
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {
+              //@ts-ignore
+              user.favoritePodcasts.map((podcast) => (
+                <PodcastCard key={podcast.id} podcast={podcast} />
+              ))}
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

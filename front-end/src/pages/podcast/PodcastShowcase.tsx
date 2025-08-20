@@ -1,0 +1,269 @@
+import PodcastCard from "@/components/cards/PodcastCard";
+import { Heart, HeartCrack, SquareCheck, SquareX } from "lucide-react";
+import React, { useEffect, useRef } from "react";
+import { useParams } from "react-router-dom";
+import type { Podcast, PodcastShort } from "types/podcast";
+import Plyr from "plyr";
+import "plyr/dist/plyr.css";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import authAxios from "@/lib/authAxios";
+
+const fetchPodcast = async (id: string): Promise<Podcast> => {
+  const res = await fetch(`http://localhost:3000/podcast/${id}`);
+  const data = await res.json();
+  return data.podcast;
+};
+
+const fetchRelatedPodcast = async (id: string): Promise<PodcastShort> => {
+  const res = await fetch(`http://localhost:3000/podcast/short/${id}`);
+  const data = await res.json();
+  return data.podcastObject;
+};
+
+const getUser = async () => {
+  const token = localStorage.getItem("token");
+  if (!token) return false;
+  try {
+    const res = await authAxios.get(`/user/me`);
+    return res.data;
+  } catch {
+    return false;
+  }
+}
+
+const PodcastShowcase = () => {
+  const { id = "" } = useParams();
+  const queryClient = useQueryClient();
+  const playerContainerRef = useRef<HTMLDivElement | null>(null);
+  const plyrInstanceRef = useRef<Plyr | null>(null);
+
+  const {
+    data: podcast,
+    isLoading: loadingPodcast,
+    isError: errorPodcast,
+  } = useQuery({
+    queryKey: ["podcast", id],
+    queryFn: () => fetchPodcast(id),
+    enabled: !!id,
+  });
+
+  const {
+    data: relatedPodcasts,
+    isLoading: loadingRelated,
+  } = useQuery({
+    queryKey: ["relatedPodcasts", podcast?.related],
+    queryFn: async () => {
+      if (!podcast?.related?.length) return [];
+      return await Promise.all(podcast.related.map(fetchRelatedPodcast));
+    },
+    enabled: !!podcast?.related?.length,
+  });
+
+  const {
+    data: currentUser,
+  } = useQuery({
+    queryKey: ["get-user-w-jwt"],
+    queryFn: getUser,
+    enabled: !!localStorage.getItem("token"),
+  });
+  // @ts-ignore
+  const isFavorited = currentUser?.favoritePodcasts?.some(p => p._id === id);
+
+
+  const toggleFavoriteMutation = useMutation({
+    mutationFn: async () => {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`http://localhost:3000/user/favorite/podcast/${id}`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "خطا در افزودن پادکست به علاقه‌مندی‌ها");
+      return data;
+    },
+    onSuccess: () => {
+      // @ts-ignore
+      queryClient.invalidateQueries(['get-user-w-jwt']);
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "مشکلی در افزودن علاقه‌مندی پیش آمد");
+    },
+  });
+
+  // Plyr player setup for audio
+  useEffect(() => {
+    if (!podcast?.content || !playerContainerRef.current) return;
+
+    if (plyrInstanceRef.current) {
+      plyrInstanceRef.current.destroy();
+      plyrInstanceRef.current = null;
+    }
+
+    playerContainerRef.current.innerHTML = "";
+
+    const audioElement = document.createElement("audio");
+    audioElement.className = "plyr w-full h-auto max-h-[480px]";
+    audioElement.setAttribute("playsinline", "");
+    audioElement.setAttribute("controls", "");
+
+    const source = document.createElement("source");
+    source.src = podcast.content;
+    source.type = "audio/mp3"; // Adjust based on actual audio type, e.g., 'audio/mp3', 'audio/wav', etc.
+
+    audioElement.appendChild(source);
+    playerContainerRef.current.appendChild(audioElement);
+
+    const player = new Plyr(audioElement, {
+      controls: [
+        "play",
+        "progress",
+        "current-time",
+        "duration",
+        "mute",
+        "volume",
+        "settings",
+      ],
+      settings: ["speed"],
+      speed: { selected: 1, options: [0.5, 1, 1.25, 1.5, 2] },
+    });
+
+    plyrInstanceRef.current = player;
+
+    return () => {
+      player.destroy();
+      plyrInstanceRef.current = null;
+    };
+  }, [podcast?.content]);
+
+  if (loadingPodcast) return <div className="p-4 text-center text-sm">Loading...</div>;
+  if (errorPodcast || !podcast) return <div className="p-4 text-center text-sm">Podcast not found.</div>;
+
+  const longDesc = typeof podcast.longDesc === "string" ? JSON.parse(podcast.longDesc) : podcast.longDesc;
+
+  const renderEditorContent = (content: any) => {
+    if (!content || !content.blocks) return null;
+
+    return content.blocks.map((block: any, index: number) => {
+      switch (block.type) {
+        case "header":
+          const Tag = `h${Math.min(Math.max(block.data.level, 1), 6)}` as keyof React.JSX.IntrinsicElements;
+          return (
+            <Tag key={index} className="font-semibold text-gray-800 my-2 sm:my-4 text-lg sm:text-xl">
+              {block.data.text}
+            </Tag>
+          );
+        case "paragraph":
+          return (
+            <p key={index} className="text-gray-700 leading-7 my-1 sm:my-2 text-sm sm:text-base">
+              {block.data.text}
+            </p>
+          );
+        case "list":
+          if (block.data.style === "unordered") {
+            return (
+              <ul key={index} className="list-disc pr-4 my-1 space-y-1 text-sm sm:text-base text-gray-700">
+                {block.data.items.map((item: any, i: number) => (
+                  <li key={i} dangerouslySetInnerHTML={{ __html: item.content }} />
+                ))}
+              </ul>
+            );
+          } else if (block.data.style === "ordered") {
+            return (
+              <ol key={index} className="list-decimal pr-4 my-1 space-y-1 text-sm sm:text-base text-gray-700">
+                {block.data.items.map((item: any, i: number) => (
+                  <li key={i} dangerouslySetInnerHTML={{ __html: item.content }} />
+                ))}
+              </ol>
+            );
+          } else if (block.data.style === "checklist") {
+            return (
+              <ol key={index} className="pr-4 my-1 space-y-1 text-sm sm:text-base text-gray-700">
+                {block.data.items.map((item: any, i: number) => (
+                  <li key={i} className="flex items-start gap-2">
+                    {item.meta.checked ? (
+                      <SquareCheck className="text-green-500 mt-0.5 w-4 h-4" />
+                    ) : (
+                      <SquareX className="text-rose-600 mt-0.5 w-4 h-4" />
+                    )}
+                    <span dangerouslySetInnerHTML={{ __html: item.content }} />
+                  </li>
+                ))}
+              </ol>
+            );
+          }
+          break;
+        case "image":
+          return (
+            <div key={index} className="my-4 self-center w-full">
+              <img
+                src={block.data.file?.url}
+                alt={block.data.caption || "Image"}
+                className="rounded-lg w-full max-w-[90%] sm:max-w-[800px] mx-auto"
+              />
+              {block.data.caption && (
+                <p className="text-center text-xs text-gray-500 mt-1">{block.data.caption}</p>
+              )}
+            </div>
+          );
+        default:
+          return null;
+      }
+    });
+  };
+
+  return (
+    <div className="w-full max-w-[90%] lg:max-w-6xl mx-auto p-4 sm:p-6 space-y-6 flex items-center justify-center flex-col min-h-screen">
+      <div className="absolute top-0 left-0 right-0 opacity-20 -z-10">
+        <img src={podcast.thumbnail} alt="thumbnail" className="w-full h-auto object-cover" />
+        <div className="relative z-10 w-full h-full -translate-y-[50vh] sm:-translate-y-96">
+          <div className="bg-gradient-to-t from-[#f1f1f1] h-[50vh] sm:h-96 absolute top-0 left-0 right-0 z-[-1]" />
+        </div>
+      </div>
+      {currentUser &&
+        <button
+          onClick={() => toggleFavoriteMutation.mutate()}
+          className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-full shadow-md flex items-center gap-2 text-sm font-medium cursor-pointer ${isFavorited ? "bg-red-600 text-white hover:bg-red-800" : "bg-white text-red-600 border border-red-600 hover:bg-red-200"
+            }`}
+        >
+          {isFavorited ? <HeartCrack size={20} /> : <Heart size={20} fill="#dc2626" />}
+          <span>{isFavorited ? " حذف از علاقه‌مندی‌ها" : "️ افزودن به علاقه‌مندی‌ها"}</span>
+        </button>
+      }
+
+
+      <h1 className="max-w-[90%] sm:max-w-[600px] text-center text-2xl sm:text-3xl font-bold leading-[150%]">
+        {podcast.title}
+      </h1>
+
+      {podcast.content && (
+        <div className="w-full max-w-3xl rounded-xl overflow-hidden border border-gray-300 bg-black">
+          <div ref={playerContainerRef} />
+        </div>
+      )}
+
+      <div className="bg-gray-50 p-10 border border-gray-300 rounded-xl w-full flex flex-col" dir="rtl">
+        <h4 className="font-bold text-lg mb-3">توضیحات کوتاه:</h4>
+        <p>{podcast.shortDesc}</p>
+      </div>
+
+      <div className="bg-gray-50 p-10 border border-gray-300 rounded-xl w-full flex flex-col min-h-[300px]" dir="rtl">
+        <p className="text-2xl font-bold mb-5">در این پادکست:</p>
+        {renderEditorContent(longDesc)}
+      </div>
+
+      {podcast.related && relatedPodcasts?.length ? (
+        <div className="bg-gray-50 py-10 px-6 border border-gray-300 rounded-xl w-full flex flex-col" dir="rtl">
+          <h1 className="text-xl font-bold mb-8">پادکست‌های مشابه</h1>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {relatedPodcasts.map((related, i) => (
+              <PodcastCard key={`relatedPodcast-${i}`} podcast={related} />
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+};
+
+export default PodcastShowcase;

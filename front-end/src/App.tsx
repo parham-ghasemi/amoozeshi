@@ -37,6 +37,9 @@ import HomePage from "./pages/Home2"
 import HomePageSettings from "./Admin/components/HomeSettings"
 import Podcasts from "./Admin/Podcast"
 import EditPodcastForm from "./Admin/components/Articles/EditPodcastForm"
+import ShowPodcasts from "./pages/podcast/ShowPodcasts"
+import PodcastSearch from "./pages/podcast/PodcastSearch"
+import PodcastShowcase from "./pages/podcast/PodcastShowcase"
 
 function App() {
   return (
@@ -68,6 +71,11 @@ function App() {
             <Route path="/videos/search" element={<VideoSearch />} />
             <Route path="/videos-all" element={<AllVideos />} />
             <Route path="/video/:id" element={<VideoShowcase />} />
+
+            {/* Podcasts */}
+            <Route path="/podcasts" element={<ShowPodcasts />} />
+            <Route path="/podcasts/search" element={<PodcastSearch />} />
+            <Route path="/podcast/:id" element={<PodcastShowcase />} />
 
             <Route path="/profile" element={<Profile />} />
 

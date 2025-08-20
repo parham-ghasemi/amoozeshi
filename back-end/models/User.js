@@ -27,7 +27,11 @@ const UserSchema = new mongoose.Schema({
   favoriteArticles: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "Article"
-  }]
+  }],
+  favoritePodcasts: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Podcast"
+  }],
 });
 
 module.exports = mongoose.model('User', UserSchema);

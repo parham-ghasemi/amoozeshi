@@ -2,6 +2,7 @@ const User = require("../models/User");
 const Course = require("../models/Course");
 const Video = require("../models/Video");
 const Article = require("../models/Article");
+const Podcast = require("../models/Podcast");
 
 
 exports.getCurrentUser = async (req, res) => {
@@ -13,7 +14,8 @@ exports.getCurrentUser = async (req, res) => {
       .populate("favoriteCourses", "title thumbnail")
       .populate("joinedCourses", "title thumbnail")
       .populate("favoriteVideos", "title thumbnail visits createdAt")
-      .populate("favoriteArticles", "title thumbnail");
+      .populate("favoriteArticles", "title thumbnail")
+      .populate("favoritePodcasts", "title thumbnail listens createdAt");
 
     if (!user) {
       return res.status(404).json({ message: "User not found." });
@@ -36,6 +38,7 @@ const toggleFavorite = async (req, res, model, field) => {
     if (!exists) return res.status(404).json({ message: `${model.modelName} not found` });
 
     const alreadyFavorite = user[field].includes(itemId);
+
     if (alreadyFavorite) {
       user[field] = user[field].filter(id => id.toString() !== itemId);
     } else {
@@ -43,9 +46,9 @@ const toggleFavorite = async (req, res, model, field) => {
     }
 
     await user.save();
-    res.status(200).json({ 
+    res.status(200).json({
       message: `${model.modelName} ${alreadyFavorite ? 'removed from' : 'added to'} favorites`,
-      [field]: user[field] 
+      [field]: user[field]
     });
   } catch (err) {
     console.error(err);
@@ -61,3 +64,6 @@ exports.toggleFavoriteVideo = (req, res) =>
 
 exports.toggleFavoriteArticle = (req, res) =>
   toggleFavorite(req, res, Article, "favoriteArticles");
+
+exports.toggleFavoritePodcast = (req, res) =>
+  toggleFavorite(req, res, Podcast, "favoritePodcasts");
