@@ -21,47 +21,48 @@ mongoose.connect(process.env.MONGO_URI, {
 
 // Routes
 const authRoutes = require('./routes/auth.routes');
-app.use('/auth', authRoutes);
-
 const articleRoutes = require('./routes/article.routes');
-app.use('/', articleRoutes);
-
 const videoRoutes = require('./routes/video.routes');
-app.use('/', videoRoutes);
-
 const podcastRoutes = require('./routes/podcast.routes');
-app.use('/', podcastRoutes);
-
 const courseRoutes = require('./routes/course.routes');
-app.use('/', courseRoutes);
-
 const visitRoutes = require('./routes/visit.routes');
-app.use('/', visitRoutes);
-
-const categoryRoutes = require('./routes/category.routes')
-app.use('/', categoryRoutes);
-
-const userRoutes = require('./routes/user.routes')
-app.use('/', userRoutes);
-
+const categoryRoutes = require('./routes/category.routes');
+const userRoutes = require('./routes/user.routes');
 const homePageRoutes = require('./routes/homepage.routes');
-app.use('/', homePageRoutes);
+
+const routers = [
+  { path: '/auth', router: authRoutes },
+  { path: '/', router: articleRoutes },
+  { path: '/', router: videoRoutes },
+  { path: '/', router: podcastRoutes },
+  { path: '/', router: courseRoutes },
+  { path: '/', router: visitRoutes },
+  { path: '/', router: categoryRoutes },
+  { path: '/', router: userRoutes },
+  { path: '/', router: homePageRoutes },
+];
+
+// Validate and use routers
+routers.forEach(r => {
+  if (!r.router || typeof r.router !== 'function' || !r.router.stack) {
+    console.error('Invalid router detected for path', r.path, r.router);
+  } else {
+    app.use(r.path, r.router);
+  }
+});
 
 // Serve React frontend
 app.use(express.static(path.join(__dirname, "client/dist")));
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "client/build", "index.html"));
+  res.sendFile(path.join(__dirname, "client/dist", "index.html"));
 });
-
 
 // Serve /uploads folder
 const uploadPath = path.join(__dirname, 'uploads');
 app.use('/uploads', express.static(uploadPath));
 if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath);
 
-
-
 // Start server
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Server is running at http://0.0.0.0:${port}`);
 });
