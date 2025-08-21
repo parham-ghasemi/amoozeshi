@@ -21,7 +21,7 @@ type VisitStats = {
   week: number;
   month: number;
   total: number;
-  chartData: VisitDataPoint[];
+  chartData?: VisitDataPoint[]; // Make chartData optional to handle undefined case
 };
 
 const filterDataByRange = (data: VisitDataPoint[], range: string): VisitDataPoint[] => {
@@ -84,7 +84,8 @@ const AdminDashboard: React.FC = () => {
     const fetchStats = async () => {
       try {
         const res = await authAxios.get<VisitStats>('/api/admin/visits');
-        setStats(res.data);
+        // Ensure chartData is an array, default to empty array if undefined
+        setStats({ ...res.data, chartData: res.data.chartData || [] });
       } catch (err) {
         console.error('خطا در دریافت آمار:', err);
         setError('خطا در بارگذاری آمار');
@@ -143,7 +144,11 @@ const AdminDashboard: React.FC = () => {
     return <p>{error || 'آماری موجود نیست.'}</p>;
   }
 
-  const rawFiltered = filterDataByRange(stats.chartData, range);
+  // Ensure chartData is an array before filtering
+  const rawFiltered = Array.isArray(stats.chartData)
+    ? filterDataByRange(stats.chartData, range)
+    : [];
+
   const filteredData =
     range === "year" || range === "all"
       ? groupByMonthWithYear(rawFiltered)
@@ -159,7 +164,11 @@ const AdminDashboard: React.FC = () => {
       </div>
 
       <div className="w-full">
-        <Chart data={filteredData} range={range} setRange={setRange} />
+        {filteredData.length > 0 ? (
+          <Chart data={filteredData} range={range} setRange={setRange} />
+        ) : (
+          <p>داده‌ای برای نمایش نمودار موجود نیست.</p>
+        )}
       </div>
 
       <div className="flex flex-row-reverse gap-11 w-full">
