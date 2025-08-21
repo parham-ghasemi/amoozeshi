@@ -7,7 +7,7 @@ import axios from "axios";
 const Layout = () => {
   const TrackVisit = () => {
     useEffect(() => {
-      axios.post('http://localhost:3000/api/track').catch((err) => {
+      axios.post('/api/track').catch((err) => {
         console.error('Visit tracking failed:', err);
       });
     }, []);

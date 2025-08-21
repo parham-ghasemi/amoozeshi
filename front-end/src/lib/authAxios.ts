@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const authAxios = axios.create({
-  baseURL: "http://localhost:3000",
+  baseURL: "",
 });
 
 authAxios.interceptors.request.use((config) => {

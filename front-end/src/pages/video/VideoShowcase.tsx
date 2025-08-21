@@ -10,13 +10,13 @@ import { toast } from "sonner";
 import authAxios from "@/lib/authAxios";
 
 const fetchVideo = async (id: string): Promise<Video> => {
-  const res = await fetch(`http://localhost:3000/api/video/${id}`);
+  const res = await fetch(`/api/video/${id}`);
   const data = await res.json();
   return data.video;
 };
 
 const fetchRelatedVideo = async (id: string): Promise<VideoShort> => {
-  const res = await fetch(`http://localhost:3000/api/video/short/${id}`);
+  const res = await fetch(`/api/video/short/${id}`);
   const data = await res.json();
   return data.videoObject;
 };
@@ -74,7 +74,7 @@ const VideoShowcase = () => {
   const toggleFavoriteMutation = useMutation({
     mutationFn: async () => {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:3000/api/user/favorite/video/${id}`, {
+      const res = await fetch(`/api/user/favorite/video/${id}`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });

@@ -11,11 +11,11 @@ interface Category {
   name: string
 }
 
-const fetchMostListened = () => axios.get('http://localhost:3000/api/podcasts/most-listened').then(res => res.data)
-const fetchNewest = () => axios.get('http://localhost:3000/api/podcasts/newest').then(res => res.data)
-const fetchCategories = () => axios.get('http://localhost:3000/api/categories').then(res => res.data.categories)
-const fetchCategoryPodcasts = (id: string) => axios.get(`http://localhost:3000/api/podcasts/category/${id}`).then(res => res.data)
-const fetchAllPodcasts = () => axios.get('http://localhost:3000/api/podcasts').then(res => res.data)
+const fetchMostListened = () => axios.get('/api/podcasts/most-listened').then(res => res.data)
+const fetchNewest = () => axios.get('/api/podcasts/newest').then(res => res.data)
+const fetchCategories = () => axios.get('/api/categories').then(res => res.data.categories)
+const fetchCategoryPodcasts = (id: string) => axios.get(`/api/podcasts/category/${id}`).then(res => res.data)
+const fetchAllPodcasts = () => axios.get('/api/podcasts').then(res => res.data)
 
 const ShowPodcasts = () => {
   const [expandedSection, setExpandedSection] = useState<null | 'listened' | 'newest' | 'category'>(null)

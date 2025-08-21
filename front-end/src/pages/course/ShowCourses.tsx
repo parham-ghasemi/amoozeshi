@@ -13,19 +13,19 @@ interface Category {
 
 // Fetchers
 const fetchMostPopular = async (): Promise<CourseShort[]> =>
-  (await fetch('http://localhost:3000/api/courses/most-popular')).json();
+  (await fetch('/api/courses/most-popular')).json();
 
 const fetchNewest = async (): Promise<CourseShort[]> =>
-  (await fetch('http://localhost:3000/api/courses/newest')).json();
+  (await fetch('/api/courses/newest')).json();
 
 const fetchCategories = async (): Promise<Category[]> =>
-  (await fetch('http://localhost:3000/api/categories')).json().then(res => res.categories);
+  (await fetch('/api/categories')).json().then(res => res.categories);
 
 const fetchCategoryCourses = async (categoryId: string): Promise<CourseShort[]> =>
-  (await fetch(`http://localhost:3000/api/courses/category/${categoryId}`)).json();
+  (await fetch(`/api/courses/category/${categoryId}`)).json();
 
 const fetchAllCourses = async (): Promise<CourseShort[]> =>
-  (await fetch('http://localhost:3000/api/courses')).json();
+  (await fetch('/api/courses')).json();
 
 const ShowCourses = () => {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);

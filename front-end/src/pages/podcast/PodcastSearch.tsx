@@ -6,7 +6,7 @@ import PodcastCard from '@/components/cards/PodcastCard';
 import PodcastSearchBox from './search/PodcastSearchBox';
 
 const fetchSearchResults = async (query: string): Promise<PodcastShort[]> => {
-  const res = await axios.get(`http://localhost:3000/api/podcasts/search?query=${encodeURIComponent(query)}`);
+  const res = await axios.get(`/api/podcasts/search?query=${encodeURIComponent(query)}`);
   return res.data;
 };
 

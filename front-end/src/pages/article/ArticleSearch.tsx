@@ -6,7 +6,7 @@ import ArticleSearchBox from './article-search/ArticleSearchBox';
 import ArticleCard from '@/components/cards/ArticleCard';
 
 const fetchSearchResults = async (query: string): Promise<ArticleShort[]> => {
-  const res = await axios.get(`http://localhost:3000/api/articles/search?query=${encodeURIComponent(query)}`);
+  const res = await axios.get(`/api/articles/search?query=${encodeURIComponent(query)}`);
   return res.data;
 };
 

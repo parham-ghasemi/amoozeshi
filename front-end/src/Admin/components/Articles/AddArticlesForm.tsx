@@ -55,7 +55,7 @@ export default function AddArticleForm() {
     ejInstance.current = editor;
 
     axios
-      .get('http://localhost:3000/api/articles')
+      .get('/api/articles')
       .then((res) => setAllArticles(res.data))
       .catch((err) => console.error('دریافت مقالات ناموفق بود', err));
 

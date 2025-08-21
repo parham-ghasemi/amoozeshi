@@ -33,7 +33,7 @@ const CategoryManager: React.FC = () => {
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/categories");
+      const res = await axios.get("/api/categories");
       setCategories(res.data.categories);
     } catch (err) {
       console.error("خطا در دریافت دسته‌بندی‌ها", err);
@@ -44,7 +44,7 @@ const CategoryManager: React.FC = () => {
     if (!newCategory.trim()) return;
     setLoading(true);
     try {
-      await authAxios.post("http://localhost:3000/api/categories", { name: newCategory });
+      await authAxios.post("/api/categories", { name: newCategory });
       setNewCategory("");
       fetchCategories();
     } catch (err) {
@@ -57,7 +57,7 @@ const CategoryManager: React.FC = () => {
   const handleDeleteCategory = async () => {
     if (!selectedToDelete) return;
     try {
-      await authAxios.delete(`http://localhost:3000/api/categories/${selectedToDelete._id}`);
+      await authAxios.delete(`/api/categories/${selectedToDelete._id}`);
       fetchCategories();
     } catch (err) {
       console.error("خطا در حذف دسته‌بندی", err);

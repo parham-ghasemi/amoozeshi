@@ -6,7 +6,7 @@ import VideoCard from '@/components/cards/VideoCard';
 import VideoSearchBox from './video-search/VideoSearchBox';
 
 const fetchSearchResults = async (query: string): Promise<VideoShort[]> => {
-  const res = await axios.get(`http://localhost:3000/api/videos/search?query=${encodeURIComponent(query)}`);
+  const res = await axios.get(`/api/videos/search?query=${encodeURIComponent(query)}`);
   return res.data;
 };
 

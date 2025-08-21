@@ -159,7 +159,7 @@ export default function AddCourseForm() {
               async uploadByFile(file: File) {
                 const formData = new FormData();
                 formData.append('image', file);
-                const res = await authAxios.post('http://localhost:3000/api/upload', formData, {
+                const res = await authAxios.post('/api/upload', formData, {
                   headers: { 'Content-Type': 'multipart/form-data' },
                 });
                 return res.data;
@@ -176,19 +176,19 @@ export default function AddCourseForm() {
 
     // Fetch courses
     axios
-      .get('http://localhost:3000/api/courses')
+      .get('/api/courses')
       .then((res) => setAllCourses(res.data))
       .catch((err) => console.error('خطا در دریافت دوره‌ها', err));
 
     // Fetch videos
     axios
-      .get('http://localhost:3000/api/videos')
+      .get('/api/videos')
       .then((res) => setAllVideos(res.data))
       .catch((err) => console.error('خطا در دریافت ویدیوها', err));
 
     // Fetch articles
     axios
-      .get('http://localhost:3000/api/articles')
+      .get('/api/articles')
       .then((res) => setAllArticles(res.data))
       .catch((err) => console.error('خطا در دریافت مقالات', err));
 
@@ -203,7 +203,7 @@ export default function AddCourseForm() {
     formData.append('image', file);
     setIsUploadingThumb(true);
     try {
-      const res = await authAxios.post('http://localhost:3000/api/upload', formData, {
+      const res = await authAxios.post('/api/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       if (res.data?.success) setThumbnail(res.data.file.url);
@@ -224,7 +224,7 @@ export default function AddCourseForm() {
     }
 
     try {
-      await authAxios.post('http://localhost:3000/api/courses', {
+      await authAxios.post('/api/courses', {
         title,
         shortDesc,
         thumbnail,
