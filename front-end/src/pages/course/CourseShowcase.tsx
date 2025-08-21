@@ -8,7 +8,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Course } from "types/course";
 import useRenderEditorContent from "@/hooks/useRenderEditorContent";
 import authAxios from "@/lib/authAxios";
-import {toast} from "sonner";
+import { toast } from "sonner";
 
 const levelMap = {
   beginner: "مبتدی",
@@ -17,7 +17,7 @@ const levelMap = {
 };
 
 const fetchCourse = async (id: string) => {
-  const res = await fetch(`http://localhost:3000/course/${id}`);
+  const res = await fetch(`http://localhost:3000/api/course/${id}`);
   const data = await res.json();
   return data.course as Course;
 };
@@ -27,7 +27,7 @@ const checkIsJoined = async (id: string): Promise<boolean> => {
   if (!token) return false;
 
   try {
-    const res = await axios.get(`http://localhost:3000/courses/is-joined/${id}`, {
+    const res = await axios.get(`http://localhost:3000/api/courses/is-joined/${id}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     return res.data.isJoined;
@@ -80,7 +80,7 @@ const CourseShowcase = () => {
   const toggleFavoriteMutation = useMutation({
     mutationFn: async () => {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:3000/user/favorite/course/${id}`, {
+      const res = await fetch(`http://localhost:3000/api/user/favorite/course/${id}`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -102,7 +102,7 @@ const CourseShowcase = () => {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No token found");
 
-      await axios.post(`http://localhost:3000/courses/join/${course?._id}`, {}, {
+      await axios.post(`http://localhost:3000/api/courses/join/${course?._id}`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
     },

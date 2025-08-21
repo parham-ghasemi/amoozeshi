@@ -39,7 +39,7 @@ export default function AddVideoForm() {
                 const formData = new FormData();
                 formData.append('image', file);
                 try {
-                  const res = await authAxios.post('http://localhost:3000/upload', formData, {
+                  const res = await authAxios.post('http://localhost:3000/api/upload', formData, {
                     headers: { 'Content-Type': 'multipart/form-data' },
                   });
                   return res.data;
@@ -58,7 +58,7 @@ export default function AddVideoForm() {
     ejInstance.current = editor;
 
     axios
-      .get('http://localhost:3000/videos') // yes, typo in backend route
+      .get('http://localhost:3000/api/videos') // yes, typo in backend route
       .then((res) => setAllVideos(res.data))
       .catch((err) => console.error('Failed to fetch videos', err));
 
@@ -73,7 +73,7 @@ export default function AddVideoForm() {
     formData.append('image', file);
     setIsUploadingThumb(true);
     try {
-      const res = await authAxios.post('http://localhost:3000/upload', formData, {
+      const res = await authAxios.post('http://localhost:3000/api/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       if (res.data?.success) {
@@ -105,7 +105,7 @@ export default function AddVideoForm() {
 
     try {
       setIsUploadingVideo(true);
-      await authAxios.post('http://localhost:3000/videos', formData, {
+      await authAxios.post('http://localhost:3000/api/videos', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       alert('Video uploaded!');

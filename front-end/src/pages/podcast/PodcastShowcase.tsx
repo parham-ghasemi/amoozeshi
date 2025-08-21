@@ -10,13 +10,13 @@ import { toast } from "sonner";
 import authAxios from "@/lib/authAxios";
 
 const fetchPodcast = async (id: string): Promise<Podcast> => {
-  const res = await fetch(`http://localhost:3000/podcast/${id}`);
+  const res = await fetch(`http://localhost:3000/api/podcast/${id}`);
   const data = await res.json();
   return data.podcast;
 };
 
 const fetchRelatedPodcast = async (id: string): Promise<PodcastShort> => {
-  const res = await fetch(`http://localhost:3000/podcast/short/${id}`);
+  const res = await fetch(`http://localhost:3000/api/podcast/short/${id}`);
   const data = await res.json();
   return data.podcastObject;
 };
@@ -74,7 +74,7 @@ const PodcastShowcase = () => {
   const toggleFavoriteMutation = useMutation({
     mutationFn: async () => {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:3000/user/favorite/podcast/${id}`, {
+      const res = await fetch(`http://localhost:3000/api/user/favorite/podcast/${id}`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });

@@ -11,11 +11,11 @@ interface Category {
   name: string;
 }
 
-const fetchMostViewed = () => axios.get("http://localhost:3000/articles/most-viewed").then(res => res.data);
-const fetchNewest = () => axios.get("http://localhost:3000/articles/newest").then(res => res.data);
-const fetchCategories = () => axios.get("http://localhost:3000/categories").then(res => res.data.categories);
-const fetchArticlesByCategory = (id: string) => axios.get(`http://localhost:3000/articles/category/${id}`).then(res => res.data);
-const fetchAllArticles = () => axios.get("http://localhost:3000/articles").then(res => res.data);
+const fetchMostViewed = () => axios.get("http://localhost:3000/api/articles/most-viewed").then(res => res.data);
+const fetchNewest = () => axios.get("http://localhost:3000/api/articles/newest").then(res => res.data);
+const fetchCategories = () => axios.get("http://localhost:3000/api/categories").then(res => res.data.categories);
+const fetchArticlesByCategory = (id: string) => axios.get(`http://localhost:3000/api/articles/category/${id}`).then(res => res.data);
+const fetchAllArticles = () => axios.get("http://localhost:3000/api/articles").then(res => res.data);
 
 const ShowArticles = () => {
   const [expandedSection, setExpandedSection] = useState<null | "viewed" | "newest" | "category">(null);
@@ -147,7 +147,7 @@ const ShowArticles = () => {
               articles={allArticles}
               loading={loadingAllArticles}
               showAll={true}
-              onShowAll={() => {}}
+              onShowAll={() => { }}
               onBack={() => setShowAllArticles(false)}
             />
           )}

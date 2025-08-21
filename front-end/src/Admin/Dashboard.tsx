@@ -57,25 +57,25 @@ const AdminDashboard: React.FC = () => {
 
   useEffect(() => {
     authAxios
-      .get<VisitStats>('http://localhost:3000/admin/visits')
+      .get<VisitStats>('http://localhost:3000/api/admin/visits')
       .then((res) => {
         setStats(res.data);
       })
       .catch((err) => {
         console.error('خطا در دریافت آمار:', err);
       }).then(() => {
-        axios.get('http://localhost:3000/articles/most-viewed').then((res) => {
+        axios.get('http://localhost:3000/api/articles/most-viewed').then((res) => {
           setMostViewedArticles(res.data)
         }).catch((err) => {
           console.error('خطا در دریافت مقالات محبوب', err);
         }).then(() => {
-          axios.get('http://localhost:3000/videos/most-viewed').then((res) => {
+          axios.get('http://localhost:3000/api/videos/most-viewed').then((res) => {
             setMostViewedVideos(res.data)
           }).catch((err) => {
             console.error('خطا در دریافت ویدئو های محبوب', err);
           })
         }).then(() => {
-          axios.get('http://localhost:3000/courses/most-popular').then((res) => {
+          axios.get('http://localhost:3000/api/courses/most-popular').then((res) => {
             setMostViewedCourses(res.data);
           }).catch((err) => {
             console.error('خطا در دریافت دوره های محبوب', err);

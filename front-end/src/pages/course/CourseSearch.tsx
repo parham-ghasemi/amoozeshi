@@ -7,7 +7,7 @@ import { useQuery } from '@tanstack/react-query'
 
 const fetchCourseSearchResults = async (query: string | null) => {
   if (!query) return []
-  const response = await axios.get(`http://localhost:3000/courses/search?query=${encodeURIComponent(query)}`)
+  const response = await axios.get(`http://localhost:3000/api/courses/search?query=${encodeURIComponent(query)}`)
   return response.data as CourseShort[]
 }
 

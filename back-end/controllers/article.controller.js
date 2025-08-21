@@ -29,7 +29,7 @@ exports.uploadImage = (req, res) => {
     return res.status(400).json({ success: 0, message: 'No file uploaded' });
   }
 
-  const fileUrl = `http://localhost:3000/uploads/images/${req.file.filename}`;
+  const fileUrl = `http://localhost:3000/api/uploads/images/${req.file.filename}`;
 
   res.status(200).json({
     success: 1,

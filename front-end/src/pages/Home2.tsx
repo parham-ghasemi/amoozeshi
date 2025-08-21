@@ -168,8 +168,8 @@ interface HomePageData {
 }
 
 
-const fetchMostViewed = (): Promise<ArticleShort[]> => axios.get("http://localhost:3000/articles/most-viewed").then(res => res.data);
-const fetchHomePage = (): Promise<HomePageData> => axios.get("http://localhost:3000/homepage").then(res => res.data);
+const fetchMostViewed = (): Promise<ArticleShort[]> => axios.get("http://localhost:3000/api/articles/most-viewed").then(res => res.data);
+const fetchHomePage = (): Promise<HomePageData> => axios.get("http://localhost:3000/api/homepage").then(res => res.data);
 
 export default function HomePage() {
   const navigator = useNavigate();

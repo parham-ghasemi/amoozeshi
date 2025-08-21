@@ -51,7 +51,7 @@ exports.uploadVideoThumbnail = imageUpload.single('image');
 exports.uploadImage = (req, res) => {
   if (!req.file) return res.status(400).json({ success: 0, message: 'No file uploaded' });
 
-  const fileUrl = `http://localhost:3000/uploads/images/${req.file.filename}`;
+  const fileUrl = `http://localhost:3000/api/uploads/images/${req.file.filename}`;
   res.status(200).json({ success: 1, file: { url: fileUrl } });
 };
 
@@ -69,7 +69,7 @@ exports.uploadVideo = async (req, res) => {
       return res.status(400).json({ message: 'Invalid category ID' });
     }
 
-    const videoUrl = `http://localhost:3000/uploads/videos/${req.file.filename}`;
+    const videoUrl = `http://localhost:3000/api/uploads/videos/${req.file.filename}`;
     let parsedRelated = [];
     try {
       parsedRelated = Array.isArray(related)
@@ -232,7 +232,7 @@ exports.editVideo = async (req, res) => {
 
     // Update video file if a new one is uploaded
     if (req.file) {
-      const videoUrl = `http://localhost:3000/uploads/videos/${req.file.filename}`;
+      const videoUrl = `http://localhost:3000/api/uploads/videos/${req.file.filename}`;
       existingVideo.content = videoUrl;
     }
 

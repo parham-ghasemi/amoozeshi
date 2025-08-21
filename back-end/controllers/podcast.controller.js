@@ -51,7 +51,7 @@ exports.uploadPodcastThumbnail = imageUpload.single('image');
 exports.uploadImage = (req, res) => {
   if (!req.file) return res.status(400).json({ success: 0, message: 'No file uploaded' });
 
-  const fileUrl = `http://localhost:3000/uploads/images/${req.file.filename}`;
+  const fileUrl = `http://localhost:3000/api/uploads/images/${req.file.filename}`;
   res.status(200).json({ success: 1, file: { url: fileUrl } });
 };
 
@@ -69,7 +69,7 @@ exports.uploadPodcast = async (req, res) => {
       return res.status(400).json({ message: 'Invalid category ID' });
     }
 
-    const audioUrl = `http://localhost:3000/uploads/podcasts/${req.file.filename}`;
+    const audioUrl = `http://localhost:3000/api/uploads/podcasts/${req.file.filename}`;
     let parsedRelated = [];
     try {
       parsedRelated = Array.isArray(related)
@@ -232,7 +232,7 @@ exports.editPodcast = async (req, res) => {
 
     // Update audio file if a new one is uploaded
     if (req.file) {
-      const audioUrl = `http://localhost:3000/uploads/podcasts/${req.file.filename}`;
+      const audioUrl = `http://localhost:3000/api/uploads/podcasts/${req.file.filename}`;
       existingPodcast.content = audioUrl;
     }
 

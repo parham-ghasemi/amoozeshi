@@ -39,7 +39,7 @@ export default function AddPodcastForm() {
                 const formData = new FormData();
                 formData.append('image', file);
                 try {
-                  const res = await authAxios.post('http://localhost:3000/podcasts/upload', formData, {
+                  const res = await authAxios.post('http://localhost:3000/api/podcasts/upload', formData, {
                     headers: { 'Content-Type': 'multipart/form-data' },
                   });
                   return res.data;
@@ -58,7 +58,7 @@ export default function AddPodcastForm() {
     ejInstance.current = editor;
 
     axios
-      .get('http://localhost:3000/podcasts')
+      .get('http://localhost:3000/api/podcasts')
       .then((res) => setAllPodcasts(res.data))
       .catch((err) => console.error('Failed to fetch podcasts', err));
 
@@ -73,7 +73,7 @@ export default function AddPodcastForm() {
     formData.append('image', file);
     setIsUploadingThumb(true);
     try {
-      const res = await authAxios.post('http://localhost:3000/podcasts/upload', formData, {
+      const res = await authAxios.post('http://localhost:3000/api/podcasts/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       if (res.data?.success) {
@@ -105,7 +105,7 @@ export default function AddPodcastForm() {
 
     try {
       setIsUploadingAudio(true);
-      await authAxios.post('http://localhost:3000/podcasts', formData, {
+      await authAxios.post('http://localhost:3000/api/podcasts', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       alert('Podcast uploaded!');

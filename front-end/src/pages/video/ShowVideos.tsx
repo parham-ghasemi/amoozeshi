@@ -11,11 +11,11 @@ interface Category {
   name: string
 }
 
-const fetchMostViewed = () => axios.get('http://localhost:3000/videos/most-viewed').then(res => res.data)
-const fetchNewest = () => axios.get('http://localhost:3000/videos/newest').then(res => res.data)
-const fetchCategories = () => axios.get('http://localhost:3000/categories').then(res => res.data.categories)
-const fetchCategoryVideos = (id: string) => axios.get(`http://localhost:3000/videos/category/${id}`).then(res => res.data)
-const fetchAllVideos = () => axios.get('http://localhost:3000/videos').then(res => res.data)
+const fetchMostViewed = () => axios.get('http://localhost:3000/api/videos/most-viewed').then(res => res.data)
+const fetchNewest = () => axios.get('http://localhost:3000/api/videos/newest').then(res => res.data)
+const fetchCategories = () => axios.get('http://localhost:3000/api/categories').then(res => res.data.categories)
+const fetchCategoryVideos = (id: string) => axios.get(`http://localhost:3000/api/videos/category/${id}`).then(res => res.data)
+const fetchAllVideos = () => axios.get('http://localhost:3000/api/videos').then(res => res.data)
 
 const ShowVideos = () => {
   const [expandedSection, setExpandedSection] = useState<null | 'viewed' | 'newest' | 'category'>(null)

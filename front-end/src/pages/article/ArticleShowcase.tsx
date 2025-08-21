@@ -4,13 +4,13 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ArticleShort, Article } from "types/article";
-import {toast} from "sonner";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import authAxios from "@/lib/authAxios";
 
 const fetchArticle = async (id: string): Promise<Article> => {
-  const res = await fetch(`http://localhost:3000/article/${id}`);
+  const res = await fetch(`http://localhost:3000/api/article/${id}`);
   const data = await res.json();
   return data.article;
 };
@@ -18,7 +18,7 @@ const fetchArticle = async (id: string): Promise<Article> => {
 const fetchRelatedArticles = async (relatedIds: string[]): Promise<ArticleShort[]> => {
   const articles = await Promise.all(
     relatedIds.map(async (relatedId) => {
-      const res = await fetch(`http://localhost:3000/articles/short/${relatedId}`);
+      const res = await fetch(`http://localhost:3000/api/articles/short/${relatedId}`);
       const data = await res.json();
       return data.articleObject;
     })
@@ -64,7 +64,7 @@ const ArticleShowcase = () => {
   const toggleFavoriteMutation = useMutation({
     mutationFn: async () => {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:3000/user/favorite/article/${id}`, {
+      const res = await fetch(`http://localhost:3000/api/user/favorite/article/${id}`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
