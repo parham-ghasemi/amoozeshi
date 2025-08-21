@@ -51,11 +51,13 @@ routers.forEach(r => {
   }
 });
 
-// Serve React frontend
-app.use(express.static(path.join(__dirname, "client/dist")));
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "client/dist", "index.html"));
+// Serve React frontend for unknown routes
+app.use(express.static(path.join(__dirname, "../front-end/dist")));
+
+app.get(/^\/(?!uploads\/).*/, (req, res) => {
+  res.sendFile(path.join(__dirname, "../front-end/dist", "index.html"));
 });
+
 
 // Serve /uploads folder
 const uploadPath = path.join(__dirname, 'uploads');
