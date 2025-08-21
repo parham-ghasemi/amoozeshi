@@ -3,7 +3,6 @@ import StatCard from './components/dashboard/StatCard';
 import axios from 'axios';
 import { Chart } from './components/dashboard/Chart';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { ChevronLeft } from 'lucide-react';
 import type { ArticleShort } from 'types/article';
 import type { CourseShort } from 'types/course';
 import type { VideoShort } from 'types/video';
@@ -47,68 +46,102 @@ const filterDataByRange = (data: VisitDataPoint[], range: string): VisitDataPoin
   });
 };
 
+const groupByMonthWithYear = (data: VisitDataPoint[]) => {
+  const map = new Map<string, number>();
+
+  data.forEach(({ _id, count }) => {
+    const d = new Date(_id);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    map.set(key, (map.get(key) || 0) + count);
+  });
+
+  return Array.from(map.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([key, count]) => {
+      const [year, month] = key.split("-");
+      const date = new Date(Number(year), Number(month) - 1);
+      const label = date.toLocaleDateString("fa-IR", {
+        month: "short",
+        year: "2-digit",
+      });
+      return { _id: label, count };
+    });
+};
+
 const AdminDashboard: React.FC = () => {
   const [stats, setStats] = useState<VisitStats | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loadingStats, setLoadingStats] = useState(true);
+  const [loadingArticles, setLoadingArticles] = useState(true);
+  const [loadingVideos, setLoadingVideos] = useState(true);
+  const [loadingCourses, setLoadingCourses] = useState(true);
   const [range, setRange] = useState("week");
   const [mostViewedArticles, setMostViewedArticles] = useState<ArticleShort[]>([]);
   const [mostViewedVideos, setMostViewedVideos] = useState<VideoShort[]>([]);
   const [mostViewedCourses, setMostViewedCourses] = useState<CourseShort[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    authAxios
-      .get<VisitStats>('/api/admin/visits')
-      .then((res) => {
+    const fetchStats = async () => {
+      try {
+        const res = await authAxios.get<VisitStats>('/api/admin/visits');
         setStats(res.data);
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error('خطا در دریافت آمار:', err);
-      }).then(() => {
-        axios.get('/api/articles/most-viewed').then((res) => {
-          setMostViewedArticles(res.data)
-        }).catch((err) => {
-          console.error('خطا در دریافت مقالات محبوب', err);
-        }).then(() => {
-          axios.get('/api/videos/most-viewed').then((res) => {
-            setMostViewedVideos(res.data)
-          }).catch((err) => {
-            console.error('خطا در دریافت ویدئو های محبوب', err);
-          })
-        }).then(() => {
-          axios.get('/api/courses/most-popular').then((res) => {
-            setMostViewedCourses(res.data);
-          }).catch((err) => {
-            console.error('خطا در دریافت دوره های محبوب', err);
-          })
-        })
-      }).finally(() => setLoading(false));
+        setError('خطا در بارگذاری آمار');
+      } finally {
+        setLoadingStats(false);
+      }
+    };
 
+    const fetchArticles = async () => {
+      try {
+        const res = await axios.get('/api/articles/most-viewed');
+        setMostViewedArticles(res.data || []);
+      } catch (err) {
+        console.error('خطا در دریافت مقالات محبوب:', err);
+        setError('خطا در بارگذاری مقالات');
+      } finally {
+        setLoadingArticles(false);
+      }
+    };
+
+    const fetchVideos = async () => {
+      try {
+        const res = await axios.get('/api/videos/most-viewed');
+        setMostViewedVideos(res.data || []);
+      } catch (err) {
+        console.error('خطا در دریافت ویدئوهای محبوب:', err);
+        setError('خطا در بارگذاری ویدئوها');
+      } finally {
+        setLoadingVideos(false);
+      }
+    };
+
+    const fetchCourses = async () => {
+      try {
+        const res = await axios.get('/api/courses/most-popular');
+        setMostViewedCourses(res.data || []);
+      } catch (err) {
+        console.error('خطا در دریافت دوره‌های محبوب:', err);
+        setError('خطا در بارگذاری دوره‌ها');
+      } finally {
+        setLoadingCourses(false);
+      }
+    };
+
+    fetchStats();
+    fetchArticles();
+    fetchVideos();
+    fetchCourses();
   }, []);
 
-  const groupByMonthWithYear = (data: VisitDataPoint[]) => {
-    const map = new Map<string, number>();
+  if (loadingStats || loadingArticles || loadingVideos || loadingCourses) {
+    return <p>در حال بارگذاری...</p>;
+  }
 
-    data.forEach(({ _id, count }) => {
-      const d = new Date(_id);
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-      map.set(key, (map.get(key) || 0) + count);
-    });
-
-    return Array.from(map.entries())
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([key, count]) => {
-        const [year, month] = key.split("-");
-        const date = new Date(Number(year), Number(month) - 1);
-        const label = date.toLocaleDateString("fa-IR", {
-          month: "short",
-          year: "2-digit",
-        }); // e.g. تیر ۰۳
-        return { _id: label, count };
-      });
-  };
-
-  if (loading) return <p>در حال بارگذاری...</p>;
-  if (!stats) return <p>آماری موجود نیست.</p>;
+  if (error || !stats) {
+    return <p>{error || 'آماری موجود نیست.'}</p>;
+  }
 
   const rawFiltered = filterDataByRange(stats.chartData, range);
   const filteredData =
@@ -130,46 +163,58 @@ const AdminDashboard: React.FC = () => {
       </div>
 
       <div className="flex flex-row-reverse gap-11 w-full">
-        <Card className='flex-1 flex flex-col'>
-          <CardHeader className='flex flex-row-reverse justify-between items-center'>
-            <p className='text-lg font-bold'>محبوب ترین مقاله ها</p>
+        <Card className="flex-1 flex flex-col">
+          <CardHeader className="flex flex-row-reverse justify-between items-center">
+            <p className="text-lg font-bold">محبوب‌ترین مقاله‌ها</p>
           </CardHeader>
-          <CardContent className='flex flex-col gap-4 max-h-[400px] overflow-y-auto'>
-            {mostViewedArticles.map((article, index) => (
-              <div className="flex-0 flex flex-col gap-4 rounded" key={`${article._id}-${index}`}>
-                <ArticleCard article={article} />
-                <div className="w-full h-px bg-gray-200"></div>
-              </div>
-            ))}
+          <CardContent className="flex flex-col gap-4 max-h-[400px] overflow-y-auto">
+            {mostViewedArticles.length > 0 ? (
+              mostViewedArticles.map((article, index) => (
+                <div className="flex-0 flex flex-col gap-4 rounded" key={`${article._id}-${index}`}>
+                  <ArticleCard article={article} />
+                  <div className="w-full h-px bg-gray-200"></div>
+                </div>
+              ))
+            ) : (
+              <p>مقاله‌ای موجود نیست.</p>
+            )}
           </CardContent>
         </Card>
 
-
-        <Card className='flex-1 flex flex-col'>
-          <CardHeader className='flex flex-row-reverse justify-between items-center'>
-            <p className='text-lg font-bold'>محبوب ترین ویدئو ها</p>
+        <Card className="flex-1 flex flex-col">
+          <CardHeader className="flex flex-row-reverse justify-between items-center">
+            <p className="text-lg font-bold">محبوب‌ترین ویدئوها</p>
           </CardHeader>
-          <CardContent className='flex flex-col gap-4 max-h-[400px] overflow-y-auto'>
-            {mostViewedVideos.map((video, index) => (
-              <div className="flex-0 flex flex-col gap-4 rounded" key={`${video._id}-${index}`}>
-                <VideoCard video={video} />
-                <div className="w-full h-px bg-gray-200"></div>
-              </div>
-            ))}
+          <CardContent className="flex flex-col gap-4 max-h-[400px] overflow-y-auto">
+            {mostViewedVideos.length > 0 ? (
+              mostViewedVideos.map((video, index) => (
+                <div className="flex-0 flex flex-col gap-4 rounded" key={`${video._id}-${index}`}>
+                  <VideoCard video={video} />
+                  <div className="w-full h-px bg-gray-200"></div>
+                </div>
+              ))
+            ) : (
+              <p>ویدئویی موجود نیست.</p>
+            )}
           </CardContent>
         </Card>
       </div>
-      <Card className='w-full flex flex-col'>
-        <CardHeader className='flex flex-row-reverse justify-between items-center'>
-          <p className='text-lg font-bold'>محبوب ترین دوره ها</p>
+
+      <Card className="w-full flex flex-col">
+        <CardHeader className="flex flex-row-reverse justify-between items-center">
+          <p className="text-lg font-bold">محبوب‌ترین دوره‌ها</p>
         </CardHeader>
-        <CardContent className='grid grid-cols-3 gap-4 max-h-[400px] overflow-y-auto'>
-          {mostViewedCourses.map((course, index) => (
-            <div className="flex-0 flex flex-col gap-4 rounded" key={`${course._id}-${index}`}>
-              <CourseCard course={course} />
-              <div className="w-full h-px bg-gray-200"></div>
-            </div>
-          ))}
+        <CardContent className="grid grid-cols-3 gap-4 max-h-[400px] overflow-y-auto">
+          {mostViewedCourses.length > 0 ? (
+            mostViewedCourses.map((course, index) => (
+              <div className="flex-0 flex flex-col gap-4 rounded" key={`${course._id}-${index}`}>
+                <CourseCard course={course} />
+                <div className="w-full h-px bg-gray-200"></div>
+              </div>
+            ))
+          ) : (
+            <p>دوره‌ای موجود نیست.</p>
+          )}
         </CardContent>
       </Card>
     </div>
