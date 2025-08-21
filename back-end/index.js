@@ -31,15 +31,15 @@ const userRoutes = require('./routes/user.routes');
 const homePageRoutes = require('./routes/homepage.routes');
 
 const routers = [
-  { path: '/auth', router: authRoutes },
-  { path: '/', router: articleRoutes },
-  { path: '/', router: videoRoutes },
-  { path: '/', router: podcastRoutes },
-  { path: '/', router: courseRoutes },
-  { path: '/', router: visitRoutes },
-  { path: '/', router: categoryRoutes },
-  { path: '/', router: userRoutes },
-  { path: '/', router: homePageRoutes },
+  { path: '/api/auth', router: authRoutes },
+  { path: '/api', router: articleRoutes },
+  { path: '/api', router: videoRoutes },
+  { path: '/api', router: podcastRoutes },
+  { path: '/api', router: courseRoutes },
+  { path: '/api', router: visitRoutes },
+  { path: '/api', router: categoryRoutes },
+  { path: '/api', router: userRoutes },
+  { path: '/api', router: homePageRoutes },
 ];
 
 // Validate and use routers
