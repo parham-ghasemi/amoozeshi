@@ -47,6 +47,12 @@ app.use('/', userRoutes);
 const homePageRoutes = require('./routes/homepage.routes');
 app.use('/', homePageRoutes);
 
+// Serve React frontend
+app.use(express.static(path.join(__dirname, "client/dist")));
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "client/build", "index.html"));
+});
+
 
 // Serve /uploads folder
 const uploadPath = path.join(__dirname, 'uploads');
