@@ -45,7 +45,7 @@ const AuthForm: React.FC = () => {
         return;
       }
 
-      const endpoint = `${mode === "signup" ? "/auth/signup" : "/auth/login"}`;
+      const endpoint = `${mode === "signup" ? "api/auth/signup" : "api/auth/login"}`;
       const { data }: { data: { token: string } } = await axios.post(endpoint, form);
 
       localStorage.setItem("token", data.token);
