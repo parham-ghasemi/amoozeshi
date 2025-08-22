@@ -83,7 +83,7 @@ const AdminDashboard: React.FC = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await authAxios.get<VisitStats>('/api/admin/visits');
+        const res = await authAxios.get<VisitStats>('/admin/visits');
         // Ensure chartData is an array, default to empty array if undefined
         setStats({ ...res.data, chartData: res.data.chartData || [] });
       } catch (err) {
