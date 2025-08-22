@@ -44,7 +44,7 @@ const CategoryManager: React.FC = () => {
     if (!newCategory.trim()) return;
     setLoading(true);
     try {
-      await authAxios.post("/api/categories", { name: newCategory });
+      await authAxios.post("/categories", { name: newCategory });
       setNewCategory("");
       fetchCategories();
     } catch (err) {
@@ -82,7 +82,7 @@ const CategoryManager: React.FC = () => {
             value={newCategory}
             onChange={(e) => setNewCategory(e.target.value)}
           />
-          <Button onClick={handleAddCategory} disabled={loading}>
+          <Button className='cursor-pointer' onClick={handleAddCategory} disabled={loading}>
             افزودن
           </Button>
         </div>
@@ -98,6 +98,7 @@ const CategoryManager: React.FC = () => {
                 <AlertDialogTrigger asChild>
                   <Button
                     variant="destructive"
+                    className="cursor-pointer"
                     size="sm"
                     onClick={() => setSelectedToDelete(cat)}
                   >
