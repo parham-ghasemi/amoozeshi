@@ -18,7 +18,7 @@ const Layout = () => {
     <>
       <TrackVisit />
       <Header />
-      <main className="min-h-screen bg-slate-100 pb-7">
+      <main className="min-h-screen bg-slate-100">
         <Outlet />
       </main>
       <Footer />
