@@ -62,12 +62,12 @@ const Footer: React.FC = () => {
 
           {/* Social Media Section */}
           <motion.div
-            className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center relative"
+            className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center justify-evenly"
             whileHover={{ scale: 1.02 }}
             transition={{ duration: 0.2 }}
           >
             <h3 className="text-xl font-bold mb-4 font-vazir">ما را دنبال کنید</h3>
-            <div className="flex gap-4 flex-wrap justify-center absolute top-1/2 -translate-y-1/2">
+            <div className="flex gap-4 flex-wrap justify-center">
               {socialLinks.map((link, index) => (
                 <motion.a
                   key={index}
