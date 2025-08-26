@@ -1,4 +1,4 @@
-const User = require("../models/User");
+const { User } = require("../models/User");
 const Course = require("../models/Course");
 const Video = require("../models/Video");
 const Article = require("../models/Article");

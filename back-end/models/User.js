@@ -1,5 +1,24 @@
 const mongoose = require('mongoose');
 
+const OTPSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  otp: {
+    type: String,
+    required: true
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+    expires: 300 // 5 minutes in seconds
+  }
+});
+
+
+// Modified User Schema
 const UserSchema = new mongoose.Schema({
   _id: { type: mongoose.Schema.Types.ObjectId, auto: true },
   userName: { type: String, required: true, unique: true },
@@ -11,7 +30,10 @@ const UserSchema = new mongoose.Schema({
     enum: ['admin', 'user'],
     default: 'user'
   },
-
+  isVerified: {
+    type: Boolean,
+    default: false
+  },
   favoriteCourses: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "Course"
@@ -34,4 +56,7 @@ const UserSchema = new mongoose.Schema({
   }],
 });
 
-module.exports = mongoose.model('User', UserSchema);
+const User = mongoose.model('User', UserSchema);
+const OTP = mongoose.model('OTP', OTPSchema);
+
+module.exports = { User, OTP };
