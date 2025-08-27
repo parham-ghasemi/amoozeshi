@@ -28,15 +28,15 @@ const PodcastSearch = () => {
   if (isError) return <div>Error fetching podcasts.</div>;
 
   return (
-    <div className="w-full pt-16 flex flex-col items-center min-h-screen gap-20" dir='rtl'>
+    <div className="w-full pt-16 flex flex-col items-center min-h-screen gap-10 px-4" dir="rtl">
       <PodcastSearchBox initSearchTerm={searchTerm} />
-      <div className="w-6xl min-h-96 bg-slate-50 rounded-2xl grid grid-cols-4 gap-4 p-10">
+      <div className="w-full max-w-6xl min-h-96 bg-slate-50 rounded-2xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-6">
         {results.length > 0 ? (
           results.map((item, index) => (
             <PodcastCard key={`podcast-${index}`} podcast={item} />
           ))
         ) : (
-          <div className="col-span-4 text-center py-10">No podcasts found</div>
+          <div className="col-span-full text-center py-10">No podcasts found</div>
         )}
       </div>
     </div>

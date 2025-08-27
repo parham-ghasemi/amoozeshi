@@ -21,22 +21,25 @@ const ArticleSearch = () => {
   } = useQuery({
     queryKey: ['search-articles', searchTerm],
     queryFn: () => fetchSearchResults(searchTerm),
-    enabled: !!searchTerm, // only run query if searchTerm exists
+    enabled: !!searchTerm,
   });
 
-  if (isLoading) return <div>Loading...</div>;
-  if (isError) return <div>خطایی در دریافت نتایج جستجو رخ داد.</div>;
+  if (isLoading) return <div className="pt-20 text-center">در حال بارگذاری...</div>;
+  if (isError) return <div className="pt-20 text-center text-red-500">خطایی در دریافت نتایج جستجو رخ داد.</div>;
 
   return (
-    <div className='w-full pt-16 flex flex-col items-center min-h-screen gap-20'>
-      <ArticleSearchBox initSearchTerm={searchTerm} />
-      <div className="w-6xl min-h-96 bg-slate-50 rounded-2xl grid grid-cols-4 gap-4">
+    <div className="w-full pt-16 flex flex-col items-center min-h-screen gap-10 sm:gap-16 px-4 sm:px-6 lg:px-12">
+      <div className="w-full max-w-4xl">
+        <ArticleSearchBox initSearchTerm={searchTerm} />
+      </div>
+
+      <div className="w-full max-w-7xl min-h-96 bg-slate-50 rounded-2xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 p-4 sm:p-6 lg:p-10">
         {results.length > 0 ? (
           results.map((item, index) => (
             <ArticleCard key={`article-${index}`} article={item} />
           ))
         ) : (
-          <p className="text-center col-span-4 py-6 text-gray-500">هیچ مقاله‌ای یافت نشد.</p>
+          <p className="text-center col-span-full py-6 text-gray-500">هیچ مقاله‌ای یافت نشد.</p>
         )}
       </div>
     </div>

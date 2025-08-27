@@ -22,23 +22,23 @@ const CourseSearchBox = ({ initSearchTerm }: { initSearchTerm?: string }) => {
     <form
       onSubmit={handleSearch}
       className={clsx(
-        'w-2xl h-14 flex justify-between items-center rounded-xl p-3 overflow-hidden shadow-lg hover:shadow-xl hover:-translate-0.5 bg-slate-50',
+        'w-full max-w-2xl h-14 flex justify-between items-center rounded-xl p-3 overflow-hidden shadow-lg hover:shadow-xl bg-slate-50 transition',
         searchError && 'shadow-red-300'
       )}
     >
       <input
         type="text"
-        className="h-full w-full px-3 border-none outline-none"
+        className="h-full w-full px-3 border-none outline-none text-sm sm:text-base"
         onChange={(e) => {
           setSearchTerm(e.target.value)
           setSearchError(false)
         }}
-        dir='rtl'
+        dir="rtl"
         value={searchTerm}
         placeholder="جستجوی دوره..."
       />
-      <button className="p-3 cursor-pointer" type="submit">
-        <Search size={26} className="hover:text-slate-700" />
+      <button className="p-2 sm:p-3 cursor-pointer" type="submit">
+        <Search size={22} className="hover:text-slate-700" />
       </button>
     </form>
   )

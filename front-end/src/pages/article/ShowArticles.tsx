@@ -85,7 +85,7 @@ const ShowArticles = () => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen w-full flex flex-col gap-15 items-center pt-16"
+      className="min-h-screen w-full flex flex-col gap-10 items-center pt-16 px-4 sm:px-6 lg:px-12"
     >
       <AnimatePresence>
         {!isCollapsed && (
@@ -94,6 +94,7 @@ const ShowArticles = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
+            className="w-full max-w-4xl"
           >
             <ArticleSearchBox />
           </motion.div>
@@ -101,7 +102,7 @@ const ShowArticles = () => {
       </AnimatePresence>
 
       <motion.div
-        className="w-6xl min-h-96 bg-slate-50 rounded-2xl flex flex-col gap-10 p-16"
+        className="w-full max-w-7xl bg-slate-50 rounded-2xl flex flex-col gap-10 p-6 sm:p-10 md:p-12 lg:p-16"
         dir="rtl"
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -156,7 +157,7 @@ const ShowArticles = () => {
         {!isCollapsed && (
           <motion.button
             onClick={handleShowAllArticles}
-            className="mt-10 mb-20 w-full py-3 bg-blue-100 cursor-pointer hover:bg-blue-200 self-center rounded-2xl hover:shadow-2xl"
+            className="mt-6 sm:mt-10 mb-16 w-full py-3 bg-blue-100 cursor-pointer hover:bg-blue-200 self-center rounded-2xl hover:shadow-2xl text-sm sm:text-base"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             transition={{ duration: 0.2 }}
@@ -188,7 +189,7 @@ const Section = ({
 
   return (
     <motion.div
-      className="flex flex-col gap-7"
+      className="flex flex-col gap-6"
       initial={{ opacity: 0, x: 50 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -50 }}
@@ -196,7 +197,7 @@ const Section = ({
     >
       <div className="flex justify-between items-center">
         <motion.p
-          className="font-bold text-xl"
+          className="font-bold text-lg sm:text-xl"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.1 }}
@@ -206,23 +207,23 @@ const Section = ({
 
         {!showAll ? (
           <motion.p
-            className="text-sm flex items-center gap-1 cursor-pointer hover:text-slate-700"
+            className="text-xs sm:text-sm flex items-center gap-1 cursor-pointer hover:text-slate-700"
             onClick={onShowAll}
             whileHover={{ x: 5 }}
             transition={{ duration: 0.2 }}
           >
             مشاهده بیشتر
-            <ChevronLeft size={17} />
+            <ChevronLeft size={16} />
           </motion.p>
         ) : (
           <motion.button
             onClick={onBack}
-            className="flex items-center gap-1 text-sm hover:text-rose-700 cursor-pointer"
+            className="flex items-center gap-1 text-xs sm:text-sm hover:text-rose-700 cursor-pointer"
             whileHover={{ x: 5 }}
             transition={{ duration: 0.2 }}
           >
             بازگشت
-            <ChevronLeft size={18} />
+            <ChevronLeft size={17} />
           </motion.button>
         )}
       </div>
@@ -243,9 +244,7 @@ const Section = ({
             hidden: { opacity: 0 },
             show: {
               opacity: 1,
-              transition: {
-                staggerChildren: 0.1,
-              },
+              transition: { staggerChildren: 0.1 },
             },
           }}
           initial="hidden"

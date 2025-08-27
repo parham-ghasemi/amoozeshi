@@ -43,9 +43,9 @@ const ShowPodcasts = () => {
     queryFn: fetchCategories,
   })
 
-  useEffect(() => (
-    console.log()
-  ), [categories, selectedCategory])
+  useEffect(() => {
+    console.log(categories, selectedCategory)
+  }, [categories, selectedCategory])
 
   const {
     data: categoryPodcasts = [],
@@ -76,28 +76,24 @@ const ShowPodcasts = () => {
   const isCollapsed = expandedSection !== null || showAllPodcasts
 
   if (loadingListened || loadingNewest || loadingCategories || (selectedCategory && loadingCategoryPodcasts))
-    return <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="pt-20"
-    >
-      در حال بارگذاری...
-    </motion.div>
+    return (
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-20 text-center">
+        در حال بارگذاری...
+      </motion.div>
+    )
 
   if (errorListened || errorNewest || errorCategories || errorCategoryPodcasts)
-    return <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="pt-20 text-red-600"
-    >
-      خطا در دریافت اطلاعات
-    </motion.div>
+    return (
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-20 text-center text-red-600">
+        خطا در دریافت اطلاعات
+      </motion.div>
+    )
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen w-full flex flex-col gap-15 items-center pt-16"
+      className="min-h-screen w-full flex flex-col gap-10 items-center pt-10 px-4 sm:px-6 lg:px-8"
     >
       <AnimatePresence>
         {!isCollapsed && (
@@ -106,6 +102,7 @@ const ShowPodcasts = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
+            className="w-full max-w-5xl flex justify-center"
           >
             <PodcastSearchBox />
           </motion.div>
@@ -113,7 +110,7 @@ const ShowPodcasts = () => {
       </AnimatePresence>
 
       <motion.div
-        className="w-6xl min-h-96 bg-slate-50 rounded-2xl flex flex-col gap-10 p-16"
+        className="w-full max-w-6xl bg-slate-50 rounded-2xl flex flex-col gap-8 sm:gap-10 p-6 sm:p-10 lg:p-16"
         dir="rtl"
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -164,7 +161,7 @@ const ShowPodcasts = () => {
         {!isCollapsed && (
           <motion.button
             onClick={handleShowAllPodcasts}
-            className="mt-10 mb-20 w-full py-3 bg-blue-100 cursor-pointer hover:bg-blue-200 self-center rounded-2xl hover:shadow-2xl"
+            className="mt-6 sm:mt-10 mb-10 w-full py-3 bg-blue-100 cursor-pointer hover:bg-blue-200 self-center rounded-2xl hover:shadow-2xl text-sm sm:text-base"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             transition={{ duration: 0.2 }}
@@ -194,15 +191,15 @@ const Section = ({
 
   return (
     <motion.div
-      className="flex flex-col gap-7"
+      className="flex flex-col gap-5 sm:gap-7"
       initial={{ opacity: 0, x: 50 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -50 }}
       transition={{ duration: 0.3 }}
     >
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center flex-wrap gap-2">
         <motion.p
-          className="font-bold text-xl"
+          className="font-bold text-lg sm:text-xl"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.1 }}
@@ -234,7 +231,7 @@ const Section = ({
       </div>
 
       <motion.div
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5"
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5"
         variants={{
           hidden: { opacity: 0 },
           show: {

@@ -21,18 +21,20 @@ const CourseSearch = () => {
     enabled: !!searchTerm,
   })
 
-  if (isLoading) return <div>Loading...</div>
+  if (isLoading) return <div className="pt-20">Loading...</div>
 
   return (
-    <div className="w-full pt-16 flex flex-col items-center min-h-screen gap-20">
-      <CourseSearchBox initSearchTerm={searchTerm || ''} />
-      <div className="w-6xl min-h-96 bg-slate-50 rounded-2xl grid grid-cols-4 gap-4 p-10">
+    <div className="w-full pt-16 flex flex-col items-center min-h-screen gap-10 px-4">
+      <div className="w-full max-w-3xl">
+        <CourseSearchBox initSearchTerm={searchTerm || ''} />
+      </div>
+      <div className="w-full max-w-7xl min-h-96 bg-slate-50 rounded-2xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 p-6 sm:p-10">
         {results.length > 0 ? (
           results.map((course, index) => (
             <CourseCard key={`course-${index}`} course={course} />
           ))
         ) : (
-          <div className="col-span-4 text-center py-10">هیچ دوره‌ای پیدا نشد</div>
+          <div className="col-span-full text-center py-10">هیچ دوره‌ای پیدا نشد</div>
         )}
       </div>
     </div>
