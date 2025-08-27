@@ -60,16 +60,16 @@ const Header = () => {
 
       {open && (
         <div className="absolute top-16 left-0 w-full bg-white border-b shadow-md flex flex-col items-center gap-4 py-4 md:hidden">
-          <Link to="/about" onClick={() => setOpen(false)}>درباره ما</Link>
-          <Link to="/courses" onClick={() => setOpen(false)}>دوره ها</Link>
-          <Link to="/videos" onClick={() => setOpen(false)}>ویدئو ها</Link>
-          <Link to="/articles" onClick={() => setOpen(false)}>مقالات</Link>
-          <Link to="/auth" onClick={() => setOpen(false)}>
+          <button onClick={onClick}>
             {
               // @ts-ignore
               user && user?.userName ? user.userName : ' ثبت نام | ورود'
             }
-          </Link>
+          </button>
+          <Link to="/about" onClick={() => setOpen(false)}>درباره ما</Link>
+          <Link to="/courses" onClick={() => setOpen(false)}>دوره ها</Link>
+          <Link to="/videos" onClick={() => setOpen(false)}>ویدئو ها</Link>
+          <Link to="/articles" onClick={() => setOpen(false)}>مقالات</Link>
           <Link to="/" onClick={() => setOpen(false)}>خانه</Link>
         </div>
       )}
