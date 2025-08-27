@@ -210,6 +210,75 @@ const About: React.FC = () => {
 
             <Separator className="my-8" />
           </motion.div>
+
+          {/* Credits Section */}
+          <motion.section
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+            className="mb-12"
+          >
+            <Card className="shadow-lg bg-white dark:bg-gray-800" dir={language === 'en' ? 'ltr' : 'rtl'}>
+              <CardHeader>
+                <CardTitle className={`text-2xl font-semibold text-center ${language === 'fa' ? 'font-vazir' : ''}`}>
+                  {language === 'fa' ? 'تیم و مشارکت‌کنندگان' : 'Team & Contributors'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                {/* Developer */}
+                <div className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-700 space-y-2">
+                  <h3 className={`text-lg font-bold mb-2 ${language === 'fa' ? 'font-vazir' : ''}`}>
+                    {language === 'fa' ? 'توسعه‌دهنده وبسایت' : 'Website Developer'}
+                  </h3>
+                  <p className={`text-gray-600 dark:text-gray-300 ${language === 'fa' ? 'font-vazir' : ''}`}>
+                    {language === 'en' ? 'Parham Ghasemi' : "پرهام قاسمی"}
+                  </p>
+                  <p className={`text-gray-600 dark:text-gray-300 text-sm ${language === 'fa' ? 'font-vazir' : ''}`}>
+                    {language === 'fa' ? "شماره تلفن: " : 'phone number: '}
+                    <span className='text-gray-800'>
+                      09912525964
+                    </span>
+                  </p>
+                  <a
+                    href="mailto:parham.ghasemi.1388@gmail.com"
+                    className="text-blue-500 hover:underline text-sm"
+                  >
+                    <span className='text-slate-600'>
+                      {language === 'fa' ? "ایمیل: " : 'email: '}
+                    </span>
+                    parham.ghasemi.1388@gmail.com
+                  </a>
+                </div>
+
+                {/* Project Coordinator */}
+                <div className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-700 space-y-2">
+                  <h3 className={`text-lg font-bold mb-2 ${language === 'fa' ? 'font-vazir' : ''}`}>
+                    {language === 'fa' ? 'هماهنگ‌کننده پروژه' : 'Project Coordinator'}
+                  </h3>
+                  <p className={`text-gray-600 dark:text-gray-300 ${language === 'fa' ? 'font-vazir' : ''}`}>
+                    {language === 'en' ? 'Arman Yousefi' : "آرمان یوسفی"}
+                  </p>
+                  <p className={`text-gray-600 dark:text-gray-300 text-sm ${language === 'fa' ? 'font-vazir' : ''}`}>
+                    {language === 'fa' ? "شماره تلفن: " : 'phone number: '}
+                    <span className='text-gray-800'>
+                      09104525731
+                    </span>
+                  </p>
+                  <a
+                    href="mailto:Mr.arman.yousefi@gmail.com"
+                    className="text-blue-500 hover:underline text-sm"
+                  >
+                    <span className='text-slate-600'>
+                      {language === 'fa' ? "ایمیل: " : 'email: '}
+                    </span>
+                    Mr.arman.yousefi@gmail.com
+                  </a>
+                </div>
+
+              </CardContent>
+            </Card>
+          </motion.section>
         </AnimatePresence>
       </div>
     </div>

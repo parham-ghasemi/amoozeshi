@@ -67,6 +67,6 @@ app.use('/uploads', express.static(uploadPath));
 if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath);
 
 // Start server
-app.listen(port, '0.0.0.0', () => {
+app.listen(port, () => {
   console.log(`Server is running at http://0.0.0.0:${port}`);
 });

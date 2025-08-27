@@ -99,10 +99,7 @@ const Footer: React.FC = () => {
         {/* Copyright and Developer Credit */}
         <div className="mt-8 text-center">
           <p className="text-sm text-gray-400 font-vazir">
-            © {new Date().getFullYear()} تمامی حقوق محفوظ است.
-          </p>
-          <p className="text-sm text-gray-400 mt-1">
-            توسعه توسط <a href='mailto:parham.ghasemi.1388@gmail.com' className='text-blue-400 hover:underline'>پرهام قاسمی (parham.ghasemi.1388@gmail.com)</a>
+            © {new Date().getFullYear()} مدیر فردا، تمامی حقوق محفوظ است.
           </p>
         </div>
       </div>
