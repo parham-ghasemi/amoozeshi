@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import type { ArticleShort } from "types/article";
 import { Link, useNavigate } from "react-router-dom";
+import authAxios from "@/lib/authAxios";
 
 const HeroMosaic = ({ images1, images2 }: { images1: string[], images2: string[] }) => {
   const isSmallScreen = typeof window !== 'undefined' && window.innerWidth < 1024;
@@ -184,8 +185,22 @@ export default function HomePage() {
     queryKey: ['homepage-stuff'],
     queryFn: fetchHomePage,
   });
-
-  console.log(homepage)
+  const getUser = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return false;
+    try {
+      const res = await authAxios.get(`/user/me`);
+      return res.data;
+    } catch {
+      return false;
+    }
+  }
+  const { data: user } = useQuery({
+    queryKey: ["get-user-w-jwt"],
+    queryFn: getUser,
+    enabled: !!localStorage.getItem("token"),
+    staleTime: 0,
+  });
 
   return (
     <motion.div
@@ -215,7 +230,7 @@ export default function HomePage() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                ثبت‌نام
+                {!user && ' ثبت‌نام '}
               </motion.button>
               <motion.div
                 whileHover={{ scale: 1.05 }}
@@ -314,7 +329,7 @@ export default function HomePage() {
               whileTap={{ scale: 0.95 }}
               onClick={() => navigator('/auth')}
             >
-              ثبت‌نام
+              {!user && ' ثبت‌نام '}
             </motion.button>
             <motion.div
               whileHover={{ scale: 1.05 }}
