@@ -66,7 +66,7 @@ exports.updateHomePageData = async (req, res) => {
     if (footerTitle) updateData.footerTitle = footerTitle;
     if (footerDescription) updateData.footerDescription = footerDescription;
 
-    const baseUrl = '/api/uploads/images';
+    const baseUrl = '/uploads/images';
 
     // Process mosaicImages1
     if (req.files && req.files['mosaicImages1']) {
