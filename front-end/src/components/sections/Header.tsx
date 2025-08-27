@@ -65,7 +65,10 @@ const Header = () => {
           <Link to="/videos" onClick={() => setOpen(false)}>ویدئو ها</Link>
           <Link to="/articles" onClick={() => setOpen(false)}>مقالات</Link>
           <Link to="/auth" onClick={() => setOpen(false)}>
-            ثبت نام | ورود
+            {
+              // @ts-ignore
+              user && user?.userName ? user.userName : ' ثبت نام | ورود'
+            }
           </Link>
           <Link to="/" onClick={() => setOpen(false)}>خانه</Link>
         </div>
