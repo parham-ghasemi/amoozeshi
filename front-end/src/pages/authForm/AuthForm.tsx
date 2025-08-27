@@ -7,6 +7,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 
 interface FormState {
   userName: string;
@@ -33,6 +34,7 @@ const AuthForm: React.FC = () => {
 
   const [timer, setTimer] = useState<number>(0);
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
 
   const toggleMode = () =>
     setMode((prev) => (prev === "login" ? "signup" : "login"));
@@ -230,8 +232,8 @@ const AuthForm: React.FC = () => {
                     onClick={handleResend}
                     disabled={timer > 0}
                     className={`mt-3 text-sm ${timer > 0
-                        ? "text-gray-400 cursor-not-allowed"
-                        : "text-indigo-600 hover:text-indigo-500"
+                      ? "text-gray-400 cursor-not-allowed"
+                      : "text-indigo-600 hover:text-indigo-500"
                       }`}
                   >
                     {timer > 0
@@ -264,15 +266,23 @@ const AuthForm: React.FC = () => {
                     required
                   />
                   <div>
-                    <Input
-                      name="password"
-                      placeholder="رمز عبور جدید"
-                      value={form.password}
-                      onChange={handleChange}
-                      required
-                      type="password"
-                      className={`w-full ${passwordError ? "border-red-500" : ""}`}
-                    />
+                    <div className="relative">
+                      <Input
+                        name="password"
+                        placeholder="رمز عبور جدید"
+                        value={form.password}
+                        onChange={handleChange}
+                        required
+                        type={showPassword ? "text" : "password"}
+                        className={`w-full ${passwordError ? "border-red-500" : ""}`}
+                      />
+                      <span
+                        className="absolute inset-y-0 end-0 flex items-center pe-3 cursor-pointer text-gray-500 hover:text-gray-700"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <AiOutlineEyeInvisible size={20} /> : <AiOutlineEye size={20} />}
+                      </span>
+                    </div>
                     {passwordError && (
                       <p className="text-xs text-red-500 mt-1">{passwordError}</p>
                     )}
@@ -306,15 +316,23 @@ const AuthForm: React.FC = () => {
                     )}
                   </div>
                   <div>
-                    <Input
-                      name="password"
-                      placeholder="رمز عبور"
-                      value={form.password}
-                      onChange={handleChange}
-                      required
-                      type="password"
-                      className={`w-full ${passwordError ? "border-red-500" : ""}`}
-                    />
+                    <div className="relative">
+                      <Input
+                        name="password"
+                        placeholder="رمز عبور"
+                        value={form.password}
+                        onChange={handleChange}
+                        required
+                        type={showPassword ? "text" : "password"}
+                        className={`w-full ${passwordError ? "border-red-500" : ""}`}
+                      />
+                      <span
+                        className="absolute inset-y-0 end-0 flex items-center pe-3 cursor-pointer text-gray-500 hover:text-gray-700"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <AiOutlineEyeInvisible size={20} /> : <AiOutlineEye size={20} />}
+                      </span>
+                    </div>
                     {passwordError && (
                       <p className="text-xs text-red-500 mt-1">{passwordError}</p>
                     )}
