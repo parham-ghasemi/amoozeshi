@@ -96,8 +96,24 @@ const Footer: React.FC = () => {
           </motion.div>
         </div>
 
+        {/* Credits (minimal with emails) */}
+        <div className="mt-6 text-center space-y-1">
+          <p className="text-xs text-gray-400 font-vazir">
+            طراحی و توسعه توسط پرهام قاسمی
+            (<a href="mailto:parham.ghasemi.1388@gmail.com" className="hover:underline text-blue-500">
+              parham.ghasemi.1388@gmail.com
+            </a>)
+          </p>
+          <p className="text-xs text-gray-400 font-vazir">
+            آرمان یوسفی
+            (<a href="mailto:Mr.arman.yousefi@gmail.com" className="hover:underline text-blue-500">
+              Mr.arman.yousefi@gmail.com
+            </a>)
+          </p>
+        </div>
+
         {/* Copyright and Developer Credit */}
-        <div className="mt-8 text-center">
+        <div className="mt-3 text-center">
           <p className="text-sm text-gray-400 font-vazir">
             © {new Date().getFullYear()} مدیر فردا، تمامی حقوق محفوظ است.
           </p>
