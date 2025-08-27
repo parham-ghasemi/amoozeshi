@@ -36,7 +36,7 @@ exports.signup = async (req, res) => {
       hashedPassword,
       isVerified: false,
     });
-    await newUser.save(); // Save explicitly to catch validation errors
+    await newUser.save();
 
     // Generate and store OTP
     const otp = generateOTP();
@@ -45,11 +45,22 @@ exports.signup = async (req, res) => {
       otp,
     });
 
-    const sms = `http://api.payamak-panel.com/post/Send.asmx/SendByBaseNumber2?username=09122153741&password=O#G6N&text=${otp}&to=${phoneNumber}&bodyId=361009`;
+    const smsUrl = `http://api.payamak-panel.com/post/Send.asmx/SendByBaseNumber2`;
+
+    // always encode query params
+    const smsParams = new URLSearchParams({
+      username: "09122153741",
+      password: "O#G6N",     // will get encoded automatically
+      text: otp,
+      to: phoneNumber,
+      bodyId: "361009"
+    });
+
     try {
-      await axios.get(sms);
+      await axios.get(`${smsUrl}?${smsParams.toString()}`);
+      console.log("OTP SMS sent successfully");
     } catch (err) {
-      console.error('Error sending the sms', err)
+      console.error("Error sending SMS:", err.response?.data || err.message);
     }
 
     res.status(201).json({
@@ -159,5 +170,53 @@ exports.login = async (req, res) => {
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({ message: "Server error during login", error: err.message });
+  }
+};
+
+exports.resendOTP = async (req, res) => {
+  try {
+    const { phoneNumber } = req.body;
+    if (!phoneNumber) {
+      return res.status(400).json({ message: "Phone number is required" });
+    }
+
+    const user = await User.findOne({ phoneNumber });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({ message: "User is already verified" });
+    }
+
+    // delete old OTPs
+    await OTP.deleteMany({ userId: user._id });
+
+    // generate new OTP
+    const otp = generateOTP();
+    await OTP.create({ userId: user._id, otp });
+
+    const smsUrl = `http://api.payamak-panel.com/post/Send.asmx/SendByBaseNumber2`;
+
+    // always encode query params
+    const smsParams = new URLSearchParams({
+      username: "09122153741",
+      password: "O#G6N",     // will get encoded automatically
+      text: otp,
+      to: phoneNumber,
+      bodyId: "361009"
+    });
+
+    try {
+      await axios.get(`${smsUrl}?${smsParams.toString()}`);
+      console.log("OTP SMS sent successfully");
+    } catch (err) {
+      console.error("Error sending SMS:", err.response?.data || err.message);
+    }
+
+    res.json({ message: "New OTP sent successfully" });
+  } catch (err) {
+    console.error("Resend OTP error:", err);
+    res.status(500).json({ message: "Server error during OTP resend", error: err.message });
   }
 };
