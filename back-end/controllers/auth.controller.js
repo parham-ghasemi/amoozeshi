@@ -220,3 +220,78 @@ exports.resendOTP = async (req, res) => {
     res.status(500).json({ message: "Server error during OTP resend", error: err.message });
   }
 };
+
+exports.requestPasswordReset = async (req, res) => {
+  try {
+    const { phoneNumber } = req.body;
+
+    if (!phoneNumber) {
+      return res.status(400).json({ message: "Phone number is required" });
+    }
+
+    const user = await User.findOne({ phoneNumber });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // delete old OTPs
+    await OTP.deleteMany({ userId: user._id });
+
+    // generate new OTP
+    const otp = generateOTP();
+    await OTP.create({ userId: user._id, otp });
+
+    const smsUrl = `http://api.payamak-panel.com/post/Send.asmx/SendByBaseNumber2`;
+    const smsParams = new URLSearchParams({
+      username: "09122153741",
+      password: "O#G6N",
+      text: otp,
+      to: phoneNumber,
+      bodyId: "361009",
+    });
+
+    try {
+      await axios.get(`${smsUrl}?${smsParams.toString()}`);
+      console.log("Password reset OTP sent successfully");
+    } catch (err) {
+      console.error("Error sending reset OTP:", err.response?.data || err.message);
+    }
+
+    res.json({ message: "Password reset OTP sent", userId: user._id });
+  } catch (err) {
+    console.error("requestPasswordReset error:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  try {
+    const { userId, otp, newPassword } = req.body;
+
+    if (!userId || !otp || !newPassword) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const otpRecord = await OTP.findOne({ userId, otp });
+    if (!otpRecord) {
+      return res.status(400).json({ message: "Invalid or expired OTP" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    user.hashedPassword = hashedPassword;
+    await user.save();
+
+    // delete OTP after use
+    await OTP.deleteOne({ _id: otpRecord._id });
+
+    res.json({ message: "Password reset successfully" });
+  } catch (err) {
+    console.error("resetPassword error:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};

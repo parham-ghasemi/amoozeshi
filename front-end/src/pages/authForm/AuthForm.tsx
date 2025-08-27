@@ -18,7 +18,9 @@ interface FormState {
 
 const AuthForm: React.FC = () => {
   const queryClient = useQueryClient();
-  const [mode, setMode] = useState<"login" | "signup" | "otp">("login");
+  const [mode, setMode] = useState<
+    "login" | "signup" | "otp" | "forgot" | "reset"
+  >("login");
   const [form, setForm] = useState<FormState>({
     userName: "",
     phoneNumber: "",
@@ -29,9 +31,7 @@ const AuthForm: React.FC = () => {
   const [passwordError, setPasswordError] = useState<string>("");
   const [phoneError, setPhoneError] = useState<string>("");
 
-  // Timer state
   const [timer, setTimer] = useState<number>(0);
-
   const navigate = useNavigate();
 
   const toggleMode = () =>
@@ -41,11 +41,10 @@ const AuthForm: React.FC = () => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
 
-    if (name === "password" && mode === "signup") {
+    if (name === "password") {
       validatePassword(value);
     }
-
-    if (name === "phoneNumber" && mode !== "otp") {
+    if (name === "phoneNumber") {
       validatePhoneNumber(value);
     }
   };
@@ -73,7 +72,7 @@ const AuthForm: React.FC = () => {
     return true;
   };
 
-  // Timer effect
+  // Countdown effect
   useEffect(() => {
     if (timer <= 0) return;
     const interval = setInterval(() => setTimer((t) => t - 1), 1000);
@@ -83,11 +82,19 @@ const AuthForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (mode === "signup") {
-      const isPasswordValid = validatePassword(form.password);
+    // ✅ run validations depending on mode
+    if (mode === "signup" || mode === "login" || mode === "forgot") {
       const isPhoneValid = validatePhoneNumber(form.phoneNumber);
-      if (!isPasswordValid || !isPhoneValid) {
-        toast.error("لطفاً ورودی‌ها را بررسی کنید");
+      if (!isPhoneValid) {
+        toast.error("شماره تلفن نامعتبر است");
+        return;
+      }
+    }
+
+    if (mode === "signup" || mode === "reset" || mode === "login") {
+      const isPasswordValid = validatePassword(form.password);
+      if (!isPasswordValid) {
+        toast.error("رمز عبور نامعتبر است");
         return;
       }
     }
@@ -115,6 +122,28 @@ const AuthForm: React.FC = () => {
         return;
       }
 
+      if (mode === "forgot") {
+        const { data } = await axios.post("/api/auth/request-password-reset", {
+          phoneNumber: form.phoneNumber,
+        });
+        setForm((prev) => ({ ...prev, userId: data.userId, otp: "" }));
+        setMode("reset");
+        setTimer(60);
+        toast.success("کد بازیابی ارسال شد");
+        return;
+      }
+
+      if (mode === "reset") {
+        await axios.post("/api/auth/reset-password", {
+          userId: form.userId,
+          otp: form.otp,
+          newPassword: form.password,
+        });
+        toast.success("رمز عبور تغییر یافت، اکنون وارد شوید");
+        setMode("login");
+        return;
+      }
+
       const endpoint =
         mode === "signup" ? "/api/auth/signup" : "/api/auth/login";
       const { data }: { data: { token: string; user: { id: string } } } =
@@ -127,7 +156,7 @@ const AuthForm: React.FC = () => {
       if (mode === "signup") {
         setForm((prev) => ({ ...prev, userId: data.user.id, otp: "" }));
         setMode("otp");
-        setTimer(60); // start 60s timer for OTP
+        setTimer(60);
         toast.success("کد یک‌بارمصرف برای شما ارسال شد");
       } else {
         localStorage.setItem("token", data.token);
@@ -146,7 +175,7 @@ const AuthForm: React.FC = () => {
       await axios.post("/api/auth/resend-otp", {
         phoneNumber: form.phoneNumber,
       });
-      setTimer(60); // reset timer
+      setTimer(60);
       toast.success("کد جدید ارسال شد");
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "خطایی رخ داد");
@@ -166,7 +195,11 @@ const AuthForm: React.FC = () => {
                 ? "ثبت‌نام"
                 : mode === "otp"
                   ? "تأیید کد"
-                  : "ورود"}
+                  : mode === "forgot"
+                    ? "بازیابی رمز عبور"
+                    : mode === "reset"
+                      ? "تغییر رمز عبور"
+                      : "ورود"}
             </h1>
           </div>
           <AnimatePresence mode="wait">
@@ -190,7 +223,7 @@ const AuthForm: React.FC = () => {
                     type="text"
                     pattern="[0-9]{6}"
                     inputMode="numeric"
-                    className="w-full bg-white text-gray-900 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-gray-400 transition-all duration-200"
+                    className="w-full"
                   />
                   <button
                     type="button"
@@ -206,6 +239,45 @@ const AuthForm: React.FC = () => {
                       : "ارسال دوباره کد"}
                   </button>
                 </div>
+              ) : mode === "forgot" ? (
+                <div>
+                  <Input
+                    name="phoneNumber"
+                    placeholder="شماره تلفن"
+                    value={form.phoneNumber}
+                    onChange={handleChange}
+                    required
+                    type="tel"
+                    className={`w-full ${phoneError ? "border-red-500" : ""}`}
+                  />
+                  {phoneError && (
+                    <p className="text-xs text-red-500 mt-1">{phoneError}</p>
+                  )}
+                </div>
+              ) : mode === "reset" ? (
+                <div className="space-y-5">
+                  <Input
+                    name="otp"
+                    placeholder="کد ۶ رقمی"
+                    value={form.otp}
+                    onChange={handleChange}
+                    required
+                  />
+                  <div>
+                    <Input
+                      name="password"
+                      placeholder="رمز عبور جدید"
+                      value={form.password}
+                      onChange={handleChange}
+                      required
+                      type="password"
+                      className={`w-full ${passwordError ? "border-red-500" : ""}`}
+                    />
+                    {passwordError && (
+                      <p className="text-xs text-red-500 mt-1">{passwordError}</p>
+                    )}
+                  </div>
+                </div>
               ) : (
                 <div className="space-y-5">
                   {mode === "signup" && (
@@ -216,7 +288,6 @@ const AuthForm: React.FC = () => {
                         value={form.userName}
                         onChange={handleChange}
                         required
-                        className="w-full bg-white text-gray-900 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-gray-400 transition-all duration-200"
                       />
                     </div>
                   )}
@@ -228,15 +299,10 @@ const AuthForm: React.FC = () => {
                       onChange={handleChange}
                       required
                       type="tel"
-                      className={`w-full bg-white text-gray-900 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-gray-400 transition-all duration-200 ${phoneError && mode === "signup"
-                          ? "border-red-500"
-                          : "border-gray-300"
-                        }`}
+                      className={`w-full ${phoneError ? "border-red-500" : ""}`}
                     />
-                    {phoneError && mode === "signup" && (
-                      <p className="text-xs text-red-500 mt-1">
-                        {phoneError}
-                      </p>
+                    {phoneError && (
+                      <p className="text-xs text-red-500 mt-1">{phoneError}</p>
                     )}
                   </div>
                   <div>
@@ -247,40 +313,62 @@ const AuthForm: React.FC = () => {
                       onChange={handleChange}
                       required
                       type="password"
-                      className={`w-full bg-white text-gray-900 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-gray-400 transition-all duration-200 ${passwordError && mode === "signup"
-                          ? "border-red-500"
-                          : "border-gray-300"
-                        }`}
+                      className={`w-full ${passwordError ? "border-red-500" : ""}`}
                     />
-                    {passwordError && mode === "signup" && (
-                      <p className="text-xs text-red-500 mt-1">
-                        {passwordError}
-                      </p>
+                    {passwordError && (
+                      <p className="text-xs text-red-500 mt-1">{passwordError}</p>
                     )}
                   </div>
                 </div>
               )}
               <Button
                 type="submit"
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-lg transition-colors duration-200"
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
               >
                 {mode === "signup"
                   ? "ثبت‌نام"
                   : mode === "otp"
                     ? "تأیید کد"
-                    : "ورود"}
+                    : mode === "forgot"
+                      ? "ارسال کد بازیابی"
+                      : mode === "reset"
+                        ? "تغییر رمز عبور"
+                        : "ورود"}
               </Button>
             </motion.form>
           </AnimatePresence>
-          {mode !== "otp" && (
+
+          {mode === "login" && (
+            <div className="text-center mt-3">
+              <button
+                onClick={() => setMode("forgot")}
+                className="text-sm text-indigo-600 hover:text-indigo-500"
+              >
+                رمز عبور را فراموش کرده‌اید؟
+              </button>
+            </div>
+          )}
+
+          {mode !== "otp" && mode !== "forgot" && mode !== "reset" && (
             <div className="text-center mt-5">
               <button
                 onClick={toggleMode}
-                className="text-sm text-indigo-600 hover:text-indigo-500 font-medium transition-colors duration-200"
+                className="text-sm text-indigo-600 hover:text-indigo-500 font-medium"
               >
                 {mode === "signup"
                   ? "حساب کاربری دارید؟ وارد شوید"
                   : "حساب کاربری ندارید؟ ثبت‌نام کنید"}
+              </button>
+            </div>
+          )}
+
+          {(mode === "forgot" || mode === "reset") && (
+            <div className="text-center mt-5">
+              <button
+                onClick={() => setMode("login")}
+                className="text-sm text-gray-600 hover:text-gray-800"
+              >
+                بازگشت به ورود
               </button>
             </div>
           )}
