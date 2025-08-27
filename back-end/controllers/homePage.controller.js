@@ -52,9 +52,9 @@ exports.updateHomePageData = async (req, res) => {
       sectionDescription,
       footerTitle,
       footerDescription,
-      mosaicImages1: mosaicImages1Existing,
-      mosaicImages2: mosaicImages2Existing,
-      sectionImage: sectionImageExisting,
+      mosaicImages1,
+      mosaicImages2,
+      sectionImage,
     } = req.body;
 
     const updateData = {};
@@ -69,42 +69,55 @@ exports.updateHomePageData = async (req, res) => {
     const baseUrl = '/uploads/images';
 
     // Process mosaicImages1
-    if (req.files && req.files['mosaicImages1']) {
-      updateData.mosaicImages1 = req.files['mosaicImages1'].map(file => `${baseUrl}/${file.filename}`);
-    } else if (mosaicImages1Existing) {
+    let mosaicImages1Array = [];
+    if (mosaicImages1 !== undefined) {
       try {
-        updateData.mosaicImages1 = Array.isArray(mosaicImages1Existing)
-          ? mosaicImages1Existing
-          : JSON.parse(mosaicImages1Existing);
-        if (!Array.isArray(updateData.mosaicImages1)) {
+        mosaicImages1Array = Array.isArray(mosaicImages1) ? mosaicImages1 : JSON.parse(mosaicImages1);
+        if (!Array.isArray(mosaicImages1Array)) {
           return res.status(400).json({ message: 'mosaicImages1 must be an array' });
         }
       } catch {
         return res.status(400).json({ message: 'Invalid mosaicImages1 format' });
       }
     }
+    if (req.files && req.files['mosaicImages1']) {
+      const newPaths = req.files['mosaicImages1'].map(file => `${baseUrl}/${file.filename}`);
+      mosaicImages1Array.push(...newPaths);
+    }
+    if (mosaicImages1 !== undefined || (req.files && req.files['mosaicImages1'])) {
+      updateData.mosaicImages1 = mosaicImages1Array;
+    }
 
     // Process mosaicImages2
-    if (req.files && req.files['mosaicImages2']) {
-      updateData.mosaicImages2 = req.files['mosaicImages2'].map(file => `${baseUrl}/${file.filename}`);
-    } else if (mosaicImages2Existing) {
+    let mosaicImages2Array = [];
+    if (mosaicImages2 !== undefined) {
       try {
-        updateData.mosaicImages2 = Array.isArray(mosaicImages2Existing)
-          ? mosaicImages2Existing
-          : JSON.parse(mosaicImages2Existing);
-        if (!Array.isArray(updateData.mosaicImages2)) {
+        mosaicImages2Array = Array.isArray(mosaicImages2) ? mosaicImages2 : JSON.parse(mosaicImages2);
+        if (!Array.isArray(mosaicImages2Array)) {
           return res.status(400).json({ message: 'mosaicImages2 must be an array' });
         }
       } catch {
         return res.status(400).json({ message: 'Invalid mosaicImages2 format' });
       }
     }
+    if (req.files && req.files['mosaicImages2']) {
+      const newPaths = req.files['mosaicImages2'].map(file => `${baseUrl}/${file.filename}`);
+      mosaicImages2Array.push(...newPaths);
+    }
+    if (mosaicImages2 !== undefined || (req.files && req.files['mosaicImages2'])) {
+      updateData.mosaicImages2 = mosaicImages2Array;
+    }
 
     // Process sectionImage
+    let sectionImageVal = undefined;
+    if (sectionImage !== undefined) {
+      sectionImageVal = sectionImage;
+    }
     if (req.files && req.files['sectionImage']) {
-      updateData.sectionImage = `${baseUrl}/${req.files['sectionImage'][0].filename}`;
-    } else if (sectionImageExisting) {
-      updateData.sectionImage = sectionImageExisting;
+      sectionImageVal = `${baseUrl}/${req.files['sectionImage'][0].filename}`;
+    }
+    if (sectionImageVal !== undefined) {
+      updateData.sectionImage = sectionImageVal;
     }
 
     const updatedHomePage = await HomePage.findOneAndUpdate(

@@ -29,6 +29,11 @@ interface HomePageData {
   sectionImage: string;
 }
 
+interface ImageItem {
+  preview: string;
+  file?: File;
+}
+
 export default function HomePageSettings() {
   const queryClient = useQueryClient();
   const { data, isLoading, error } = useQuery<HomePageData>({
@@ -40,62 +45,38 @@ export default function HomePageSettings() {
   });
 
   const [formData, setFormData] = useState<Partial<HomePageData>>({});
-  const [mosaicImages1Files, setMosaicImages1Files] = useState<File[]>([]);
-  const [mosaicImages2Files, setMosaicImages2Files] = useState<File[]>([]);
-  const [sectionImageFile, setSectionImageFile] = useState<File | null>(null);
-  const [mosaicImages1Previews, setMosaicImages1Previews] = useState<string[]>([]);
-  const [mosaicImages2Previews, setMosaicImages2Previews] = useState<string[]>([]);
-  const [sectionImagePreview, setSectionImagePreview] = useState<string | null>(null);
+  const [mosaicImages1, setMosaicImages1] = useState<ImageItem[]>([]);
+  const [mosaicImages2, setMosaicImages2] = useState<ImageItem[]>([]);
+  const [sectionImage, setSectionImage] = useState<ImageItem | null>(null);
 
   useEffect(() => {
     if (data) {
       setFormData(data);
-      setMosaicImages1Previews(data.mosaicImages1 || []);
-      setMosaicImages2Previews(data.mosaicImages2 || []);
-      setSectionImagePreview(data.sectionImage || null);
+      setMosaicImages1((data.mosaicImages1 || []).map((url) => ({ preview: url })));
+      setMosaicImages2((data.mosaicImages2 || []).map((url) => ({ preview: url })));
+      setSectionImage(data.sectionImage ? { preview: data.sectionImage } : null);
     }
   }, [data]);
 
   const handleFileChange = (
     files: FileList | null,
-    setFiles: React.Dispatch<React.SetStateAction<File[]>>,
-    setPreviews: React.Dispatch<React.SetStateAction<string[]>>,
+    setImages: React.Dispatch<React.SetStateAction<ImageItem[]>>,
     maxFiles: number
   ) => {
     if (!files) return;
     const newFiles = Array.from(files);
-    setFiles((prev) => {
-      const combined = [...prev, ...newFiles];
-      return combined.slice(0, maxFiles);
-    });
-    const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
-    setPreviews((prev) => {
-      const combined = [...prev, ...newPreviews];
-      return combined.slice(0, maxFiles);
-    });
+    const newItems = newFiles.map((file) => ({
+      preview: URL.createObjectURL(file),
+      file,
+    }));
+    setImages((prev) => [...prev, ...newItems].slice(0, maxFiles));
   };
 
   const handleDeleteImage = (
     index: number,
-    previews: string[],
-    setPreviews: React.Dispatch<React.SetStateAction<string[]>>,
-    files: File[],
-    setFiles: React.Dispatch<React.SetStateAction<File[]>>,
-    formKey: keyof HomePageData
+    setImages: React.Dispatch<React.SetStateAction<ImageItem[]>>,
   ) => {
-    const updatedPreviews = previews.filter((_, i) => i !== index);
-    setPreviews(updatedPreviews);
-    setFiles(files.filter((_, i) => i !== index));
-    setFormData((prev) => ({
-      ...prev,
-      [formKey]: updatedPreviews.filter((url) => !url.startsWith("blob:")),
-    }));
-  };
-
-  const urlToFile = async (url: string, filename: string): Promise<File> => {
-    const res = await fetch(url);
-    const blob = await res.blob();
-    return new File([blob], filename, { type: blob.type });
+    setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const mutation = useMutation({
@@ -112,35 +93,28 @@ export default function HomePageSettings() {
           fd.append(key, value as string);
         }
       });
-      // Append mosaicImages1
-      const mosaic1Files: File[] = [
-        ...mosaicImages1Files,
-        ...(await Promise.all(
-          (mosaicImages1Previews.filter((p) => !p.startsWith("blob:")) || []).map((url, idx) =>
-            urlToFile(url, `mosaic1-${idx}.jpg`)
-          )
-        )),
-      ];
-      mosaic1Files.forEach((file) => fd.append("mosaicImages1", file));
-      // Append mosaicImages2
-      const mosaic2Files: File[] = [
-        ...mosaicImages2Files,
-        ...(await Promise.all(
-          (mosaicImages2Previews.filter((p) => !p.startsWith("blob:")) || []).map((url, idx) =>
-            urlToFile(url, `mosaic2-${idx}.jpg`)
-          )
-        )),
-      ];
-      mosaic2Files.forEach((file) => fd.append("mosaicImages2", file));
+
+      // Append mosaicImages1 kept and new
+      const mosaic1Kept = mosaicImages1.filter((item) => !item.file).map((item) => item.preview);
+      fd.append("mosaicImages1", JSON.stringify(mosaic1Kept));
+      const mosaic1New = mosaicImages1.filter((item) => !!item.file).map((item) => item.file!);
+      mosaic1New.forEach((file) => fd.append("mosaicImages1", file));
+
+      // Append mosaicImages2 kept and new
+      const mosaic2Kept = mosaicImages2.filter((item) => !item.file).map((item) => item.preview);
+      fd.append("mosaicImages2", JSON.stringify(mosaic2Kept));
+      const mosaic2New = mosaicImages2.filter((item) => !!item.file).map((item) => item.file!);
+      mosaic2New.forEach((file) => fd.append("mosaicImages2", file));
+
       // Append sectionImage
-      if (sectionImageFile) {
-        fd.append("sectionImage", sectionImageFile);
-      } else if (sectionImagePreview && !sectionImagePreview.startsWith("blob:")) {
-        fd.append(
-          "sectionImage",
-          await urlToFile(sectionImagePreview, "sectionImage.jpg")
-        );
+      if (sectionImage === null) {
+        fd.append("sectionImage", "");
+      } else if (sectionImage.file) {
+        fd.append("sectionImage", sectionImage.file);
+      } else {
+        fd.append("sectionImage", sectionImage.preview);
       }
+
       // Log FormData contents for debugging
       for (const [key, value] of fd.entries()) {
         console.log(`FormData: ${key} =`, value);
@@ -223,50 +197,37 @@ export default function HomePageSettings() {
           {/* Mosaic Images 1 */}
           <ImageUploadSection
             title="تصاویر موزاییکی ۱ (حداکثر ۶ تصویر)"
-            previews={mosaicImages1Previews}
+            previews={mosaicImages1.map((item) => item.preview)}
             onDelete={(idx) =>
-              handleDeleteImage(
-                idx,
-                mosaicImages1Previews,
-                setMosaicImages1Previews,
-                mosaicImages1Files,
-                setMosaicImages1Files,
-                "mosaicImages1"
-              )
+              handleDeleteImage(idx, setMosaicImages1)
             }
             onChange={(files) =>
-              handleFileChange(files, setMosaicImages1Files, setMosaicImages1Previews, 6)
+              handleFileChange(files, setMosaicImages1, 6)
             }
           />
           {/* Mosaic Images 2 */}
           <ImageUploadSection
             title="تصاویر موزاییکی ۲ (حداکثر ۶ تصویر)"
-            previews={mosaicImages2Previews}
+            previews={mosaicImages2.map((item) => item.preview)}
             onDelete={(idx) =>
-              handleDeleteImage(
-                idx,
-                mosaicImages2Previews,
-                setMosaicImages2Previews,
-                mosaicImages2Files,
-                setMosaicImages2Files,
-                "mosaicImages2"
-              )
+              handleDeleteImage(idx, setMosaicImages2)
             }
             onChange={(files) =>
-              handleFileChange(files, setMosaicImages2Files, setMosaicImages2Previews, 6)
+              handleFileChange(files, setMosaicImages2, 6)
             }
           />
           {/* Section Image */}
           <SectionImageUpload
-            preview={sectionImagePreview}
+            preview={sectionImage?.preview || null}
             onFile={(file) => {
-              setSectionImageFile(file);
-              setSectionImagePreview(file ? URL.createObjectURL(file) : null);
+              if (file) {
+                setSectionImage({ preview: URL.createObjectURL(file), file });
+              } else {
+                setSectionImage(null);
+              }
             }}
             onDelete={() => {
-              setSectionImageFile(null);
-              setSectionImagePreview(null);
-              setFormData((prev) => ({ ...prev, sectionImage: "" }));
+              setSectionImage(null);
             }}
           />
         </CardContent>
