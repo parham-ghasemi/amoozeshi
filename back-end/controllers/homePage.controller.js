@@ -6,7 +6,7 @@ const HomePage = require('../models/HomePage');
 // Multer setup
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, '../Uploads/images');
+    const uploadPath = path.join(__dirname, '../uploads/images');
     if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath, { recursive: true });
     cb(null, uploadPath);
   },
@@ -127,7 +127,7 @@ exports.updateHomePageData = async (req, res) => {
         ...(req.files['sectionImage'] || []),
       ];
       filesToDelete.forEach(file => {
-        const filePath = path.join(__dirname, '../Uploads/images', file.filename);
+        const filePath = path.join(__dirname, '../uploads/images', file.filename);
         if (fs.existsSync(filePath)) {
           fs.unlinkSync(filePath);
         }
