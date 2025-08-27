@@ -26,6 +26,9 @@ const AuthForm: React.FC = () => {
     otp: "",
     userId: "",
   });
+  const [passwordError, setPasswordError] = useState<string>("");
+  const [phoneError, setPhoneError] = useState<string>("");
+
   const navigate = useNavigate();
 
   const toggleMode = () => setMode((prev) => (prev === "login" ? "signup" : "login"));
@@ -33,19 +36,57 @@ const AuthForm: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+
+    if (name === "password" && mode === "signup") {
+      validatePassword(value);
+    }
+
+    if (name === "phoneNumber" && mode !== "otp") {
+      validatePhoneNumber(value);
+    }
+  };
+
+  const validatePassword = (password: string) => {
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&._-]{8,}$/;
+    if (!regex.test(password)) {
+      setPasswordError(
+        "رمز عبور باید حداقل ۸ کاراکتر و شامل حروف بزرگ، کوچک و عدد باشد"
+      );
+      return false;
+    }
+    setPasswordError("");
+    return true;
+  };
+
+  const validatePhoneNumber = (phone: string) => {
+    const regex = new RegExp('^(\\+98|0)?9\\d{9}$');
+    if (!regex.test(phone)) {
+      setPhoneError("شماره تلفن معتبر نیست");
+      return false;
+    }
+    setPhoneError("");
+    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (mode === "signup") {
+      const isPasswordValid = validatePassword(form.password);
+      const isPhoneValid = validatePhoneNumber(form.phoneNumber);
+      if (!isPasswordValid || !isPhoneValid) {
+        toast.error("لطفاً ورودی‌ها را بررسی کنید");
+        return;
+      }
+    }
+
     try {
       if (mode === "otp") {
-        const { data }: { data: { token: string; user: { id: string } } } = await axios.post(
-          "/api/auth/verify-otp",
-          {
+        const { data }: { data: { token: string; user: { id: string } } } =
+          await axios.post("/api/auth/verify-otp", {
             userId: form.userId,
             otp: form.otp,
-          }
-        );
+          });
 
         localStorage.setItem("token", data.token);
         queryClient.invalidateQueries({ queryKey: ["get-user-w-jwt"] });
@@ -57,11 +98,12 @@ const AuthForm: React.FC = () => {
       }
 
       const endpoint = mode === "signup" ? "/api/auth/signup" : "/api/auth/login";
-      const { data }: { data: { token: string; user: { id: string } } } = await axios.post(endpoint, {
-        userName: form.userName,
-        phoneNumber: form.phoneNumber,
-        password: form.password,
-      });
+      const { data }: { data: { token: string; user: { id: string } } } =
+        await axios.post(endpoint, {
+          userName: form.userName,
+          phoneNumber: form.phoneNumber,
+          password: form.password,
+        });
 
       if (mode === "signup") {
         setForm((prev) => ({ ...prev, userId: data.user.id, otp: "" }));
@@ -134,8 +176,12 @@ const AuthForm: React.FC = () => {
                       onChange={handleChange}
                       required
                       type="tel"
-                      className="w-full bg-white text-gray-900 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-gray-400 transition-all duration-200"
+                      className={`w-full bg-white text-gray-900 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-gray-400 transition-all duration-200 ${phoneError && mode === "signup" ? "border-red-500" : "border-gray-300"
+                        }`}
                     />
+                    {phoneError && mode === "signup" && (
+                      <p className="text-xs text-red-500 mt-1">{phoneError}</p>
+                    )}
                   </div>
                   <div>
                     <Input
@@ -145,8 +191,12 @@ const AuthForm: React.FC = () => {
                       onChange={handleChange}
                       required
                       type="password"
-                      className="w-full bg-white text-gray-900 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-gray-400 transition-all duration-200"
+                      className={`w-full bg-white text-gray-900 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-gray-400 transition-all duration-200 ${passwordError && mode === "signup" ? "border-red-500" : "border-gray-300"
+                        }`}
                     />
+                    {passwordError && mode === "signup" && (
+                      <p className="text-xs text-red-500 mt-1">{passwordError}</p>
+                    )}
                   </div>
                 </div>
               )}

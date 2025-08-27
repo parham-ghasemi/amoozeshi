@@ -52,10 +52,6 @@ exports.signup = async (req, res) => {
       console.error('Error sending the sms', err)
     }
 
-    // Log OTP for testing
-    console.log(`OTP for user ${phoneNumber}: ${otp}`);
-
-
     res.status(201).json({
       message: "Signup successful, OTP sent",
       user: {
