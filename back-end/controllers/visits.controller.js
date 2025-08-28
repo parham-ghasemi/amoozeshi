@@ -1,11 +1,14 @@
 const Visit = require('../models/Visit');
-const moment = require('moment');
+const moment = require('moment-timezone');
 
 exports.getVisitStats = async (req, res) => {
   try {
-    const today = moment().startOf('day');
-    const weekStart = moment().startOf('isoWeek');
-    const monthStart = moment().startOf('month');
+    // Use Iran timezone
+    const tz = "Asia/Tehran";
+
+    const today = moment.tz(tz).startOf('day');
+    const weekStart = moment.tz(tz).startOf('isoWeek');
+    const monthStart = moment.tz(tz).startOf('month');
 
     const [todayVisits, weekVisits, monthVisits, totalVisits, dailyVisits] = await Promise.all([
       Visit.countDocuments({ createdAt: { $gte: today.toDate() } }),
@@ -16,7 +19,11 @@ exports.getVisitStats = async (req, res) => {
         {
           $group: {
             _id: {
-              $dateToString: { format: "%Y-%m-%d", date: "$createdAt" }
+              $dateToString: {
+                format: "%Y-%m-%d",
+                date: "$createdAt",
+                timezone: tz   // 👈 important
+              }
             },
             count: { $sum: 1 }
           }
@@ -30,7 +37,7 @@ exports.getVisitStats = async (req, res) => {
       week: weekVisits,
       month: monthVisits,
       total: totalVisits,
-      chartData: dailyVisits // For chart
+      chartData: dailyVisits
     });
   } catch (err) {
     console.error(err);

@@ -1,9 +1,6 @@
-
-import { TrendingUp } from "lucide-react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import {
-  Card, CardContent, CardDescription, CardFooter,
-  CardHeader, CardTitle,
+  Card, CardContent, CardDescription, CardHeader, CardTitle,
 } from "@/components/ui/card";
 import {
   ChartContainer, ChartTooltip, ChartTooltipContent,
@@ -12,6 +9,7 @@ import {
   Select, SelectTrigger, SelectValue,
   SelectContent, SelectItem,
 } from "@/components/ui/select";
+import moment from "moment-timezone";
 
 type VisitDataPoint = {
   _id: string;
@@ -26,26 +24,27 @@ type ChartProps = {
 
 const chartConfig = {
   count: {
-    label: "بازدیدها", // "Visits"
+    label: "بازدیدها",
     color: "var(--chart-1)",
   },
 };
 
+const tz = "Asia/Tehran";
+
 export function Chart({ data, range, setRange }: ChartProps) {
-  const formatDate = (date: string) => {
-    if (range === "year" || range === "all") return date;
-    const d = new Date(date);
+  const formatDate = (val: string) => {
+    if (range === "year" || range === "all") return val; // already month/year label
+
+    const m = moment.tz(val, ["YYYY-MM-DD", "MMM YY"], tz);
     switch (range) {
       case "today":
-        return d.toLocaleTimeString("fa-IR", { hour: "2-digit", minute: "2-digit" });
+        return m.format("HH:mm");
       case "week":
-        return d.toLocaleDateString("fa-IR", { weekday: "short" });
+        return m.format("ddd");
       case "month":
-        return d.toLocaleDateString("fa-IR", { day: "2-digit", month: "short" });
-      case "all":
-        return d.toLocaleDateString("fa-IR", { month: "short", year: "numeric" });
+        return m.format("D MMM");
       default:
-        return d.toDateString();
+        return m.format("YYYY/MM/DD");
     }
   };
 
@@ -73,7 +72,9 @@ export function Chart({ data, range, setRange }: ChartProps) {
           </SelectContent>
         </Select>
         <div className="flex flex-col gap-1">
-          <CardTitle className="text-end">آمار بازدید - {rangeLabelMap[range]}</CardTitle>
+          <CardTitle className="text-end">
+            آمار بازدید - {rangeLabelMap[range]}
+          </CardTitle>
           <CardDescription>تعداد بازدیدکنندگان در بازه انتخابی</CardDescription>
         </div>
       </CardHeader>
