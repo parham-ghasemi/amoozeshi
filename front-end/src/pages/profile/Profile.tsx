@@ -53,7 +53,7 @@ const Profile = () => {
             <span className="font-semibold">شماره تلفن:</span> {user.phoneNumber}
           </p>
           <p className="text-sm sm:text-base text-gray-600">
-            <span className="font-semibold">نقش:</span> {user.role === 'admin' ? 'ادمین' : 'یوزر'}
+            <span className="font-semibold">نقش:</span> {user.role === 'admin' ? 'ادمین' : 'هنرجو'}
           </p>
         </div>
 

@@ -30,6 +30,7 @@ const categoryRoutes = require('./routes/category.routes');
 const userRoutes = require('./routes/user.routes');
 const homePageRoutes = require('./routes/homepage.routes');
 const footerRoutes = require('./routes/footer.routes');
+const resumeRoutes = require('./routes/resume.routes');
 
 const routers = [
   { path: '/api/auth', router: authRoutes },
@@ -42,6 +43,7 @@ const routers = [
   { path: '/api', router: userRoutes },
   { path: '/api', router: homePageRoutes },
   { path: '/api', router: footerRoutes },
+  { path: '/api', router: resumeRoutes },
 ];
 
 // Validate and use routers

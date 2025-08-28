@@ -7,6 +7,9 @@ import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { motion, AnimatePresence } from 'framer-motion';
 import { content } from './about/aboutdata';
+import { toast } from 'sonner';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
 
 const About: React.FC = () => {
   const [language, setLanguage] = useState<'fa' | 'en'>('fa');
@@ -39,6 +42,21 @@ const About: React.FC = () => {
     { href: "https://www.youtube.com/channel/UCyuzEhGXzYvOMQs1PdK91cQ?view_as=subscriber", icon: FaYoutube, color: "text-red-600", name: language === 'fa' ? 'یوتیوب' : 'YouTube' },
     { href: "https://instagram.com/management.today?igshid=x99j8teqek9v", icon: FaInstagram, color: "text-pink-500", name: language === 'fa' ? 'اینستاگرام' : 'Instagram' }
   ];
+
+  const { data: resumeUrl } = useQuery({
+    queryKey: ["resume"],
+    queryFn: async () => {
+      try {
+        const res = await axios.get("/api/resume", { responseType: "blob" });
+        return URL.createObjectURL(new Blob([res.data]));
+      } catch (err: any) {
+        if (err.response && err.response.status === 404) {
+          return null;
+        }
+        throw err;
+      }
+    }
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
@@ -92,7 +110,7 @@ const About: React.FC = () => {
               </p>
             </motion.section>
 
-            {/* Summary of Activities Section */}
+            {/* Summary Section */}
             <motion.section
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
@@ -122,7 +140,7 @@ const About: React.FC = () => {
               </Card>
             </motion.section>
 
-            {/* Contact and Resume Grid */}
+            {/* Contact + Resume Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
               {/* Contact Section */}
               <motion.div variants={cardVariants} initial="hidden" animate="visible" whileHover="hover">
@@ -176,10 +194,23 @@ const About: React.FC = () => {
                       {content[language].resumeText}
                     </p>
                     <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
-                      <Button asChild>
-                        <a href="/path-to-resume.pdf" download className="flex items-center gap-2">
-                          <FiDownload className="h-4 w-4" /> {content[language].resumeButton}
-                        </a>
+                      <Button
+                        asChild
+                        onClick={() => {
+                          if (!resumeUrl) {
+                            toast.error(language === "fa" ? "رزومه‌ای آپلود نشده است" : "No resume uploaded yet");
+                          }
+                        }}
+                      >
+                        {resumeUrl ? (
+                          <a href={resumeUrl} download="resume.pdf" className="flex items-center gap-2">
+                            <FiDownload className="h-4 w-4" /> {content[language].resumeButton}
+                          </a>
+                        ) : (
+                          <span className="flex items-center gap-2">
+                            <FiDownload className="h-4 w-4" /> {content[language].resumeButton}
+                          </span>
+                        )}
                       </Button>
                     </motion.div>
                   </CardContent>

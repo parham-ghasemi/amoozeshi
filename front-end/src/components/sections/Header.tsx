@@ -1,8 +1,10 @@
 import { Link, useNavigate } from "react-router-dom"
+import { motion } from "framer-motion";
 import { useState } from "react"
 import { Menu, X } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
 import authAxios from "@/lib/authAxios"
+import { AnimatePresence } from "framer-motion"
 
 const Header = () => {
   const [open, setOpen] = useState(false)
@@ -27,6 +29,7 @@ const Header = () => {
 
 
   const onClick = () => {
+    setOpen(false);
     if (!user) {
       nav('/auth');
       return;
@@ -58,21 +61,31 @@ const Header = () => {
         </button>
       </div>
 
-      {open && (
-        <div className="absolute top-16 left-0 w-full bg-white border-b shadow-md flex flex-col items-center gap-4 py-4 md:hidden">
-          <button onClick={onClick}>
-            {
-              // @ts-ignore
-              user && user?.userName ? user.userName : ' ثبت نام | ورود'
-            }
-          </button>
-          <Link to="/about" onClick={() => setOpen(false)}>درباره ما</Link>
-          <Link to="/courses" onClick={() => setOpen(false)}>دوره ها</Link>
-          <Link to="/videos" onClick={() => setOpen(false)}>ویدئو ها</Link>
-          <Link to="/articles" onClick={() => setOpen(false)}>مقالات</Link>
-          <Link to="/" onClick={() => setOpen(false)}>خانه</Link>
-        </div>
-      )}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.1, ease: "easeInOut" }}
+            className="absolute top-16 left-0 w-full bg-white border-b shadow-md flex flex-col items-center gap-4 py-4 md:hidden overflow-hidden"
+          >
+            <button
+              onClick={() => {
+                setOpen(false)
+                onClick()
+              }}
+            >
+              {user && user?.userName ? user.userName : " ثبت نام | ورود"}
+            </button>
+            <Link to="/about" onClick={() => setOpen(false)}>درباره ما</Link>
+            <Link to="/courses" onClick={() => setOpen(false)}>دوره ها</Link>
+            <Link to="/videos" onClick={() => setOpen(false)}>ویدئو ها</Link>
+            <Link to="/articles" onClick={() => setOpen(false)}>مقالات</Link>
+            <Link to="/" onClick={() => setOpen(false)}>خانه</Link>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
