@@ -57,7 +57,7 @@ const CategoryManager: React.FC = () => {
   const handleDeleteCategory = async () => {
     if (!selectedToDelete) return;
     try {
-      await authAxios.delete(`/api/categories/${selectedToDelete._id}`);
+      await authAxios.delete(`/categories/${selectedToDelete._id}`);
       fetchCategories();
     } catch (err) {
       console.error("خطا در حذف دسته‌بندی", err);
