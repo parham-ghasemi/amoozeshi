@@ -10,10 +10,9 @@ import ArticleCard from '@/components/cards/ArticleCard';
 import VideoCard from '@/components/cards/VideoCard';
 import CourseCard from '@/components/cards/CourseCard';
 import authAxios from "@/lib/authAxios";
-import moment from "moment-timezone";
 
 type VisitDataPoint = {
-  _id: string; // already YYYY-MM-DD Tehran local from backend
+  _id: string;
   count: number;
 };
 
@@ -22,45 +21,49 @@ type VisitStats = {
   week: number;
   month: number;
   total: number;
-  chartData?: VisitDataPoint[];
+  chartData?: VisitDataPoint[]; // Make chartData optional to handle undefined case
 };
 
-const tz = "Asia/Tehran";
-
 const filterDataByRange = (data: VisitDataPoint[], range: string): VisitDataPoint[] => {
-  const todayStr = moment().tz(tz).format("YYYY-MM-DD");
-  const weekAgo = moment().tz(tz).subtract(6, "days").format("YYYY-MM-DD");
-  const monthAgo = moment().tz(tz).subtract(29, "days").format("YYYY-MM-DD");
-  const yearAgo = moment().tz(tz).subtract(365, "days").format("YYYY-MM-DD");
+  const now = new Date();
+  return data.filter(({ _id }) => {
+    const date = new Date(_id);
+    const diffTime = now.getTime() - date.getTime();
+    const diffDays = diffTime / (1000 * 60 * 60 * 24);
 
-  switch (range) {
-    case "today":
-      return data.filter(d => d._id === todayStr);
-    case "week":
-      return data.filter(d => d._id >= weekAgo);
-    case "month":
-      return data.filter(d => d._id >= monthAgo);
-    case "year":
-      return data.filter(d => d._id >= yearAgo);
-    default:
-      return data; // "all"
-  }
+    switch (range) {
+      case "today":
+        return date.toDateString() === now.toDateString();
+      case "week":
+        return diffDays < 7;
+      case "month":
+        return diffDays < 30;
+      case "year":
+        return diffDays < 365;
+      default:
+        return true; // "all"
+    }
+  });
 };
 
 const groupByMonthWithYear = (data: VisitDataPoint[]) => {
   const map = new Map<string, number>();
 
   data.forEach(({ _id, count }) => {
-    const m = moment.tz(_id, "YYYY-MM-DD", tz);
-    const key = m.format("YYYY-MM");
+    const d = new Date(_id);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
     map.set(key, (map.get(key) || 0) + count);
   });
 
   return Array.from(map.entries())
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([key, count]) => {
-      const m = moment.tz(key, "YYYY-MM", tz);
-      const label = m.format("MMM YY"); // Persian short month + 2-digit year
+      const [year, month] = key.split("-");
+      const date = new Date(Number(year), Number(month) - 1);
+      const label = date.toLocaleDateString("fa-IR", {
+        month: "short",
+        year: "2-digit",
+      });
       return { _id: label, count };
     });
 };
@@ -81,6 +84,7 @@ const AdminDashboard: React.FC = () => {
     const fetchStats = async () => {
       try {
         const res = await authAxios.get<VisitStats>('/admin/visits');
+        // Ensure chartData is an array, default to empty array if undefined
         setStats({ ...res.data, chartData: res.data.chartData || [] });
       } catch (err) {
         console.error('خطا در دریافت آمار:', err);
@@ -140,6 +144,7 @@ const AdminDashboard: React.FC = () => {
     return <p>{error || 'آماری موجود نیست.'}</p>;
   }
 
+  // Ensure chartData is an array before filtering
   const rawFiltered = Array.isArray(stats.chartData)
     ? filterDataByRange(stats.chartData, range)
     : [];
@@ -150,7 +155,7 @@ const AdminDashboard: React.FC = () => {
       : rawFiltered;
 
   return (
-    <div className="p-6 space-y-6 max-w-5xl flex flex-col items-center">
+    <div className="p-6 space-y-6 w-5xl flex flex-col items-center">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="تعداد بازدید کل" value={stats.total} />
         <StatCard label="تعداد بازدید این ماه" value={stats.month} />
@@ -174,11 +179,9 @@ const AdminDashboard: React.FC = () => {
           <CardContent className="flex flex-col gap-4 max-h-[400px] overflow-y-auto">
             {mostViewedArticles.length > 0 ? (
               mostViewedArticles.map((article, index) => (
-                <div className="flex flex-col gap-4 rounded" key={article._id}>
+                <div className="flex-0 flex flex-col gap-4 rounded" key={`${article._id}-${index}`}>
                   <ArticleCard article={article} />
-                  {index < mostViewedArticles.length - 1 && (
-                    <div className="w-full h-px bg-gray-200"></div>
-                  )}
+                  <div className="w-full h-px bg-gray-200"></div>
                 </div>
               ))
             ) : (
@@ -194,11 +197,9 @@ const AdminDashboard: React.FC = () => {
           <CardContent className="flex flex-col gap-4 max-h-[400px] overflow-y-auto">
             {mostViewedVideos.length > 0 ? (
               mostViewedVideos.map((video, index) => (
-                <div className="flex flex-col gap-4 rounded" key={video._id}>
+                <div className="flex-0 flex flex-col gap-4 rounded" key={`${video._id}-${index}`}>
                   <VideoCard video={video} />
-                  {index < mostViewedVideos.length - 1 && (
-                    <div className="w-full h-px bg-gray-200"></div>
-                  )}
+                  <div className="w-full h-px bg-gray-200"></div>
                 </div>
               ))
             ) : (
@@ -215,11 +216,9 @@ const AdminDashboard: React.FC = () => {
         <CardContent className="grid grid-cols-3 gap-4 max-h-[400px] overflow-y-auto">
           {mostViewedCourses.length > 0 ? (
             mostViewedCourses.map((course, index) => (
-              <div className="flex flex-col gap-4 rounded" key={course._id}>
+              <div className="flex-0 flex flex-col gap-4 rounded" key={`${course._id}-${index}`}>
                 <CourseCard course={course} />
-                {index < mostViewedCourses.length - 1 && (
-                  <div className="w-full h-px bg-gray-200"></div>
-                )}
+                <div className="w-full h-px bg-gray-200"></div>
               </div>
             ))
           ) : (
