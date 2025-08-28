@@ -40,6 +40,7 @@ import EditPodcastForm from "./Admin/components/Articles/EditPodcastForm"
 import ShowPodcasts from "./pages/podcast/ShowPodcasts"
 import PodcastSearch from "./pages/podcast/PodcastSearch"
 import PodcastShowcase from "./pages/podcast/PodcastShowcase"
+import UsersPage from "./Admin/UserPage"
 
 function App() {
   return (
@@ -97,6 +98,7 @@ function App() {
             <Route path="course/edit/:id" element={<EditCourseForm />} />
             <Route path="settings" element={<Settings />} />
             <Route path="homepage" element={<HomePageSettings />} />
+            <Route path="users" element={<UsersPage />} />
           </Route>
 
         </Routes>

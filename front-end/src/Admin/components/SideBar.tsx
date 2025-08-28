@@ -9,6 +9,7 @@ const items = [
   { name: "مقالات", path: "/article" },
   { name: "دوره ها", path: "/course" },
   { name: " صفحه اصلی", path: "/homepage" },
+  { name: "کاربران", path: "/users" },
   { name: "سایر تنظیمات", path: "/settings" },
   { name: "خروج", path: "/" },
 ];

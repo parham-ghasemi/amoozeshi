@@ -4,7 +4,6 @@ const Video = require("../models/Video");
 const Article = require("../models/Article");
 const Podcast = require("../models/Podcast");
 
-
 exports.getCurrentUser = async (req, res) => {
   try {
     const userId = req.user.id; // from the JWT payload
@@ -24,6 +23,26 @@ exports.getCurrentUser = async (req, res) => {
     return res.status(200).json(user);
   } catch (err) {
     console.error("Error getting current user:", err);
+    return res.status(500).json({ message: "Server error." });
+  }
+};
+
+exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find()
+      .select("-hashedPassword") // exclude sensitive info
+      .populate("joinedCourses", "title thumbnail")
+      .populate("favoriteVideos", "title thumbnail visits createdAt")
+      .populate("favoriteArticles", "title thumbnail")
+      .populate("favoritePodcasts", "title thumbnail listens createdAt");
+
+    if (!users || users.length === 0) {
+      return res.status(404).json({ message: "No users found." });
+    }
+
+    return res.status(200).json(users);
+  } catch (err) {
+    console.error("Error getting all users:", err);
     return res.status(500).json({ message: "Server error." });
   }
 };
