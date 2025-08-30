@@ -1,4 +1,5 @@
 import React from "react";
+import { GiQuill, GiQuillInk, GiScrollQuill } from "react-icons/gi";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -157,6 +158,23 @@ const FeatureCard: React.FC<{ title?: string; desc?: string; image?: string; ind
   );
 };
 
+const StatsCard: React.FC<{ title: string; content: string; index: number }> = ({ title, content, index }) => {
+  console.log(title)
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: index * 0.2, ease: "easeOut" }}
+    >
+      <Card className="border flex flex-col h-full items-center justify-center gap-2.5 text-center py-6 px-4 hover:shadow-xl transition cursor-pointer" dir="rtl">
+        <GiScrollQuill size={50} className="text-neutral-800 mb-5" />
+        <p className="text-lg font-semibold text-neutral-800">{title}</p>
+        <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-neutral-900">{content}</h3>
+      </Card>
+    </motion.div>
+  );
+};
+
 interface HomePageData {
   heroTitle: string;
   heroDescription: string;
@@ -168,6 +186,7 @@ interface HomePageData {
   mosaicImages1: string[];
   mosaicImages2: string[];
   sectionImage: string;
+  statsCards: { title: string; content: string }[];
 }
 
 
@@ -272,7 +291,7 @@ export default function HomePage() {
         </section>
 
         <motion.section
-          className="mt-12 sm:mt-16 grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center"
+          className="mt-12 sm:mt-16 grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center "
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
@@ -297,10 +316,23 @@ export default function HomePage() {
             </p>
           </motion.div>
         </motion.section>
+
+        {homepage?.statsCards && (
+          <section className={`mt-8 grid grid-cols-1 sm:grid-cols-${homepage.statsCards.length >= 2 ? 2 : homepage.statsCards.length} lg:grid-cols-${homepage.statsCards.length >= 4 ? 4 : homepage.statsCards.length} gap-4 sm:gap-6`}>
+            {homepage.statsCards.slice(0, 4).map((card, index) => (
+              <StatsCard
+                key={index}
+                title={card.title}
+                content={card.content}
+                index={index}
+              />
+            ))}
+          </section>
+        )}
       </main>
 
       <motion.footer
-        className="mt-12 sm:mt-20 bg-neutral-200 py-8 sm:py-10"
+        className="mt-8 bg-neutral-200 py-8 sm:py-10"
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.6 }}

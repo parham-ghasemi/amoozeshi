@@ -27,6 +27,7 @@ interface HomePageData {
   mosaicImages1: string[];
   mosaicImages2: string[];
   sectionImage: string;
+  statsCards: { title: string; content: string }[];
 }
 
 interface ImageItem {
@@ -48,6 +49,7 @@ export default function HomePageSettings() {
   const [mosaicImages1, setMosaicImages1] = useState<ImageItem[]>([]);
   const [mosaicImages2, setMosaicImages2] = useState<ImageItem[]>([]);
   const [sectionImage, setSectionImage] = useState<ImageItem | null>(null);
+  const [statsCards, setStatsCards] = useState<{ title: string; content: string }[]>([]);
 
   useEffect(() => {
     if (data) {
@@ -55,6 +57,7 @@ export default function HomePageSettings() {
       setMosaicImages1((data.mosaicImages1 || []).map((url) => ({ preview: url })));
       setMosaicImages2((data.mosaicImages2 || []).map((url) => ({ preview: url })));
       setSectionImage(data.sectionImage ? { preview: data.sectionImage } : null);
+      setStatsCards(data.statsCards || []);
     }
   }, [data]);
 
@@ -79,6 +82,28 @@ export default function HomePageSettings() {
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const addStatsCard = () => {
+    if (statsCards.length < 4) {
+      setStatsCards([...statsCards, { title: '', content: '' }]);
+    }
+  };
+
+  const removeStatsCard = (index: number) => {
+    setStatsCards(statsCards.filter((_, i) => i !== index));
+  };
+
+  const updateStatsCardTitle = (index: number, value: string) => {
+    const newCards = [...statsCards];
+    newCards[index].title = value;
+    setStatsCards(newCards);
+  };
+
+  const updateStatsCardContent = (index: number, value: string) => {
+    const newCards = [...statsCards];
+    newCards[index].content = value;
+    setStatsCards(newCards);
+  };
+
   const mutation = useMutation({
     mutationFn: async () => {
       const fd = new FormData();
@@ -88,6 +113,7 @@ export default function HomePageSettings() {
           key !== "mosaicImages1" &&
           key !== "mosaicImages2" &&
           key !== "sectionImage" &&
+          key !== "statsCards" &&
           value !== undefined
         ) {
           fd.append(key, value as string);
@@ -114,6 +140,9 @@ export default function HomePageSettings() {
       } else {
         fd.append("sectionImage", sectionImage.preview);
       }
+
+      // Append statsCards
+      fd.append("statsCards", JSON.stringify(statsCards));
 
       // Log FormData contents for debugging
       for (const [key, value] of fd.entries()) {
@@ -230,6 +259,41 @@ export default function HomePageSettings() {
               setSectionImage(null);
             }}
           />
+          {/* Stats Cards */}
+          <div className="mt-6 space-y-4">
+            <Label>کارت‌های آمار (حداکثر ۴)</Label>
+            {statsCards.map((card, idx) => (
+              <div key={idx} className="border p-4 rounded-md space-y-2 relative">
+                <div className="space-y-2">
+                  <Label>عنوان کارت {idx + 1}</Label>
+                  <Input
+                    value={card.title}
+                    onChange={(e) => updateStatsCardTitle(idx, e.target.value)}
+                    placeholder="عنوان"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>محتوای کارت {idx + 1}</Label>
+                  <Textarea
+                    value={card.content}
+                    onChange={(e) => updateStatsCardContent(idx, e.target.value)}
+                    placeholder="محتوا"
+                  />
+                </div>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="absolute top-2 left-2"
+                  onClick={() => removeStatsCard(idx)}
+                >
+                  حذف
+                </Button>
+              </div>
+            ))}
+            {statsCards.length < 4 && (
+              <Button onClick={addStatsCard}>افزودن کارت</Button>
+            )}
+          </div>
         </CardContent>
         <CardFooter className="flex justify-end pt-6 border-t">
           <Button

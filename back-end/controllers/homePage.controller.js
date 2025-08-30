@@ -55,6 +55,7 @@ exports.updateHomePageData = async (req, res) => {
       mosaicImages1,
       mosaicImages2,
       sectionImage,
+      statsCards
     } = req.body;
 
     const updateData = {};
@@ -118,6 +119,26 @@ exports.updateHomePageData = async (req, res) => {
     }
     if (sectionImageVal !== undefined) {
       updateData.sectionImage = sectionImageVal;
+    }
+
+    // Process statsCards
+    let statsCardsArray = [];
+    if (statsCards !== undefined) {
+      try {
+        statsCardsArray = Array.isArray(statsCards) ? statsCards : JSON.parse(statsCards);
+        if (!Array.isArray(statsCardsArray)) {
+          return res.status(400).json({ message: 'statsCards must be an array' });
+        }
+        // Optional: Validate each item has title and content
+        for (const card of statsCardsArray) {
+          if (!card.title || !card.content) {
+            return res.status(400).json({ message: 'Each statsCard must have title and content' });
+          }
+        }
+      } catch {
+        return res.status(400).json({ message: 'Invalid statsCards format' });
+      }
+      updateData.statsCards = statsCardsArray;
     }
 
     const updatedHomePage = await HomePage.findOneAndUpdate(

@@ -57,7 +57,8 @@ exports.signup = async (req, res) => {
     });
 
     try {
-      await axios.get(`${smsUrl}?${smsParams.toString()}`);
+      // await axios.get(`${smsUrl}?${smsParams.toString()}`);
+      console.log(otp)
       console.log("OTP SMS sent successfully");
     } catch (err) {
       console.error("Error sending SMS:", err.response?.data || err.message);
@@ -208,7 +209,8 @@ exports.resendOTP = async (req, res) => {
     });
 
     try {
-      await axios.get(`${smsUrl}?${smsParams.toString()}`);
+      // await axios.get(`${smsUrl}?${smsParams.toString()}`);
+      console.log(otp)
       console.log("OTP SMS sent successfully");
     } catch (err) {
       console.error("Error sending SMS:", err.response?.data || err.message);
@@ -251,7 +253,8 @@ exports.requestPasswordReset = async (req, res) => {
     });
 
     try {
-      await axios.get(`${smsUrl}?${smsParams.toString()}`);
+      // await axios.get(`${smsUrl}?${smsParams.toString()}`);
+      console.log(otp)
       console.log("Password reset OTP sent successfully");
     } catch (err) {
       console.error("Error sending reset OTP:", err.response?.data || err.message);

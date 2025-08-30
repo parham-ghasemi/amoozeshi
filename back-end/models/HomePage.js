@@ -47,6 +47,13 @@ const homePageSchema = new mongoose.Schema({
   sectionImage: {
     type: String,
     default: ''
+  },
+  statsCards: {
+    type: [{
+      title: { type: String, required: true },
+      content: { type: String, required: true }
+    }],
+    default: []
   }
 }, { timestamps: true });
 
