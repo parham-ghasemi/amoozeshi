@@ -194,7 +194,7 @@ export default function HomePageSettings() {
         <CardContent className="pt-6">
           {/* Text fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[
+            {([
               { key: "heroTitle", label: "عنوان اصلی", type: "input" },
               { key: "heroDescription", label: "توضیح اصلی", type: "textarea" },
               { key: "middleText", label: "متن میانی", type: "textarea" },
@@ -202,19 +202,19 @@ export default function HomePageSettings() {
               { key: "sectionDescription", label: "توضیح بخش", type: "textarea" },
               { key: "footerTitle", label: "عنوان فوتر", type: "input" },
               { key: "footerDescription", label: "توضیح فوتر", type: "textarea" },
-            ].map((field) => (
+            ] as const).map((field) => (
               <div key={field.key} className="space-y-2">
                 <Label>{field.label}</Label>
                 {field.type === "textarea" ? (
                   <Textarea
-                    value={formData[field.key as keyof HomePageData] || ""}
+                    value={(formData[field.key] as string | undefined) ?? ""}
                     onChange={(e) =>
                       setFormData({ ...formData, [field.key]: e.target.value })
                     }
                   />
                 ) : (
                   <Input
-                    value={formData[field.key as keyof HomePageData] || ""}
+                    value={(formData[field.key] as string | undefined) ?? ""}
                     onChange={(e) =>
                       setFormData({ ...formData, [field.key]: e.target.value })
                     }
@@ -227,23 +227,15 @@ export default function HomePageSettings() {
           <ImageUploadSection
             title="تصاویر موزاییکی ۱ (حداکثر ۶ تصویر)"
             previews={mosaicImages1.map((item) => item.preview)}
-            onDelete={(idx) =>
-              handleDeleteImage(idx, setMosaicImages1)
-            }
-            onChange={(files) =>
-              handleFileChange(files, setMosaicImages1, 6)
-            }
+            onDelete={(idx) => handleDeleteImage(idx, setMosaicImages1)}
+            onChange={(files) => handleFileChange(files, setMosaicImages1, 6)}
           />
           {/* Mosaic Images 2 */}
           <ImageUploadSection
             title="تصاویر موزاییکی ۲ (حداکثر ۶ تصویر)"
             previews={mosaicImages2.map((item) => item.preview)}
-            onDelete={(idx) =>
-              handleDeleteImage(idx, setMosaicImages2)
-            }
-            onChange={(files) =>
-              handleFileChange(files, setMosaicImages2, 6)
-            }
+            onDelete={(idx) => handleDeleteImage(idx, setMosaicImages2)}
+            onChange={(files) => handleFileChange(files, setMosaicImages2, 6)}
           />
           {/* Section Image */}
           <SectionImageUpload
