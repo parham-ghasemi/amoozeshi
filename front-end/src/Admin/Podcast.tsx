@@ -12,7 +12,6 @@ const Podcasts = () => {
 
       {/* Edit Podcast */}
       <section className="bg-white p-5 rounded-xl shadow" dir="rtl">
-        <h2 className="text-xl font-bold mb-4">ویرایش پادکست</h2>
         <SearchPodcasts />
       </section>
     </div>
