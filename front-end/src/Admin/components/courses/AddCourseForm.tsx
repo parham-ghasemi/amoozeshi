@@ -159,7 +159,7 @@ export default function AddCourseForm() {
               async uploadByFile(file: File) {
                 const formData = new FormData();
                 formData.append('image', file);
-                const res = await authAxios.post('/api/upload', formData, {
+                const res = await authAxios.post('/upload', formData, {
                   headers: { 'Content-Type': 'multipart/form-data' },
                 });
                 return res.data;
@@ -203,7 +203,7 @@ export default function AddCourseForm() {
     formData.append('image', file);
     setIsUploadingThumb(true);
     try {
-      const res = await authAxios.post('/api/upload', formData, {
+      const res = await authAxios.post('/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       if (res.data?.success) setThumbnail(res.data.file.url);
@@ -224,7 +224,7 @@ export default function AddCourseForm() {
     }
 
     try {
-      await authAxios.post('/api/courses', {
+      await authAxios.post('/courses', {
         title,
         shortDesc,
         thumbnail,

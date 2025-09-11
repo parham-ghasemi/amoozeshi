@@ -39,7 +39,7 @@ export default function AddVideoForm() {
                 const formData = new FormData();
                 formData.append('image', file);
                 try {
-                  const res = await authAxios.post('/api/upload', formData, {
+                  const res = await authAxios.post('/upload', formData, {
                     headers: { 'Content-Type': 'multipart/form-data' },
                   });
                   return res.data;
@@ -73,7 +73,7 @@ export default function AddVideoForm() {
     formData.append('image', file);
     setIsUploadingThumb(true);
     try {
-      const res = await authAxios.post('/api/upload', formData, {
+      const res = await authAxios.post('/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       if (res.data?.success) {
@@ -105,7 +105,7 @@ export default function AddVideoForm() {
 
     try {
       setIsUploadingVideo(true);
-      await authAxios.post('/api/videos', formData, {
+      await authAxios.post('/videos', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       alert('Video uploaded!');

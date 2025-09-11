@@ -39,7 +39,7 @@ export default function AddPodcastForm() {
                 const formData = new FormData();
                 formData.append('image', file);
                 try {
-                  const res = await authAxios.post('/api/podcasts/upload', formData, {
+                  const res = await authAxios.post('/podcasts/upload', formData, {
                     headers: { 'Content-Type': 'multipart/form-data' },
                   });
                   return res.data;
@@ -73,7 +73,7 @@ export default function AddPodcastForm() {
     formData.append('image', file);
     setIsUploadingThumb(true);
     try {
-      const res = await authAxios.post('/api/podcasts/upload', formData, {
+      const res = await authAxios.post('/podcasts/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       if (res.data?.success) {
@@ -105,7 +105,7 @@ export default function AddPodcastForm() {
 
     try {
       setIsUploadingAudio(true);
-      await authAxios.post('/api/podcasts', formData, {
+      await authAxios.post('/podcasts', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       alert('Podcast uploaded!');
