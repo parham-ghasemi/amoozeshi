@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import authAxios from "@/lib/authAxios";
+import { Helmet } from "react-helmet";
 
 const fetchArticle = async (id: string): Promise<Article> => {
   const res = await fetch(`/api/article/${id}`);
@@ -192,6 +193,15 @@ const ArticleShowcase = () => {
 
   return (
     <div className="relative min-h-screen bg-gray-50">
+      <Helmet>
+        <title>{article.title} - modirfarda</title>
+        <meta name="description" content={article.description || "خواندن مقاله در مورد موضوعات مختلف در مدیر فردا"} />
+        <meta property="og:title" content={article.title} />
+        <meta property="og:description" content={article.description || "خواندن مقاله در مورد موضوعات مختلف در مدیر فردا"} />
+        <meta property="og:type" content="article" />
+        <meta property="og:image" content={article.thumbnail} />
+        <link rel="canonical" href={`https://modirfarda.com/article/${id}`} />
+      </Helmet>
       {/* Background Image with Frosted Glass Effect */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <img

@@ -12,6 +12,7 @@ import { motion } from "framer-motion";
 import type { ArticleShort } from "types/article";
 import { Link, useNavigate } from "react-router-dom";
 import authAxios from "@/lib/authAxios";
+import { FaGraduationCap } from "react-icons/fa6";
 
 const HeroMosaic = ({ images1, images2 }: { images1: string[], images2: string[] }) => {
   const isSmallScreen = typeof window !== 'undefined' && window.innerWidth < 1024;
@@ -167,7 +168,7 @@ const StatsCard: React.FC<{ title: string; content: string; index: number }> = (
       transition={{ duration: 0.5, delay: index * 0.2, ease: "easeOut" }}
     >
       <Card className="border flex flex-col h-full items-center justify-center gap-2.5 text-center py-6 px-4 hover:shadow-xl transition cursor-pointer" dir="rtl">
-        <GiScrollQuill size={50} className="text-neutral-800 mb-5" />
+        <FaGraduationCap size={55} className="text-neutral-800 mb-2" />
         <p className="text-lg font-semibold text-neutral-800">{title}</p>
         <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-neutral-900">{content}</h3>
       </Card>
