@@ -113,7 +113,7 @@ const CourseShowcase = () => {
     onError: (err: any) => {
       console.error("Failed to join course:", err);
       const message = err.response?.data?.message || "Something went wrong.";
-      alert(message);
+      toast.error(message);
     },
   });
 

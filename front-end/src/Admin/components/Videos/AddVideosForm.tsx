@@ -8,6 +8,8 @@ import { CategoryDropDown } from '../CategoryDropDown';
 import { RelatedVideosSelector } from './RelatedVideosSelector'; // <-- Use the one we made
 import type { VideoShort } from 'types/video';
 import authAxios from '@/lib/authAxios';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 export default function AddVideoForm() {
   const ejInstance = useRef<EditorJS | null>(null);
@@ -16,14 +18,14 @@ export default function AddVideoForm() {
   const [shortDesc, setShortDesc] = useState('');
   const [category, setCategory] = useState('');
   const [relatedVideos, setRelatedVideos] = useState<string[]>([]);
-  const [allVideos, setAllVideos] = useState<VideoShort[]>([]);
-
   const [thumbnail, setThumbnail] = useState('');
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [videoFile, setVideoFile] = useState<File | null>(null);
 
-  const [isUploadingThumb, setIsUploadingThumb] = useState(false);
-  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
+  const { data: allVideos = [] } = useQuery<VideoShort[]>({
+    queryKey: ['videos'],
+    queryFn: () => axios.get('/api/videos').then((res) => res.data),
+  });
 
   useEffect(() => {
     const editor = new EditorJS({
@@ -57,65 +59,61 @@ export default function AddVideoForm() {
 
     ejInstance.current = editor;
 
-    axios
-      .get('/api/videos') // yes, typo in backend route
-      .then((res) => setAllVideos(res.data))
-      .catch((err) => console.error('Failed to fetch videos', err));
-
     return () => {
       ejInstance.current?.destroy?.();
       ejInstance.current = null;
     };
   }, []);
 
-  const handleThumbnailUpload = async (file: File) => {
-    const formData = new FormData();
-    formData.append('image', file);
-    setIsUploadingThumb(true);
-    try {
-      const res = await authAxios.post('/upload', formData, {
+  const uploadThumbMutation = useMutation({
+    mutationFn: (file: File) => {
+      const formData = new FormData();
+      formData.append('image', file);
+      return authAxios.post('/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
+    },
+    onSuccess: (res) => {
       if (res.data?.success) {
         setThumbnail(res.data.file.url);
-      } else alert('Thumbnail upload failed');
-    } catch {
-      alert('Failed to upload thumbnail');
-    } finally {
-      setIsUploadingThumb(false);
-    }
-  };
+      } else toast.error('خطا در آپلود عکس');
+    },
+    onError: () => toast.error('خطا در آپلود عکس'),
+  });
 
-  const handleSubmit = async () => {
-    const longDesc = await ejInstance.current?.save();
+  const submitMutation = useMutation({
+    mutationFn: async () => {
+      const longDesc = await ejInstance.current?.save();
 
-    if (!title || !shortDesc || !thumbnail || !videoFile || !category || !longDesc) {
-      alert('All fields are required');
-      return;
-    }
+      if (!title || !shortDesc || !thumbnail || !videoFile || !category || !longDesc) {
+        throw new Error('All fields are required');
+      }
 
-    const formData = new FormData();
-    formData.append('title', title);
-    formData.append('shortDesc', shortDesc);
-    formData.append('longDesc', JSON.stringify(longDesc));
-    formData.append('category', category);
-    formData.append('thumbnail', thumbnail);
-    formData.append('video', videoFile);
-    formData.append('related', JSON.stringify(relatedVideos));
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('shortDesc', shortDesc);
+      formData.append('longDesc', JSON.stringify(longDesc));
+      formData.append('category', category);
+      formData.append('thumbnail', thumbnail);
+      formData.append('video', videoFile);
+      formData.append('related', JSON.stringify(relatedVideos));
 
-    try {
-      setIsUploadingVideo(true);
-      await authAxios.post('/videos', formData, {
+      return authAxios.post('/videos', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      alert('Video uploaded!');
+    },
+    onSuccess: () => {
+      toast.success('ویدئو با موفقیت آپلود شد')
       window.location.reload();
-    } catch (err) {
+    },
+    onError: (err) => {
       console.error('Upload error:', err);
-      alert('Failed to upload video');
-    } finally {
-      setIsUploadingVideo(false);
-    }
+      toast.error('خطا در آپلود ویدئو');
+    },
+  });
+
+  const handleSubmit = () => {
+    submitMutation.mutate();
   };
 
   return (
@@ -145,12 +143,12 @@ export default function AddVideoForm() {
             const file = e.target.files?.[0];
             if (file) {
               setThumbnailFile(file);
-              handleThumbnailUpload(file);
+              uploadThumbMutation.mutate(file);
             }
           }}
           className="block w-full border px-4 py-2 text-sm file:bg-blue-50 file:text-blue-700 file:rounded-lg"
         />
-        {isUploadingThumb && <p className="text-sm text-gray-500">Uploading...</p>}
+        {uploadThumbMutation.isPending && <p className="text-sm text-gray-500">Uploading...</p>}
         {thumbnail && <img src={thumbnail} className="mt-2 w-full max-h-64 object-cover rounded-xl" />}
       </div>
 
@@ -162,7 +160,7 @@ export default function AddVideoForm() {
           onChange={(e) => setVideoFile(e.target.files?.[0] || null)}
           className="block w-full border px-4 py-2 text-sm file:bg-green-50 file:text-green-700 file:rounded-lg"
         />
-        {isUploadingVideo && <p className="text-sm text-gray-500">Uploading video...</p>}
+        {submitMutation.isPending && <p className="text-sm text-gray-500">Uploading video...</p>}
       </div>
 
       <div id="editorjs" className="min-h-[300px] border rounded-xl p-4 bg-gray-50" />
@@ -177,9 +175,10 @@ export default function AddVideoForm() {
       <div className="text-right pt-4">
         <button
           onClick={handleSubmit}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl transition-all"
+          disabled={submitMutation.isPending}
+          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl transition-all disabled:opacity-50"
         >
-          انتشار ویدئو
+          {submitMutation.isPending ? 'در حال انتشار...' : 'انتشار ویدئو'}
         </button>
       </div>
     </div>

@@ -22,6 +22,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 export default function EditPodcastForm() {
   const { id } = useParams();
@@ -145,7 +146,8 @@ export default function EditPodcastForm() {
       navigate("/admin/podcast");
     },
     onError: (error: any) => {
-      alert(error.message || "خطا در حذف پادکست");
+      toast.error("خطا در حذف پادکست");
+      console.error(error);
     },
   });
 

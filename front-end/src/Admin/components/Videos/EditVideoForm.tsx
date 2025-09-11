@@ -22,6 +22,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 export default function EditVideoForm() {
   const { id } = useParams();
@@ -142,7 +143,7 @@ export default function EditVideoForm() {
       navigate("/admin/video");
     },
     onError: (error: any) => {
-      alert(error.message || "خطا در حذف ویدیو");
+      toast.error("خطا در حذف ویدیو");
     },
   });
 

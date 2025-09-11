@@ -8,7 +8,8 @@ import { CategoryDropDown } from '../CategoryDropDown';
 import { RelatedArticlesSelector } from './RelatedArticlesSelector';
 import type { ArticleShort } from '@/../types/article'
 import authAxios from '@/lib/authAxios';
-import ArticleCard from '@/components/cards/ArticleCard';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 export default function AddArticleForm() {
   const ejInstance = useRef<EditorJS | null>(null);
@@ -16,10 +17,13 @@ export default function AddArticleForm() {
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   const [relatedArticles, setRelatedArticles] = useState<string[]>([]);
-  const [allArticles, setAllArticles] = useState<ArticleShort[]>([]);
   const [thumbnail, setThumbnail] = useState<string>('');
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
-  const [isUploadingThumb, setIsUploadingThumb] = useState(false);
+
+  const { data: allArticles = [] } = useQuery<ArticleShort[]>({
+    queryKey: ['articles'],
+    queryFn: () => axios.get('/api/articles').then((res) => res.data),
+  });
 
   useEffect(() => {
     const editor = new EditorJS({
@@ -54,50 +58,44 @@ export default function AddArticleForm() {
 
     ejInstance.current = editor;
 
-    axios
-      .get('/api/articles')
-      .then((res) => setAllArticles(res.data))
-      .catch((err) => console.error('دریافت مقالات ناموفق بود', err));
-
     return () => {
       ejInstance.current?.destroy?.();
       ejInstance.current = null;
     };
   }, []);
 
-  const handleThumbnailUpload = async (file: File) => {
-    const formData = new FormData();
-    formData.append('image', file);
-    setIsUploadingThumb(true);
-
-    try {
-      const response = await authAxios.post('/upload', formData)
+  const uploadThumbMutation = useMutation({
+    mutationFn: (file: File) => {
+      const formData = new FormData();
+      formData.append('image', file);
+      return authAxios.post('/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+    },
+    onSuccess: (response) => {
       if (response.data?.success) {
         setThumbnail(response.data.file.url);
       } else {
-        alert('بارگذاری تصویر کوچک ناموفق بود.');
+        toast.error('بارگذاری تصویر کوچک ناموفق بود.');
       }
-    } catch (err) {
+    },
+    onError: (err) => {
       console.error('خطا در بارگذاری تصویر کوچک:', err);
-      alert('بارگذاری تصویر کوچک ناموفق بود.');
-    } finally {
-      setIsUploadingThumb(false);
-    }
-  };
+      toast.error('بارگذاری تصویر کوچک ناموفق بود.');
+    },
+  });
 
-  const handleSubmit = async () => {
-    const data = await ejInstance.current?.save();
-    if (!title || !description || !data || !category || data.blocks.length === 0) {
-      alert('عنوان، توضیحات، محتوا یا دسته‌بندی وارد نشده است!');
-      return;
-    }
-    if (!thumbnail) {
-      alert('تصویر کوچک الزامی است!');
-      return;
-    }
+  const submitMutation = useMutation({
+    mutationFn: async () => {
+      const data = await ejInstance.current?.save();
+      if (!title || !description || !data || !category || data.blocks.length === 0) {
+        throw new Error('عنوان، توضیحات، محتوا یا دسته‌بندی وارد نشده است!');
+      }
+      if (!thumbnail) {
+        throw new Error('تصویر کوچک الزامی است!');
+      }
 
-    try {
-      await authAxios.post('/articles', {
+      return authAxios.post('/articles', {
         title,
         description,
         content: JSON.stringify(data),
@@ -105,11 +103,18 @@ export default function AddArticleForm() {
         related: relatedArticles,
         thumbnail,
       });
-      alert('مقاله منتشر شد!');
-    } catch (error: any) {
+    },
+    onSuccess: () => {
+      toast.success('مقاله منتشر شد!');
+    },
+    onError: (error: any) => {
       console.error('خطا در انتشار مقاله:', error);
-      alert('انتشار مقاله ناموفق بود :(');
-    }
+      toast.error('انتشار مقاله ناموفق بود :(');
+    },
+  });
+
+  const handleSubmit = () => {
+    submitMutation.mutate();
   };
 
   return (
@@ -140,12 +145,12 @@ export default function AddArticleForm() {
             const file = e.target.files?.[0];
             if (file) {
               setThumbnailFile(file);
-              handleThumbnailUpload(file);
+              uploadThumbMutation.mutate(file);
             }
           }}
           className="block w-full border border-gray-200 rounded-xl px-4 py-2 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition"
         />
-        {isUploadingThumb ? (
+        {uploadThumbMutation.isPending ? (
           <p className="text-sm text-gray-500 italic">در حال بارگذاری...</p>
         ) : thumbnail ? (
           <img
@@ -168,10 +173,11 @@ export default function AddArticleForm() {
       />
       <div className="text-right pt-4">
         <button
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50"
           onClick={handleSubmit}
+          disabled={submitMutation.isPending}
         >
-          انتشار مقاله
+          {submitMutation.isPending ? 'در حال انتشار...' : 'انتشار مقاله'}
         </button>
       </div>
     </div>

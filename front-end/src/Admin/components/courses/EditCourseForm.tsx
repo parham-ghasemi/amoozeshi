@@ -23,6 +23,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { toast } from 'sonner';
 
 function ContentSelector({
   allVideos,
@@ -240,9 +241,9 @@ export default function EditCourseForm() {
     try {
       const res = await authAxios.post('/upload', formData);
       if (res.data?.success) setThumbnail(res.data.file.url);
-      else alert('بارگذاری تصویر بند انگشتی ناموفق بود');
+      else toast.error('بارگذاری تصویر بند انگشتی ناموفق بود');
     } catch {
-      alert('خطا در بارگذاری تصویر بند انگشتی');
+      toast.error('خطا در بارگذاری تصویر بند انگشتی');
     } finally {
       setIsUploadingThumb(false);
     }
@@ -286,7 +287,7 @@ export default function EditCourseForm() {
       navigate('/admin/course'); // or wherever you want to go
     },
     onError: (error: any) => {
-      alert(error.message || 'خطا در به‌روزرسانی دوره');
+      toast.error('خطا در به‌روزرسانی دوره');
     },
   });
 
@@ -299,7 +300,7 @@ export default function EditCourseForm() {
       navigate("/admin/course");
     },
     onError: (error: any) => {
-      alert(error.message || "خطا در حذف دوره");
+      toast.error("خطا در حذف دوره");
     },
   });
 

@@ -22,6 +22,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 export default function EditArticleForm() {
   const { id } = useParams();
@@ -136,7 +137,8 @@ export default function EditArticleForm() {
       navigate("/admin/article");
     },
     onError: (error: any) => {
-      alert(error.message || "خطا در حذف مقاله");
+      toast.error("خطا در حذف مقاله");
+      console.error(error)
     },
   });
 

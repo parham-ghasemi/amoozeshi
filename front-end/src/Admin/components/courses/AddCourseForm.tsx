@@ -10,6 +10,8 @@ import type { CourseShort } from 'types/course';
 import type { VideoShort } from 'types/video';
 import type { ArticleShort } from 'types/article';
 import authAxios from '@/lib/authAxios';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 interface ContentItem {
   itemId: string;
@@ -141,10 +143,21 @@ export default function AddCourseForm() {
   const [questions, setQuestions] = useState([{ question: '', answer: '' }]);
   const [contentItems, setContentItems] = useState<ContentItem[]>([]);
   const [relatedCourses, setRelatedCourses] = useState<string[]>([]);
-  const [allCourses, setAllCourses] = useState<CourseShort[]>([]);
-  const [allVideos, setAllVideos] = useState<VideoShort[]>([]);
-  const [allArticles, setAllArticles] = useState<ArticleShort[]>([]);
-  const [isUploadingThumb, setIsUploadingThumb] = useState(false);
+
+  const { data: allCourses = [] } = useQuery<CourseShort[]>({
+    queryKey: ['courses'],
+    queryFn: () => axios.get('/api/courses').then((res) => res.data),
+  });
+
+  const { data: allVideos = [] } = useQuery<VideoShort[]>({
+    queryKey: ['videos'],
+    queryFn: () => axios.get('/api/videos').then((res) => res.data),
+  });
+
+  const { data: allArticles = [] } = useQuery<ArticleShort[]>({
+    queryKey: ['articles'],
+    queryFn: () => axios.get('/api/articles').then((res) => res.data),
+  });
 
   useEffect(() => {
     const editor = new EditorJS({
@@ -174,57 +187,36 @@ export default function AddCourseForm() {
 
     ejInstance.current = editor;
 
-    // Fetch courses
-    axios
-      .get('/api/courses')
-      .then((res) => setAllCourses(res.data))
-      .catch((err) => console.error('خطا در دریافت دوره‌ها', err));
-
-    // Fetch videos
-    axios
-      .get('/api/videos')
-      .then((res) => setAllVideos(res.data))
-      .catch((err) => console.error('خطا در دریافت ویدیوها', err));
-
-    // Fetch articles
-    axios
-      .get('/api/articles')
-      .then((res) => setAllArticles(res.data))
-      .catch((err) => console.error('خطا در دریافت مقالات', err));
-
     return () => {
       ejInstance.current?.destroy?.();
       ejInstance.current = null;
     };
   }, []);
 
-  const handleThumbnailUpload = async (file: File) => {
-    const formData = new FormData();
-    formData.append('image', file);
-    setIsUploadingThumb(true);
-    try {
-      const res = await authAxios.post('/upload', formData, {
+  const uploadThumbMutation = useMutation({
+    mutationFn: (file: File) => {
+      const formData = new FormData();
+      formData.append('image', file);
+      return authAxios.post('/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
+    },
+    onSuccess: (res) => {
       if (res.data?.success) setThumbnail(res.data.file.url);
-      else alert('بارگذاری تصویر بند انگشتی ناموفق بود');
-    } catch {
-      alert('خطا در بارگذاری تصویر بند انگشتی');
-    } finally {
-      setIsUploadingThumb(false);
-    }
-  };
+      else toast.error('بارگذاری تصویر بند انگشتی ناموفق بود');
+    },
+    onError: () => toast.error('خطا در بارگذاری تصویر بند انگشتی'),
+  });
 
-  const handleSubmit = async () => {
-    const longDescData = await ejInstance.current?.save();
+  const submitMutation = useMutation({
+    mutationFn: async () => {
+      const longDescData = await ejInstance.current?.save();
 
-    if (!title || !shortDesc || !thumbnail || !category || !level || !goal || !longDescData || time <= 0) {
-      alert('همه فیلدها الزامی هستند');
-      return;
-    }
+      if (!title || !shortDesc || !thumbnail || !category || !level || !goal || !longDescData || time <= 0) {
+        throw new Error('همه فیلدها الزامی هستند');
+      }
 
-    try {
-      await authAxios.post('/courses', {
+      return authAxios.post('/courses', {
         title,
         shortDesc,
         thumbnail,
@@ -238,12 +230,19 @@ export default function AddCourseForm() {
         content: contentItems,
         related: relatedCourses,
       });
-      alert('دوره با موفقیت بارگذاری شد!');
+    },
+    onSuccess: () => {
+      toast.success('دوره با موفقیت بارگذاری شد!');
       window.location.reload();
-    } catch (err) {
+    },
+    onError: (err) => {
       console.error('خطا در بارگذاری:', err);
-      alert('خطا در بارگذاری دوره');
-    }
+      toast.success('خطا در بارگذاری دوره');
+    },
+  });
+
+  const handleSubmit = () => {
+    submitMutation.mutate();
   };
 
   return (
@@ -272,11 +271,11 @@ export default function AddCourseForm() {
           accept="image/*"
           onChange={(e) => {
             const file = e.target.files?.[0];
-            if (file) handleThumbnailUpload(file);
+            if (file) uploadThumbMutation.mutate(file);
           }}
           className="block w-full border px-4 py-2 text-sm file:bg-blue-50 file:text-blue-700 file:rounded-lg"
         />
-        {isUploadingThumb && <p className="text-sm text-gray-500">در حال بارگذاری...</p>}
+        {uploadThumbMutation.isPending && <p className="text-sm text-gray-500">در حال بارگذاری...</p>}
         {thumbnail && <img src={thumbnail} className="mt-2 w-full max-h-64 object-cover rounded-xl" />}
       </div>
 
@@ -400,9 +399,10 @@ export default function AddCourseForm() {
       <div className="text-right pt-4">
         <button
           onClick={handleSubmit}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl transition-all"
+          disabled={submitMutation.isPending}
+          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl transition-all disabled:opacity-50"
         >
-          ایجاد دوره
+          {submitMutation.isPending ? 'در حال ایجاد...' : 'ایجاد دوره'}
         </button>
       </div>
     </div>
