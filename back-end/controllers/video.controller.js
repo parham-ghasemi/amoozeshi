@@ -8,7 +8,7 @@ const Course = require('../models/Course'); // Add this import
 
 const videoStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, '../Uploads/videos');
+    const uploadPath = path.join(__dirname, '../uploads/videos');
     if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath, { recursive: true });
     cb(null, uploadPath);
   },
@@ -34,7 +34,7 @@ exports.uploadVideoMiddleware = videoUpload.single('video');
 
 const imageStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, '../Uploads/images');
+    const uploadPath = path.join(__dirname, '../uploads/images');
     if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath, { recursive: true });
     cb(null, uploadPath);
   },
@@ -50,7 +50,7 @@ exports.uploadVideoThumbnail = imageUpload.single('image');
 exports.uploadImage = (req, res) => {
   if (!req.file) return res.status(400).json({ success: 0, message: 'No file uploaded' });
 
-  const fileUrl = `/Uploads/images/${req.file.filename}`;
+  const fileUrl = `/uploads/images/${req.file.filename}`;
   res.status(200).json({ success: 1, file: { url: fileUrl } });
 };
 
@@ -67,7 +67,7 @@ exports.uploadVideo = async (req, res) => {
       return res.status(400).json({ message: 'Invalid category ID' });
     }
 
-    const videoUrl = `/Uploads/videos/${req.file.filename}`;
+    const videoUrl = `/uploads/videos/${req.file.filename}`;
     let parsedRelated = [];
     try {
       parsedRelated = Array.isArray(related)
@@ -223,7 +223,7 @@ exports.editVideo = async (req, res) => {
     }
 
     if (req.file) {
-      const videoUrl = `/Uploads/videos/${req.file.filename}`;
+      const videoUrl = `/uploads/videos/${req.file.filename}`;
       existingVideo.content = videoUrl;
     }
 

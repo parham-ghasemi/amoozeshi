@@ -10,7 +10,7 @@ const Course = require('../models/Course'); // Add this import
 // Multer setup
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, '../Uploads/images');
+    const uploadPath = path.join(__dirname, '../uploads/images');
     if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath, { recursive: true });
     cb(null, uploadPath);
   },
@@ -30,7 +30,7 @@ exports.uploadImage = (req, res) => {
     return res.status(400).json({ success: 0, message: 'No file uploaded' });
   }
 
-  const fileUrl = `/Uploads/images/${req.file.filename}`;
+  const fileUrl = `/uploads/images/${req.file.filename}`;
 
   res.status(200).json({
     success: 1,

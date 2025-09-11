@@ -7,7 +7,7 @@ const Category = require('../models/Category');
 
 const audioStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, '../Uploads/podcasts');
+    const uploadPath = path.join(__dirname, '../uploads/podcasts');
     if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath, { recursive: true });
     cb(null, uploadPath);
   },
@@ -33,7 +33,7 @@ exports.uploadPodcastMiddleware = audioUpload.single('audio');
 
 const imageStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, '../Uploads/images');
+    const uploadPath = path.join(__dirname, '../uploads/images');
     if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath, { recursive: true });
     cb(null, uploadPath);
   },
@@ -49,7 +49,7 @@ exports.uploadPodcastThumbnail = imageUpload.single('image');
 exports.uploadImage = (req, res) => {
   if (!req.file) return res.status(400).json({ success: 0, message: 'No file uploaded' });
 
-  const fileUrl = `/Uploads/images/${req.file.filename}`;
+  const fileUrl = `/uploads/images/${req.file.filename}`;
   res.status(200).json({ success: 1, file: { url: fileUrl } });
 };
 
@@ -66,7 +66,7 @@ exports.uploadPodcast = async (req, res) => {
       return res.status(400).json({ message: 'Invalid category ID' });
     }
 
-    const audioUrl = `/Uploads/podcasts/${req.file.filename}`;
+    const audioUrl = `/uploads/podcasts/${req.file.filename}`;
     let parsedRelated = [];
     try {
       parsedRelated = Array.isArray(related)
@@ -222,7 +222,7 @@ exports.editPodcast = async (req, res) => {
     }
 
     if (req.file) {
-      const audioUrl = `/Uploads/podcasts/${req.file.filename}`;
+      const audioUrl = `/uploads/podcasts/${req.file.filename}`;
       existingPodcast.content = audioUrl;
     }
 
