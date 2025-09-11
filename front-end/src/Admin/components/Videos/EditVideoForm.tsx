@@ -8,9 +8,20 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import authAxios from "@/lib/authAxios";
 import { CategoryDropDown } from "../CategoryDropDown";
-import { RelatedVideosSelector } from "./RelatedVideosSelector"; // You'll need to implement similar to RelatedArticlesSelector
+import { RelatedVideosSelector } from "./RelatedVideosSelector";
 import type { VideoShort } from "types/video";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function EditVideoForm() {
   const { id } = useParams();
@@ -27,7 +38,6 @@ export default function EditVideoForm() {
   const [isUploadingThumb, setIsUploadingThumb] = useState(false);
   const [videoFile, setVideoFile] = useState<File | null>(null);
 
-  // Fetch existing video
   const { data: videoData, isPending: isLoading } = useQuery({
     queryKey: ["video", id],
     queryFn: async () => {
@@ -37,7 +47,6 @@ export default function EditVideoForm() {
     enabled: !!id,
   });
 
-  // Load all videos for "related" selector
   useEffect(() => {
     authAxios
       .get("/videos")
@@ -45,7 +54,6 @@ export default function EditVideoForm() {
       .catch(console.error);
   }, []);
 
-  // Init EditorJS once videoData is loaded
   useEffect(() => {
     if (!videoData) return;
 
@@ -125,6 +133,19 @@ export default function EditVideoForm() {
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      return authAxios.delete(`/videos/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["videos"] });
+      navigate("/admin/video");
+    },
+    onError: (error: any) => {
+      alert(error.message || "خطا در حذف ویدیو");
+    },
+  });
+
   if (isLoading) return <p className="text-center">در حال بارگذاری...</p>;
 
   return (
@@ -178,7 +199,28 @@ export default function EditVideoForm() {
         relatedVideos={relatedVideos}
         setRelatedVideos={setRelatedVideos}
       />
-      <div className="text-right pt-4">
+      <div className="text-right pt-4 flex justify-between">
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive" disabled={deleteMutation.isPending}>
+              {deleteMutation.isPending ? "در حال حذف..." : "حذف ویدیو"}
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent dir="rtl">
+            <AlertDialogHeader>
+              <AlertDialogTitle>آیا از حذف ویدیو مطمئن هستید؟</AlertDialogTitle>
+              <AlertDialogDescription>
+                این عملیات قابل بازگشت نیست و ویدیو به طور کامل حذف خواهد شد.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>لغو</AlertDialogCancel>
+              <AlertDialogAction onClick={() => deleteMutation.mutate()}>
+                حذف
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
         <Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>
           {mutation.isPending ? "در حال ذخیره..." : "ذخیره تغییرات"}
         </Button>

@@ -1,4 +1,3 @@
-
 const express = require('express');
 const router = express.Router();
 
@@ -13,23 +12,24 @@ const {
   getArticlesByCategory,
   getNewestArticles,
   getMostViewedArticles,
-  editArticle
+  editArticle,
+  deleteArticle
 } = require('../controllers/article.controller');
 const authenticate = require('../middleware/auth.middleware');
 const authorizeAdmin = require('../middleware/authorizeAdmin');
 
 router.post('/articles', authenticate, authorizeAdmin, addArticle);
 router.patch('/article/:id', authenticate, authorizeAdmin, editArticle);
+router.delete('/article/:id', authenticate, authorizeAdmin, deleteArticle);
 router.post('/upload', authenticate, authorizeAdmin, uploadMiddleware, uploadImage);
 
 router.get('/article/:id', getArticleById);
-router.get('/articles/short/:id', getShortArticleById)
+router.get('/articles/short/:id', getShortArticleById);
 router.get('/articles', getAllArticles);
-router.get('/articles/search', searchedArticles)
+router.get('/articles/search', searchedArticles);
 
 router.get('/articles/category/:category', getArticlesByCategory);
 router.get('/articles/most-viewed', getMostViewedArticles);
 router.get('/articles/newest', getNewestArticles);
-
 
 module.exports = router;

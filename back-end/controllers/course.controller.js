@@ -3,7 +3,6 @@ const Course = require('../models/Course');
 const Category = require('../models/Category');
 const { User } = require('../models/User');
 
-// === Add a new course ===
 exports.addCourse = async (req, res) => {
   try {
     const {
@@ -28,7 +27,6 @@ exports.addCourse = async (req, res) => {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
-    // ✅ Validate category
     const categoryExists = await Category.findById(category);
     if (!categoryExists) {
       return res.status(400).json({ message: 'Invalid category ID' });
@@ -71,9 +69,6 @@ exports.addCourse = async (req, res) => {
   }
 };
 
-
-
-// === Get all courses (short version) ===
 exports.getAllCourses = async (req, res) => {
   try {
     const courses = await Course.find({}, { _id: 1, title: 1, shortDesc: 1, thumbnail: 1 });
@@ -84,7 +79,6 @@ exports.getAllCourses = async (req, res) => {
   }
 };
 
-// === Get course by ID (and increment visits) ===
 exports.getCourseById = async (req, res) => {
   try {
     const course = await Course.findById(req.params.id)
@@ -101,23 +95,21 @@ exports.getCourseById = async (req, res) => {
   }
 };
 
-
 exports.getCourseContentById = async (req, res) => {
   try {
     const course = await Course.findById(req.params.id)
       .populate('content.itemId')
       .populate('related', '_id title shortDesc thumbnail');
 
-    if (!course) return res.status(404).json({ message: 'course not foudn' });
+    if (!course) return res.status(404).json({ message: 'Course not found' });
 
-    res.json({ content: course.content, title: course.title })
+    res.json({ content: course.content, title: course.title });
   } catch (err) {
     console.error('Get course content by ID error:', err);
     res.status(500).json({ message: 'Failed to fetch course content' });
   }
-}
+};
 
-// === Get courses by category (short version) ===
 exports.getCoursesByCategory = async (req, res) => {
   const { category } = req.params;
 
@@ -138,8 +130,6 @@ exports.getCoursesByCategory = async (req, res) => {
   }
 };
 
-
-// === Get newest courses (short version) ===
 exports.getNewestCourses = async (req, res) => {
   try {
     const courses = await Course.find({}, { _id: 1, title: 1, shortDesc: 1, thumbnail: 1 })
@@ -169,7 +159,6 @@ exports.getMostPopularCourses = async (req, res) => {
   }
 };
 
-// === Search courses by title or shortDesc (short version) ===
 exports.searchCourses = async (req, res) => {
   const query = req.query.query;
   if (!query) return res.status(400).json({ error: 'Query parameter is required' });
@@ -189,7 +178,6 @@ exports.searchCourses = async (req, res) => {
   }
 };
 
-
 exports.joinCourse = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -198,27 +186,23 @@ exports.joinCourse = async (req, res) => {
     const course = await Course.findById(courseId);
     if (!course) return res.status(404).json({ message: "Course not found" });
 
-    // Check if user already joined the course
     if (course.joinedBy.includes(userId)) {
       return res.status(400).json({ message: "Already joined" });
     }
 
-    // Add user to course's joinedBy
     course.joinedBy.push(userId);
     await course.save();
 
-    // Add course to user's joinedCourses
     await User.findByIdAndUpdate(userId, {
-      $addToSet: { joinedCourses: courseId } // ensures no duplicates
+      $addToSet: { joinedCourses: courseId }
     });
 
     res.json({ message: "Successfully joined course" });
   } catch (err) {
-    console.error('error joining course:', err);
+    console.error('Error joining course:', err);
     res.status(500).json({ message: "Server error" });
   }
 };
-
 
 exports.checkIsJoined = async (req, res) => {
   try {
@@ -232,7 +216,7 @@ exports.checkIsJoined = async (req, res) => {
 
     res.json({ isJoined });
   } catch (err) {
-    console.error("error checking if the user is joined", err);
+    console.error("Error checking if the user is joined", err);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -241,18 +225,15 @@ exports.editCourse = async (req, res) => {
   try {
     const courseId = req.params.id;
 
-    // Validate course ID
     if (!mongoose.Types.ObjectId.isValid(courseId)) {
       return res.status(400).json({ message: 'Invalid course ID' });
     }
 
-    // Find existing course
     const course = await Course.findById(courseId);
     if (!course) {
       return res.status(404).json({ message: 'Course not found' });
     }
 
-    // Destructure fields from request body
     const {
       title,
       shortDesc,
@@ -268,7 +249,6 @@ exports.editCourse = async (req, res) => {
       related,
     } = req.body;
 
-    // Validate required fields (you can adjust as needed)
     if (
       !title || !shortDesc || !thumbnail || !longDesc || !category ||
       !time || !level || !goal || !topics || !questions || !content
@@ -276,13 +256,11 @@ exports.editCourse = async (req, res) => {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
-    // Validate category exists
     const categoryExists = await Category.findById(category);
     if (!categoryExists) {
       return res.status(400).json({ message: 'Invalid category ID' });
     }
 
-    // Parse fields if passed as JSON strings
     const parsedTopics = typeof topics === 'string' ? JSON.parse(topics) : topics;
     const parsedQuestions = typeof questions === 'string' ? JSON.parse(questions) : questions;
     const parsedContent = typeof content === 'string' ? JSON.parse(content) : content;
@@ -297,7 +275,6 @@ exports.editCourse = async (req, res) => {
       itemType: item.itemType,
     }));
 
-    // Update fields
     course.title = title;
     course.shortDesc = shortDesc;
     course.thumbnail = thumbnail;
@@ -317,5 +294,46 @@ exports.editCourse = async (req, res) => {
   } catch (err) {
     console.error('Edit course error:', err);
     res.status(500).json({ message: 'Failed to update course' });
+  }
+};
+
+exports.deleteCourse = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid course ID' });
+    }
+
+    const course = await Course.findById(id);
+    if (!course) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
+
+    // Delete associated thumbnail file
+    if (course.thumbnail) {
+      const thumbnailPath = path.join(__dirname, '../', course.thumbnail);
+      if (fs.existsSync(thumbnailPath)) {
+        fs.unlinkSync(thumbnailPath);
+      }
+    }
+
+    // Remove course from related fields in other courses
+    await Course.updateMany(
+      { related: id },
+      { $pull: { related: id } }
+    );
+
+    // Remove course from users' joinedCourses
+    await User.updateMany(
+      { joinedCourses: id },
+      { $pull: { joinedCourses: id } }
+    );
+
+    await Course.findByIdAndDelete(id);
+
+    res.status(200).json({ message: 'Course deleted successfully' });
+  } catch (error) {
+    console.error('Delete course error:', error);
+    res.status(500).json({ message: 'Failed to delete course' });
   }
 };

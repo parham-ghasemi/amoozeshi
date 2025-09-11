@@ -4,11 +4,11 @@ const fs = require('fs');
 const mongoose = require('mongoose');
 const Video = require('../models/Video');
 const Category = require('../models/Category');
+const Course = require('../models/Course'); // Add this import
 
-// === Multer setup for video files ===
 const videoStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, '../uploads/videos');
+    const uploadPath = path.join(__dirname, '../Uploads/videos');
     if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath, { recursive: true });
     cb(null, uploadPath);
   },
@@ -21,7 +21,7 @@ const videoStorage = multer.diskStorage({
 
 const videoUpload = multer({
   storage: videoStorage,
-  limits: { fileSize: 500 * 1024 * 1024 }, // 500MB
+  limits: { fileSize: 500 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const allowed = ['.mp4', '.mov', '.avi', '.mkv', '.webm'];
     const ext = path.extname(file.originalname).toLowerCase();
@@ -32,10 +32,9 @@ const videoUpload = multer({
 
 exports.uploadVideoMiddleware = videoUpload.single('video');
 
-// === EditorJS-compatible image upload ===
 const imageStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, '../uploads/images');
+    const uploadPath = path.join(__dirname, '../Uploads/images');
     if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath, { recursive: true });
     cb(null, uploadPath);
   },
@@ -51,11 +50,10 @@ exports.uploadVideoThumbnail = imageUpload.single('image');
 exports.uploadImage = (req, res) => {
   if (!req.file) return res.status(400).json({ success: 0, message: 'No file uploaded' });
 
-  const fileUrl = `/uploads/images/${req.file.filename}`;
+  const fileUrl = `/Uploads/images/${req.file.filename}`;
   res.status(200).json({ success: 1, file: { url: fileUrl } });
 };
 
-// === Upload and save video ===
 exports.uploadVideo = async (req, res) => {
   try {
     const { title, shortDesc, longDesc, thumbnail, category, related } = req.body;
@@ -69,7 +67,7 @@ exports.uploadVideo = async (req, res) => {
       return res.status(400).json({ message: 'Invalid category ID' });
     }
 
-    const videoUrl = `/uploads/videos/${req.file.filename}`;
+    const videoUrl = `/Uploads/videos/${req.file.filename}`;
     let parsedRelated = [];
     try {
       parsedRelated = Array.isArray(related)
@@ -80,7 +78,6 @@ exports.uploadVideo = async (req, res) => {
       console.warn('Failed to parse related:', related);
       parsedRelated = [];
     }
-
 
     const newVideo = new Video({
       title,
@@ -102,7 +99,6 @@ exports.uploadVideo = async (req, res) => {
   }
 };
 
-
 exports.getAllVideos = async (req, res) => {
   try {
     const videos = await Video.find({}, { id: 1, thumbnail: 1, title: 1, visits: 1, createdAt: 1 });
@@ -119,7 +115,7 @@ exports.getVideoById = async (req, res) => {
       req.params.id,
       { $inc: { visits: 1 } },
       { new: true }
-    ).populate("category", "name"); // ✅ Populate category name
+    ).populate("category", "name");
 
     if (!video) return res.status(404).json({ message: 'Video not found' });
 
@@ -129,7 +125,6 @@ exports.getVideoById = async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch video' });
   }
 };
-
 
 exports.getShortVideoById = async (req, res) => {
   try {
@@ -163,7 +158,6 @@ exports.getVideosByCategory = async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch category videos' });
   }
 };
-
 
 exports.getMostViewedVideos = async (req, res) => {
   try {
@@ -215,13 +209,11 @@ exports.editVideo = async (req, res) => {
     const { id } = req.params;
     const { title, shortDesc, longDesc, thumbnail, category, related } = req.body;
 
-    // Find existing video
     const existingVideo = await Video.findById(id);
     if (!existingVideo) {
       return res.status(404).json({ message: 'Video not found' });
     }
 
-    // If category changed, validate it
     if (category && category.toString() !== existingVideo.category.toString()) {
       const categoryExists = await Category.findById(category);
       if (!categoryExists) {
@@ -230,13 +222,11 @@ exports.editVideo = async (req, res) => {
       existingVideo.category = category;
     }
 
-    // Update video file if a new one is uploaded
     if (req.file) {
-      const videoUrl = `/uploads/videos/${req.file.filename}`;
+      const videoUrl = `/Uploads/videos/${req.file.filename}`;
       existingVideo.content = videoUrl;
     }
 
-    // Update text fields if provided
     if (title) existingVideo.title = title;
     if (shortDesc) existingVideo.shortDesc = shortDesc;
     if (longDesc) {
@@ -248,7 +238,6 @@ exports.editVideo = async (req, res) => {
     }
     if (thumbnail) existingVideo.thumbnail = thumbnail;
 
-    // Handle related videos update
     if (related !== undefined) {
       try {
         let parsedRelated = Array.isArray(related)
@@ -268,5 +257,52 @@ exports.editVideo = async (req, res) => {
   } catch (err) {
     console.error('Edit video error:', err);
     res.status(500).json({ message: 'Failed to edit video' });
+  }
+};
+
+exports.deleteVideo = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid video ID' });
+    }
+
+    const video = await Video.findById(id);
+    if (!video) {
+      return res.status(404).json({ message: 'Video not found' });
+    }
+
+    // Delete associated video and thumbnail files
+    if (video.content) {
+      const videoPath = path.join(__dirname, '../', video.content);
+      if (fs.existsSync(videoPath)) {
+        fs.unlinkSync(videoPath);
+      }
+    }
+    if (video.thumbnail) {
+      const thumbnailPath = path.join(__dirname, '../', video.thumbnail);
+      if (fs.existsSync(thumbnailPath)) {
+        fs.unlinkSync(thumbnailPath);
+      }
+    }
+
+    // Remove video from related fields in other videos
+    await Video.updateMany(
+      { related: id },
+      { $pull: { related: id } }
+    );
+
+    // Remove video from courses' content
+    await Course.updateMany(
+      { 'content.itemId': id },
+      { $pull: { content: { itemId: id } } }
+    );
+
+    await Video.findByIdAndDelete(id);
+
+    res.status(200).json({ message: 'Video deleted successfully' });
+  } catch (error) {
+    console.error('Delete video error:', error);
+    res.status(500).json({ message: 'Failed to delete video' });
   }
 };

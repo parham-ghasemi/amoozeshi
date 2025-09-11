@@ -11,6 +11,17 @@ import { CategoryDropDown } from "../CategoryDropDown";
 import { RelatedPodcastsSelector } from "../Podcasts/RelatedPodcastSelector";
 import type { PodcastShort } from "types/podcast";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function EditPodcastForm() {
   const { id } = useParams();
@@ -125,6 +136,19 @@ export default function EditPodcastForm() {
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      return authAxios.delete(`/podcasts/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["podcasts"] });
+      navigate("/admin/podcast");
+    },
+    onError: (error: any) => {
+      alert(error.message || "خطا در حذف پادکست");
+    },
+  });
+
   if (isLoading) return <p className="text-center">در حال بارگذاری...</p>;
 
   return (
@@ -178,7 +202,28 @@ export default function EditPodcastForm() {
         relatedPodcasts={relatedPodcasts}
         setRelatedPodcasts={setRelatedPodcasts}
       />
-      <div className="text-right pt-4">
+      <div className="text-right pt-4 flex justify-between">
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive" disabled={deleteMutation.isPending}>
+              {deleteMutation.isPending ? "در حال حذف..." : "حذف پادکست"}
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent dir="rtl">
+            <AlertDialogHeader>
+              <AlertDialogTitle>آیا از حذف پادکست مطمئن هستید؟</AlertDialogTitle>
+              <AlertDialogDescription>
+                این عملیات قابل بازگشت نیست و پادکست به طور کامل حذف خواهد شد.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>لغو</AlertDialogCancel>
+              <AlertDialogAction onClick={() => deleteMutation.mutate()}>
+                حذف
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
         <Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>
           {mutation.isPending ? "در حال ذخیره..." : "ذخیره تغییرات"}
         </Button>

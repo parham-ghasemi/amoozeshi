@@ -4,12 +4,13 @@ const multer = require('multer');
 const mongoose = require('mongoose');
 
 const Article = require('../models/Article');
-const Category = require('../models/Category'); // Add this import
+const Category = require('../models/Category');
+const Course = require('../models/Course'); // Add this import
 
 // Multer setup
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, '../uploads/images');
+    const uploadPath = path.join(__dirname, '../Uploads/images');
     if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath, { recursive: true });
     cb(null, uploadPath);
   },
@@ -29,7 +30,7 @@ exports.uploadImage = (req, res) => {
     return res.status(400).json({ success: 0, message: 'No file uploaded' });
   }
 
-  const fileUrl = `/uploads/images/${req.file.filename}`;
+  const fileUrl = `/Uploads/images/${req.file.filename}`;
 
   res.status(200).json({
     success: 1,
@@ -39,7 +40,6 @@ exports.uploadImage = (req, res) => {
   });
 };
 
-
 exports.addArticle = async (req, res) => {
   try {
     const { title, description, content, category, related, thumbnail } = req.body;
@@ -48,7 +48,6 @@ exports.addArticle = async (req, res) => {
       return res.status(400).json({ message: 'Title, content, and category are required' });
     }
 
-    // ✅ Check that the category exists
     const categoryExists = await Category.findById(category);
     if (!categoryExists) {
       return res.status(400).json({ message: 'Invalid category ID' });
@@ -59,7 +58,7 @@ exports.addArticle = async (req, res) => {
     const newArticle = new Article({
       title,
       description,
-      content: JSON.parse(content), // still stringified
+      content: JSON.parse(content),
       category,
       related: parsedRelated,
       thumbnail,
@@ -75,14 +74,13 @@ exports.addArticle = async (req, res) => {
   }
 };
 
-
 exports.getArticleById = async (req, res) => {
   try {
     const article = await Article.findByIdAndUpdate(
       req.params.id,
       { $inc: { visits: 1 } },
       { new: true }
-    ).populate("category"); // ✅ populate category
+    ).populate("category");
 
     if (!article) return res.status(404).json({ message: 'Article not found' });
 
@@ -92,7 +90,6 @@ exports.getArticleById = async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch article' });
   }
 };
-
 
 exports.getShortArticleById = async (req, res) => {
   try {
@@ -107,8 +104,7 @@ exports.getShortArticleById = async (req, res) => {
     console.error('Error getting short article:', error);
     res.status(500).json({ message: 'Failed to fetch article' });
   }
-}
-
+};
 
 exports.getAllArticles = async (req, res) => {
   try {
@@ -127,7 +123,6 @@ exports.searchedArticles = async (req, res) => {
   }
 
   try {
-    // Search MongoDB (case-insensitive search in title or description)
     const results = await Article.find({
       $or: [
         { title: { $regex: query, $options: 'i' } },
@@ -141,7 +136,6 @@ exports.searchedArticles = async (req, res) => {
   }
 };
 
-// Get articles by category
 exports.getArticlesByCategory = async (req, res) => {
   const { category } = req.params;
 
@@ -161,8 +155,6 @@ exports.getArticlesByCategory = async (req, res) => {
   }
 };
 
-
-// Get most viewed articles (top 10 by visits)
 exports.getMostViewedArticles = async (req, res) => {
   try {
     const articles = await Article.find({}, { id: 1, thumbnail: 1, title: 1, description: 1, visits: 1 })
@@ -176,7 +168,6 @@ exports.getMostViewedArticles = async (req, res) => {
   }
 };
 
-// Get newest articles (sorted by createdAt descending)
 exports.getNewestArticles = async (req, res) => {
   try {
     const articles = await Article.find({}, { id: 1, thumbnail: 1, title: 1, description: 1, createdAt: 1 })
@@ -248,5 +239,46 @@ exports.editArticle = async (req, res) => {
   } catch (error) {
     console.error("Edit article error:", error);
     res.status(500).json({ message: "Failed to update article" });
+  }
+};
+
+exports.deleteArticle = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid article ID' });
+    }
+
+    const article = await Article.findById(id);
+    if (!article) {
+      return res.status(404).json({ message: 'Article not found' });
+    }
+
+    // Delete associated thumbnail file
+    if (article.thumbnail) {
+      const thumbnailPath = path.join(__dirname, '../', article.thumbnail);
+      if (fs.existsSync(thumbnailPath)) {
+        fs.unlinkSync(thumbnailPath);
+      }
+    }
+
+    // Remove article from related fields in other articles
+    await Article.updateMany(
+      { related: id },
+      { $pull: { related: id } }
+    );
+
+    // Remove article from courses' content
+    await Course.updateMany(
+      { 'content.itemId': id },
+      { $pull: { content: { itemId: id } } }
+    );
+
+    await Article.findByIdAndDelete(id);
+
+    res.status(200).json({ message: 'Article deleted successfully' });
+  } catch (error) {
+    console.error('Delete article error:', error);
+    res.status(500).json({ message: 'Failed to delete article' });
   }
 };

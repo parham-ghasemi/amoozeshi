@@ -6,7 +6,7 @@ const Course = () => {
     <div className="my-5 flex flex-col gap-10">
       {/* Add Article */}
       <section className="bg-white p-5 rounded-xl shadow" dir="rtl">
-        <h2 className="text-xl font-bold mb-4">افزودن مقاله جدید</h2>
+        <h2 className="text-xl font-bold mb-4">افزودن دوره جدید</h2>
         <AddCourseForm />
       </section>
 

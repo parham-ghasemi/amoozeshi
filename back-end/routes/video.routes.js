@@ -13,24 +13,21 @@ const {
   getMostViewedVideos,
   getNewestVideos,
   searchedVideos,
-  editVideo
+  editVideo,
+  deleteVideo
 } = require('../controllers/video.controller');
 const authenticate = require('../middleware/auth.middleware');
 const authorizeAdmin = require('../middleware/authorizeAdmin');
 
-// Upload a video file and create entry
 router.post('/videos', authenticate, authorizeAdmin, uploadVideoMiddleware, uploadVideo);
 router.patch('/videos/:id', authenticate, authorizeAdmin, uploadVideoMiddleware, editVideo);
-
-// EditorJS-compatible image upload (thumbnail, etc.)
+router.delete('/videos/:id', authenticate, authorizeAdmin, deleteVideo);
 router.post('/videos/upload', authenticate, authorizeAdmin, uploadVideoThumbnail, uploadImage);
 
-// Fetch videos
 router.get('/videos', getAllVideos);
 router.get('/video/:id', getVideoById);
 router.get('/video/short/:id', getShortVideoById);
 
-// Filter & search
 router.get('/videos/category/:category', getVideosByCategory);
 router.get('/videos/most-viewed', getMostViewedVideos);
 router.get('/videos/newest', getNewestVideos);

@@ -5,10 +5,9 @@ const mongoose = require('mongoose');
 const Podcast = require('../models/Podcast');
 const Category = require('../models/Category');
 
-// === Multer setup for audio files ===
 const audioStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, '../uploads/podcasts');
+    const uploadPath = path.join(__dirname, '../Uploads/podcasts');
     if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath, { recursive: true });
     cb(null, uploadPath);
   },
@@ -21,7 +20,7 @@ const audioStorage = multer.diskStorage({
 
 const audioUpload = multer({
   storage: audioStorage,
-  limits: { fileSize: 500 * 1024 * 1024 }, // 500MB
+  limits: { fileSize: 500 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const allowed = ['.mp3', '.wav', '.ogg', '.aac', '.m4a'];
     const ext = path.extname(file.originalname).toLowerCase();
@@ -32,10 +31,9 @@ const audioUpload = multer({
 
 exports.uploadPodcastMiddleware = audioUpload.single('audio');
 
-// === EditorJS-compatible image upload ===
 const imageStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, '../uploads/images');
+    const uploadPath = path.join(__dirname, '../Uploads/images');
     if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath, { recursive: true });
     cb(null, uploadPath);
   },
@@ -51,11 +49,10 @@ exports.uploadPodcastThumbnail = imageUpload.single('image');
 exports.uploadImage = (req, res) => {
   if (!req.file) return res.status(400).json({ success: 0, message: 'No file uploaded' });
 
-  const fileUrl = `/uploads/images/${req.file.filename}`;
+  const fileUrl = `/Uploads/images/${req.file.filename}`;
   res.status(200).json({ success: 1, file: { url: fileUrl } });
 };
 
-// === Upload and save podcast ===
 exports.uploadPodcast = async (req, res) => {
   try {
     const { title, shortDesc, longDesc, thumbnail, category, related } = req.body;
@@ -69,7 +66,7 @@ exports.uploadPodcast = async (req, res) => {
       return res.status(400).json({ message: 'Invalid category ID' });
     }
 
-    const audioUrl = `/uploads/podcasts/${req.file.filename}`;
+    const audioUrl = `/Uploads/podcasts/${req.file.filename}`;
     let parsedRelated = [];
     try {
       parsedRelated = Array.isArray(related)
@@ -80,7 +77,6 @@ exports.uploadPodcast = async (req, res) => {
       console.warn('Failed to parse related:', related);
       parsedRelated = [];
     }
-
 
     const newPodcast = new Podcast({
       title,
@@ -102,7 +98,6 @@ exports.uploadPodcast = async (req, res) => {
   }
 };
 
-
 exports.getAllPodcasts = async (req, res) => {
   try {
     const podcasts = await Podcast.find({}, { id: 1, thumbnail: 1, title: 1, listens: 1, createdAt: 1 });
@@ -119,7 +114,7 @@ exports.getPodcastById = async (req, res) => {
       req.params.id,
       { $inc: { listens: 1 } },
       { new: true }
-    ).populate("category", "name"); // ✅ Populate category name
+    ).populate("category", "name");
 
     if (!podcast) return res.status(404).json({ message: 'Podcast not found' });
 
@@ -129,7 +124,6 @@ exports.getPodcastById = async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch podcast' });
   }
 };
-
 
 exports.getShortPodcastById = async (req, res) => {
   try {
@@ -163,7 +157,6 @@ exports.getPodcastsByCategory = async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch category podcasts' });
   }
 };
-
 
 exports.getMostListenedPodcasts = async (req, res) => {
   try {
@@ -215,13 +208,11 @@ exports.editPodcast = async (req, res) => {
     const { id } = req.params;
     const { title, shortDesc, longDesc, thumbnail, category, related } = req.body;
 
-    // Find existing podcast
     const existingPodcast = await Podcast.findById(id);
     if (!existingPodcast) {
       return res.status(404).json({ message: 'Podcast not found' });
     }
 
-    // If category changed, validate it
     if (category && category.toString() !== existingPodcast.category.toString()) {
       const categoryExists = await Category.findById(category);
       if (!categoryExists) {
@@ -230,13 +221,11 @@ exports.editPodcast = async (req, res) => {
       existingPodcast.category = category;
     }
 
-    // Update audio file if a new one is uploaded
     if (req.file) {
-      const audioUrl = `/uploads/podcasts/${req.file.filename}`;
+      const audioUrl = `/Uploads/podcasts/${req.file.filename}`;
       existingPodcast.content = audioUrl;
     }
 
-    // Update text fields if provided
     if (title) existingPodcast.title = title;
     if (shortDesc) existingPodcast.shortDesc = shortDesc;
     if (longDesc) {
@@ -248,7 +237,6 @@ exports.editPodcast = async (req, res) => {
     }
     if (thumbnail) existingPodcast.thumbnail = thumbnail;
 
-    // Handle related podcasts update
     if (related !== undefined) {
       try {
         let parsedRelated = Array.isArray(related)
@@ -268,5 +256,46 @@ exports.editPodcast = async (req, res) => {
   } catch (err) {
     console.error('Edit podcast error:', err);
     res.status(500).json({ message: 'Failed to edit podcast' });
+  }
+};
+
+exports.deletePodcast = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid podcast ID' });
+    }
+
+    const podcast = await Podcast.findById(id);
+    if (!podcast) {
+      return res.status(404).json({ message: 'Podcast not found' });
+    }
+
+    // Delete associated audio and thumbnail files
+    if (podcast.content) {
+      const audioPath = path.join(__dirname, '../', podcast.content);
+      if (fs.existsSync(audioPath)) {
+        fs.unlinkSync(audioPath);
+      }
+    }
+    if (podcast.thumbnail) {
+      const thumbnailPath = path.join(__dirname, '../', podcast.thumbnail);
+      if (fs.existsSync(thumbnailPath)) {
+        fs.unlinkSync(thumbnailPath);
+      }
+    }
+
+    // Remove podcast from related fields in other podcasts
+    await Podcast.updateMany(
+      { related: id },
+      { $pull: { related: id } }
+    );
+
+    await Podcast.findByIdAndDelete(id);
+
+    res.status(200).json({ message: 'Podcast deleted successfully' });
+  } catch (error) {
+    console.error('Delete podcast error:', error);
+    res.status(500).json({ message: 'Failed to delete podcast' });
   }
 };

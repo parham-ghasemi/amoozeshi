@@ -11,6 +11,17 @@ import { CategoryDropDown } from "../CategoryDropDown";
 import { RelatedArticlesSelector } from "./RelatedArticlesSelector";
 import type { ArticleShort } from "types/article";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function EditArticleForm() {
   const { id } = useParams();
@@ -26,7 +37,6 @@ export default function EditArticleForm() {
   const [thumbnail, setThumbnail] = useState("");
   const [isUploadingThumb, setIsUploadingThumb] = useState(false);
 
-  // Fetch existing article
   const { data: articleData, isPending: isLoading } = useQuery({
     queryKey: ["article", id],
     queryFn: async () => {
@@ -36,7 +46,6 @@ export default function EditArticleForm() {
     enabled: !!id,
   });
 
-  // Load all articles for "related" selector
   useEffect(() => {
     authAxios
       .get("/articles")
@@ -44,7 +53,6 @@ export default function EditArticleForm() {
       .catch(console.error);
   }, []);
 
-  // Init EditorJS once articleData is loaded
   useEffect(() => {
     if (!articleData) return;
 
@@ -119,6 +127,19 @@ export default function EditArticleForm() {
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      return authAxios.delete(`/article/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["articles"] });
+      navigate("/admin/article");
+    },
+    onError: (error: any) => {
+      alert(error.message || "خطا در حذف مقاله");
+    },
+  });
+
   if (isLoading) return <p className="text-center">در حال بارگذاری...</p>;
 
   return (
@@ -165,7 +186,28 @@ export default function EditArticleForm() {
         setRelatedArticles={setRelatedArticles}
       />
 
-      <div className="text-right pt-4">
+      <div className="text-right pt-4 flex justify-between">
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive" disabled={deleteMutation.isPending}>
+              {deleteMutation.isPending ? "در حال حذف..." : "حذف مقاله"}
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent dir="rtl">
+            <AlertDialogHeader>
+              <AlertDialogTitle>آیا از حذف مقاله مطمئن هستید؟</AlertDialogTitle>
+              <AlertDialogDescription>
+                این عملیات قابل بازگشت نیست و مقاله به طور کامل حذف خواهد شد.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>لغو</AlertDialogCancel>
+              <AlertDialogAction onClick={() => deleteMutation.mutate()}>
+                حذف
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
         <Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>
           {mutation.isPending ? "در حال ذخیره..." : "ذخیره تغییرات"}
         </Button>

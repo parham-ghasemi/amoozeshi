@@ -11,6 +11,18 @@ import { CategoryDropDown } from '../CategoryDropDown';
 import { RelatedCoursesSelector } from './RelatedCourseSelector';
 import type { VideoShort } from 'types/video';
 import type { ArticleShort } from 'types/article';
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 function ContentSelector({
   allVideos,
@@ -278,6 +290,19 @@ export default function EditCourseForm() {
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      return authAxios.delete(`/course/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
+      navigate("/admin/course");
+    },
+    onError: (error: any) => {
+      alert(error.message || "خطا در حذف دوره");
+    },
+  });
+
   if (isLoading) return <p className="text-center">در حال بارگذاری...</p>;
 
   return (
@@ -442,14 +467,34 @@ export default function EditCourseForm() {
         setRelatedCourses={setRelatedCourses}
       />
 
-      <div className="text-right pt-4">
-        <button
+      <div className="text-right pt-4 flex justify-between">
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive" disabled={deleteMutation.isPending}>
+              {deleteMutation.isPending ? "در حال حذف..." : "حذف دوره"}
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent dir="rtl">
+            <AlertDialogHeader>
+              <AlertDialogTitle>آیا از حذف دوره مطمئن هستید؟</AlertDialogTitle>
+              <AlertDialogDescription>
+                این عملیات قابل بازگشت نیست و دوره به طور کامل حذف خواهد شد.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>لغو</AlertDialogCancel>
+              <AlertDialogAction onClick={() => deleteMutation.mutate()}>
+                حذف
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+        <Button
           onClick={() => mutation.mutate()}
           disabled={mutation.isPending}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl transition-all"
         >
           {mutation.isPending ? 'در حال ذخیره...' : 'ذخیره تغییرات'}
-        </button>
+        </Button>
       </div>
     </div>
   );
