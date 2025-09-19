@@ -3,6 +3,7 @@ const Course = require("../models/Course");
 const Video = require("../models/Video");
 const Article = require("../models/Article");
 const Podcast = require("../models/Podcast");
+const Counsel = require("../models/Counsel");
 
 exports.getCurrentUser = async (req, res) => {
   try {
@@ -34,7 +35,8 @@ exports.getAllUsers = async (req, res) => {
       .populate("joinedCourses", "title thumbnail")
       .populate("favoriteVideos", "title thumbnail visits createdAt")
       .populate("favoriteArticles", "title thumbnail")
-      .populate("favoritePodcasts", "title thumbnail listens createdAt");
+      .populate("favoritePodcasts", "title thumbnail listens createdAt")
+      .populate("favoriteCounsels", "title thumbnail");
 
     if (!users || users.length === 0) {
       return res.status(404).json({ message: "No users found." });
@@ -86,3 +88,6 @@ exports.toggleFavoriteArticle = (req, res) =>
 
 exports.toggleFavoritePodcast = (req, res) =>
   toggleFavorite(req, res, Podcast, "favoritePodcasts");
+
+exports.toggleFavoriteCounsel = (req, res) =>
+  toggleFavorite(req, res, Counsel, "favoriteCounsels");

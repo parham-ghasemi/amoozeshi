@@ -41,6 +41,11 @@ import ShowPodcasts from "./pages/podcast/ShowPodcasts"
 import PodcastSearch from "./pages/podcast/PodcastSearch"
 import PodcastShowcase from "./pages/podcast/PodcastShowcase"
 import UsersPage from "./Admin/UserPage"
+import ShowCounsels from "./pages/counsel/ShowCounsels"
+import CounselShowcase from "./pages/counsel/CounselShowcase"
+import CounselSearch from "./pages/counsel/CouselSearch"
+import EditCounselForm from "./Admin/components/Counsels/EditCounselForm"
+import Counsels from "./Admin/components/Counsels"
 
 function App() {
   return (
@@ -66,6 +71,12 @@ function App() {
             <Route path="/course/:id" element={<CourseShowcase />} />
             <Route path="/course/:id/content" element={<CourseContent />} />
             <Route path="/courses/search" element={<CourseSearch />} />
+
+            {/* Counsel */}
+            <Route path="/counsel" element={<ShowCounsels />} />
+            <Route path="/counsel-all" element={<ShowAllCourses />} />
+            <Route path="/counsel/:id" element={<CounselShowcase />} />
+            <Route path="/counsel/search" element={<CounselSearch />} />
 
             {/* Videos */}
             <Route path="/videos" element={<Showvideos />} />
@@ -96,6 +107,8 @@ function App() {
             <Route path="podcast/edit/:id" element={<EditPodcastForm />} />
             <Route path="course" element={<Course />} />
             <Route path="course/edit/:id" element={<EditCourseForm />} />
+            <Route path="counsel" element={<Counsels />} />
+            <Route path="counsel/edit/:id" element={<EditCounselForm />} />
             <Route path="settings" element={<Settings />} />
             <Route path="homepage" element={<HomePageSettings />} />
             <Route path="users" element={<UsersPage />} />

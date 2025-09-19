@@ -8,6 +8,7 @@ const items = [
   { name: "پادکست ها", path: "/podcast" },
   { name: "مقالات", path: "/article" },
   { name: "دوره ها", path: "/course" },
+  { name: "مشاوره", path: "/counsel" },
   { name: " صفحه اصلی", path: "/homepage" },
   { name: "کاربران", path: "/users" },
   { name: "سایر تنظیمات", path: "/settings" },

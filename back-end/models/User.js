@@ -54,6 +54,10 @@ const UserSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Podcast"
   }],
+  favoriteCounsels: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Counsel"
+  }],
 });
 
 const User = mongoose.model('User', UserSchema);

@@ -25,6 +25,7 @@ const articleRoutes = require('./routes/article.routes');
 const videoRoutes = require('./routes/video.routes');
 const podcastRoutes = require('./routes/podcast.routes');
 const courseRoutes = require('./routes/course.routes');
+const counselRoutes = require('./routes/counsel.routes');
 const visitRoutes = require('./routes/visit.routes');
 const categoryRoutes = require('./routes/category.routes');
 const userRoutes = require('./routes/user.routes');
@@ -38,6 +39,7 @@ const routers = [
   { path: '/api', router: videoRoutes },
   { path: '/api', router: podcastRoutes },
   { path: '/api', router: courseRoutes },
+  { path: '/api', router: counselRoutes },
   { path: '/api', router: visitRoutes },
   { path: '/api', router: categoryRoutes },
   { path: '/api', router: userRoutes },

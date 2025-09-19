@@ -49,6 +49,7 @@ const Header = () => {
       <div className="md:flex hidden items-center justify-center gap-6">
         <Link to="/about">درباره ما</Link>
         <Link to="/courses">دوره ها</Link>
+        <Link to="/counsel">مشاوره</Link>
         <Link to="/videos">ویدئو ها</Link>
         <Link to="/podcasts">پادکست ها</Link>
         <Link to="/articles">مقالات</Link>
@@ -80,6 +81,7 @@ const Header = () => {
             </button>
             <Link to="/about" onClick={() => setOpen(false)}>درباره ما</Link>
             <Link to="/courses" onClick={() => setOpen(false)}>دوره ها</Link>
+            <Link to="/counsel" onClick={() => setOpen(false)}>مشاوره</Link>
             <Link to="/videos" onClick={() => setOpen(false)}>ویدئو ها</Link>
             <Link to="/articles" onClick={() => setOpen(false)}>مقالات</Link>
             <Link to="/" onClick={() => setOpen(false)}>خانه</Link>
